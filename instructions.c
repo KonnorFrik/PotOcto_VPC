@@ -174,7 +174,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
     }
 }
 
-void jmp_instructions(PC* vpc, word code, word op1, word op2) {
+void stuff_instructions(PC* vpc, word code, word op1, word op2) {
     word sub_code = code & 0x0f;
     dword addr;
 
@@ -186,6 +186,22 @@ void jmp_instructions(PC* vpc, word code, word op1, word op2) {
             if (DEBUG) {
                 fprintf(stderr, "\t[DEBUG]: Instruction: IP = %x\n", addr);
             }
+            break;
+
+        case 0x01:
+            if (DEBUG) {
+                fprintf(stderr, "\t[DEBUG]: Instruction: #%x(%d) = #%x(%d)\n", op1, op1, op2, op2);
+            }
+
+            vpc->cpu.reg[op1] = vpc->cpu.reg[op2];
+            break;
+
+        case 0x02:
+            if (DEBUG) {
+                fprintf(stderr, "\t[DEBUG]: Instruction: #%x(%d) = (%d)\n", op1, op1, op2);
+            }
+
+            vpc->cpu.reg[op1] = op2;
             break;
     }
 }
@@ -387,39 +403,39 @@ int do_instruction(PC* vpc, word code, word op1, word op2) {
     }
 
     switch(instr_code) {
-        case 0x10:
+        case MEMORY_SECTION:
             if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Memory segment\n");
+                fprintf(stderr, "\t[DEBUG]: Memory section\n");
             }
 
             memory_instructions(vpc, code, op1, op2);
             break;
 
-        case 0x20:
+        case LOGIC_SECTION:
             if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Logic segment\n");
+                fprintf(stderr, "\t[DEBUG]: Logic section\n");
             }
 
             logic_instructions(vpc, code, op1, op2);
             break;
 
-        case 0x30:
+        case STUFF_SECTION:
             if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: JMP segment\n");
+                fprintf(stderr, "\t[DEBUG]: Stuff section\n");
             }
 
-            jmp_instructions(vpc, code, op1, op2);
+            stuff_instructions(vpc, code, op1, op2);
             break;
 
-        case 0xe0:
+        case MATH_SECTION:
             if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Math segment\n");
+                fprintf(stderr, "\t[DEBUG]: Math section\n");
             }
 
             math_instructions(vpc, code , op1, op2);
             break;
 
-        case 0xf0:
+        case BITWISE_SECTION:
             if (code == 0xff && op1 == 0xff && op2 == 0xff) {
                 if (DEBUG) {
                     fprintf(stderr, "\t[DEBUG]: Instruction: HALT\n");
@@ -430,7 +446,7 @@ int do_instruction(PC* vpc, word code, word op1, word op2) {
             }
 
             if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Bitwise segment\n");
+                fprintf(stderr, "\t[DEBUG]: Bitwise section\n");
             }
 
             bitwise_instructions(vpc, code, op1, op2);
