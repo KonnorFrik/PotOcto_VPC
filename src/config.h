@@ -1,6 +1,8 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#define DEBUG 0
+
 typedef unsigned char word;
 typedef unsigned short dword;
 
@@ -9,6 +11,7 @@ enum ERROR_CODES {
     WRONG_ARGS,
     FILE_ERROR,
     MAP_ERROR,
+    ERROR = -1,
 };
 
 #endif

@@ -203,6 +203,22 @@ void stuff_instructions(PC* vpc, word code, word op1, word op2) {
 
             vpc->cpu.reg[op1] = op2;
             break;
+
+        case 0x03:
+            if (DEBUG) {
+                fprintf(stderr, "\t[DEBUG]: Instruction: #%x(%d)++\n", op2, vpc->cpu.reg[op2]);
+            }
+
+            (vpc->cpu.reg[op2])++;
+            break;
+
+        case 0x04:
+            if (DEBUG) {
+                fprintf(stderr, "\t[DEBUG]: Instruction: #%x(%d)--\n", op2, vpc->cpu.reg[op2]);
+            }
+
+            (vpc->cpu.reg[op2])--;
+            break;
     }
 }
 
