@@ -1,6 +1,10 @@
 #include "compiler.h"
 // \w\+\s[r\$]\?\(0x|0b\)\?[0-9a-f]\+\s[r\$]\?\(0x|0b\)[0-9a-f]\+
 
+void full_exit(int code) {
+    m_destroy();
+    exit(code);
+}
 void usage(const char* prog_name) {
     printf("Usage: %s file\n", prog_name);
 }
@@ -88,6 +92,10 @@ Token* get_token(char* line) {
 
     Token* token = create_token(token_type, value);
 
+    if (is_null(token)) {
+        fprintf(stderr, "MemAlloc Error: get_token\n");
+    }
+
     if (DEBUG) {
         fprintf(stderr, "\t[DEBUG]: Create Token: type: %d value: %u\n", token_type, value);
     }
@@ -112,6 +120,11 @@ int append_to_node(Node* head, Token* token, int token_count) {
         return 1;
     }
 
+    if (token->type == INVALID) {
+        return 1;
+    }
+
+    int result = 0;
     Node* copy = head;
 
     if (token_count == 0) { //kw
@@ -129,9 +142,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
             copy->left->token = token;
 
         } else {
-            fprintf(stderr, "MemAlloc Error: append_to_node: token_count: %d\n", token_count);
-            m_destroy();
-            exit(ERROR);
+            result = 1;
         }
     }
 
@@ -146,9 +157,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
             copy->right->token = token;
 
         } else {
-            fprintf(stderr, "MemAlloc Error: append_to_node: token_count: %d\n", token_count);
-            m_destroy();
-            exit(ERROR);
+            result = 1;
         }
     }
 
@@ -156,7 +165,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
         fprintf(stderr, "\t[DEBUG]: Append token: token: %d | count: %d\n", token->type, token_count);
     }
     
-    return 0;
+    return result;
 }
 
 void fix_new_line(char* line, size_t line_size) {
@@ -173,6 +182,11 @@ void fix_new_line(char* line, size_t line_size) {
 Node* tokenize_line(char* line) {
     size_t len = strlen(line);
     Node* ast_node = create_node();
+
+    if (is_null(ast_node)) {
+        fprintf(stderr, "MemAlloc Error: tokens_line: ast_node\n");
+        full_exit(MEM_ERROR);
+    }
 
     int read_flag = 1;
     char* line_buffer = line;
@@ -201,32 +215,28 @@ Node* tokenize_line(char* line) {
 
         Token* word_token = get_token(line_buffer);
 
-        if (is_null(word_token) || word_token->type == INVALID) {
-            fprintf(stderr, "Syntax or MemAlloc Error in line: \n> '%s'", line);
-            m_destroy();
-            exit(ERROR);
+        if (word_token->type == INVALID) {
+            fprintf(stderr, "Syntax Error in line: \n> '%s'", line);
+            full_exit(ERROR);
         }
-
 
         if (append_to_node(ast_node, word_token, token_count)) {
-            fprintf(stderr, "Syntax Error in line: \n> '%s'", line);
-            m_destroy();
-            exit(ERROR);
+            fprintf(stderr, "Syntax or MemAlloc Error in line: \n> '%s'", line);
+            full_exit(ERROR);
         }
+        //remove duplicates
 
         if (word_token->type == MEM_ACCESS_OPERATOR || word_token->type == REG_ACCESS_OPERATOR) {
             Token* num_token = get_token(line_buffer + 1);
 
-            if (is_null(num_token) || num_token->type == INVALID) {
-                fprintf(stderr, "Syntax or MemAlloc Error in line: \n> '%s'", line);
-                m_destroy();
-                exit(ERROR);
+            if (num_token->type == INVALID) {
+                fprintf(stderr, "Syntax Error in line: \n> '%s'", line);
+                full_exit(ERROR);
             }
 
             if (append_to_node(ast_node, num_token, token_count)) {
-                fprintf(stderr, "Syntax Error in line: \n> '%s'", line);
-                m_destroy();
-                exit(ERROR);
+                fprintf(stderr, "Syntax or MemAlloc Error in line: \n> '%s'", line);
+                full_exit(ERROR);
             }
         }
 
@@ -317,6 +327,5 @@ int main(const int argc, const char** argv) {
     }
 
     m_destroy();
-
     return OK;
 }

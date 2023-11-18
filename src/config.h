@@ -11,6 +11,7 @@ enum ERROR_CODES {
     WRONG_ARGS,
     FILE_ERROR,
     MAP_ERROR,
+    MEM_ERROR,
     ERROR = -1,
 };
 
