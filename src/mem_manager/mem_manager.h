@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "../common/funcs.h"
 #include "../config.h"
 
 #define BASIC_SIZE 10
@@ -21,8 +22,5 @@ void* c_alloc(size_t count, size_t size);
 void* re_alloc(void* mem, size_t size);
 void m_free(void* mem);
 void m_destroy();
-
-int is_null(void* mem);
-
 
 #endif

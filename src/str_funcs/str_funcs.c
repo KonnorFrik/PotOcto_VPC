@@ -103,7 +103,7 @@ int is_hex(char s) {
 int string_type(const char* str) {
     int result = INVALID;
 
-    if (result == INVALID && is_str_bin(str)) {
+    if (is_str_bin(str)) {
         result = BIN;
     }
 

@@ -2,11 +2,9 @@
 #define __INSTRUCTIONS_PARSE_H__
 
 #include "pc.h"
+#include "config.h"
 
-#define DEBUG 1
-#if DEBUG == 1
-    #include <stdio.h>
-#endif
+#include <stdio.h>
 
 void memory_instructions(PC* vpc, word code, word op1, word op2);
 void logic_instructions(PC* vpc, word code, word op1, word op2);

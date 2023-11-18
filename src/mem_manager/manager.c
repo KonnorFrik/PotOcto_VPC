@@ -8,10 +8,6 @@ static int is_full(void** arr, int size);
 static void exstand(void*** arr_addr, int* size_out);
 static void memory(void* mem, void* prev, int command);
 
-int is_null(void* mem) {
-    return mem == NULL;
-}
-
 static void exstand(void*** arr_addr, int* size_out) {
     int new_size = *size_out + EXSTAND_SIZE;
     void** new_mem = realloc(*arr_addr, new_size * sizeof(void*));
