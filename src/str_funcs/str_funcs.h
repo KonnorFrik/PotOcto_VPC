@@ -7,6 +7,8 @@
 
 #include "../config.h" 
 
+#define STR_DEBUG 0
+
 enum str_type {
     BIN = 2,
     DEC = 10,

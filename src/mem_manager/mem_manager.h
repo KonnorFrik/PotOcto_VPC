@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../common/funcs.h"
 #include "../config.h"
+#include "../common/funcs.h"
+
+#define MEM_DEBUG 0
 
 #define BASIC_SIZE 10
 #define EXSTAND_SIZE 5

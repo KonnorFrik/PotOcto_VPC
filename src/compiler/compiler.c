@@ -5,16 +5,51 @@ void full_exit(int code) {
     m_destroy();
     exit(code);
 }
+
 void usage(const char* prog_name) {
     printf("Usage: %s file\n", prog_name);
 }
 
-Token* create_token(int type, dword value) {
+void show_error(int code) {
+    int showed = 0;
+
+    if (code & MEM_ERROR) {
+        fprintf(stderr, "Memory Alloc Error\n");
+        showed = 1;
+    }
+
+    if (!showed && (code & FILE_ERROR)) {
+        fprintf(stderr, "File Error\n");
+        showed = 1;
+    }
+
+    if (!showed && (code & SYNTAX)) {
+        fprintf(stderr, "Syntax Error\n");
+        showed = 1;
+    }
+
+    if (!showed && (code & INVALID_LINE)) {
+        fprintf(stderr, "Invalid line Error\n");
+        showed = 1;
+    }
+
+    if (!showed && (code & INVALID_WORD)) {
+        fprintf(stderr, "Invalid word Error\n");
+        showed = 1;
+    }
+}
+
+Token* create_token(int type, char* word, dword value) {
     Token* obj = c_alloc(1, sizeof(Token));
 
     if (!is_null(obj)) {
         obj->type = type;
         obj->value = value;
+        obj->word = c_alloc(strlen(word) + 1, sizeof(char));
+
+        if (!is_null(obj->word)) {
+            strcpy(obj->word, word);
+        }
     }
 
     return obj;
@@ -22,9 +57,14 @@ Token* create_token(int type, dword value) {
 
 int is_line_kw(char* line) {
     int result = 0;
+    int ind = 0;
 
-    if (strcmp(line, "mov") == 0) {
-        result = 1;
+    while (!result && Keywords[ind] != NULL) {
+        if (strcmp(line, Keywords[ind]) == 0) {
+            result = 1;
+        }
+
+        ind++;
     }
 
     return result;
@@ -33,7 +73,7 @@ int is_line_kw(char* line) {
 int is_line_access_op(char* line) {
     int result = 0;
 
-    if (line[0] == 'r' || line[0] == '$') {
+    if (line[0] == REG_ACCESS_WORD || line[0] == MEM_ACCESS_WORD) {
         result = 1;
     }
 
@@ -57,22 +97,30 @@ dword str_to_num(char* line) {
 
     if (type == BIN) {
         base = 2;
+        line += 2;
 
     } else if (type == HEX) {
         base = 16;
+        line += 2;
     }
 
     result = (dword)strtol(line, NULL, base);
+
+    if (CMP_DEBUG) {
+        fprintf(stderr, "\t[CMP_DEBUG]: str_to_num: '%s':type(%d) -> '%d'\n", line, type, result);
+    }
 
     return result;
 }
 
 Token* get_token(char* line) {
     int token_type = INVALID;
+    char* word = "";
     dword value = 0;
 
     if (is_line_kw(line)) {
         token_type = KEYWORD;
+        word = line;
 
     } else if (is_line_access_op(line)) {
         if (line[0] == 'r') {
@@ -84,20 +132,18 @@ Token* get_token(char* line) {
 
     } else if (is_line_number(line)) {
         token_type = NUMBER;
-    }
-
-    if (token_type == NUMBER) {
         value = str_to_num(line);
     }
 
-    Token* token = create_token(token_type, value);
+    Token* token = create_token(token_type, word, value);
 
     if (is_null(token)) {
-        fprintf(stderr, "MemAlloc Error: get_token\n");
+        show_error(MEM_ERROR);
+        fprintf(stderr, "get_token: token\n");
     }
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: Create Token: type: %d value: %u\n", token_type, value);
+    if (CMP_DEBUG) {
+        fprintf(stderr, "\t[CMP_DEBUG]: Create Token: type: %d value: %u\n", token_type, value);
     }
 
     return token;
@@ -117,11 +163,11 @@ Node* create_node() {
 
 int append_to_node(Node* head, Token* token, int token_count) {
     if (token_count > 2) {
-        return 1;
+        return INVALID_LINE;
     }
 
     if (token->type == INVALID) {
-        return 1;
+        return INVALID_WORD;
     }
 
     int result = 0;
@@ -142,7 +188,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
             copy->left->token = token;
 
         } else {
-            result = 1;
+            result = MEM_ERROR; // MEM_ERROR
         }
     }
 
@@ -157,12 +203,12 @@ int append_to_node(Node* head, Token* token, int token_count) {
             copy->right->token = token;
 
         } else {
-            result = 1;
+            result = MEM_ERROR; // MEM_ERROR
         }
     }
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: Append token: token: %d | count: %d\n", token->type, token_count);
+    if (CMP_DEBUG) {
+        fprintf(stderr, "\t[CMP_DEBUG]: Append token: token: %d | count: %d\n\n", token->type, token_count);
     }
     
     return result;
@@ -170,8 +216,9 @@ int append_to_node(Node* head, Token* token, int token_count) {
 
 void fix_new_line(char* line, size_t line_size) {
     size_t len = strlen(line);
-    if (line[len - 1] != '\n') {
-        line[len] = '\n';
+
+    if (line[len - 1] == '\n') {
+        line[len - 1] = '\0';
     }
 
     if (len + 1 < line_size) {
@@ -179,71 +226,84 @@ void fix_new_line(char* line, size_t line_size) {
     }
 }
 
+int safe_create_append(char* line, Node* ast, int token_count) {
+    int result = OK; // 0
+    Token* word_token = get_token(line);
+
+    if (word_token->type == INVALID) {
+        result = SYNTAX;
+    }
+
+    result |= append_to_node(ast, word_token, token_count);
+
+    if (word_token->type == MEM_ACCESS_OPERATOR || word_token->type == REG_ACCESS_OPERATOR) {
+        result |= safe_create_append(line + 1, ast, token_count);
+    }
+
+    return result;
+}
+
 Node* tokenize_line(char* line) {
     size_t len = strlen(line);
     Node* ast_node = create_node();
 
     if (is_null(ast_node)) {
-        fprintf(stderr, "MemAlloc Error: tokens_line: ast_node\n");
+        show_error(MEM_ERROR);
+        fprintf(stderr, "Tokens_line: ast_node\n");
         full_exit(MEM_ERROR);
     }
 
+    char* buffer = c_alloc(len + 2, sizeof(char));
+    
+    if (is_null(buffer)) {
+        show_error(MEM_ERROR);
+        fprintf(stderr, "Tokens_line: buffer line\n");
+        full_exit(MEM_ERROR);
+    }
+
+    strcpy(buffer, line);
+
+    int err_code = 0;
     int read_flag = 1;
-    char* line_buffer = line;
     int token_count = 0; //0-kw 1-op1 2-op2
 
     while (read_flag) {
         long unsigned int ind = 0;
-        int word_start = ind;
 
-        if (line_buffer[ind] == '\0' || line_buffer[ind] == '\n') {
+        if (buffer[ind] == '\0' || buffer[ind] == '\n') {
             read_flag = 0;
             continue;
         }
 
-        while (line_buffer[ind] != ' ' && !(line_buffer[ind] == '\0' || line_buffer[ind] == '\n')) {
+        while (buffer[ind] != ' ' && !(buffer[ind] == '\0' || buffer[ind] == '\n')) {
             ind++;
         }
 
-        int word_end = ind;
-        char save = line_buffer[ind];
-        line_buffer[ind] = '\0';
+        char save = buffer[ind];
+        buffer[ind] = '\0';
+        err_code = safe_create_append(buffer, ast_node, token_count);
 
-        if (DEBUG) {
-            fprintf(stderr, "\t[DEBUG]: word: '%s'\n", line_buffer);
+        if (CMP_DEBUG) {
+            fprintf(stderr, "\t[CMP_DEBUG]: word: '%s'\n", buffer);
+            fprintf(stderr, "\t[CMP_DEBUG]: append code: '%d'\n", err_code);
         }
 
-        Token* word_token = get_token(line_buffer);
-
-        if (word_token->type == INVALID) {
-            fprintf(stderr, "Syntax Error in line: \n> '%s'", line);
-            full_exit(ERROR);
+        if (err_code) {
+            read_flag = 0;
+            continue;
         }
 
-        if (append_to_node(ast_node, word_token, token_count)) {
-            fprintf(stderr, "Syntax or MemAlloc Error in line: \n> '%s'", line);
-            full_exit(ERROR);
-        }
-        //remove duplicates
-
-        if (word_token->type == MEM_ACCESS_OPERATOR || word_token->type == REG_ACCESS_OPERATOR) {
-            Token* num_token = get_token(line_buffer + 1);
-
-            if (num_token->type == INVALID) {
-                fprintf(stderr, "Syntax Error in line: \n> '%s'", line);
-                full_exit(ERROR);
-            }
-
-            if (append_to_node(ast_node, num_token, token_count)) {
-                fprintf(stderr, "Syntax or MemAlloc Error in line: \n> '%s'", line);
-                full_exit(ERROR);
-            }
-        }
-
-        line_buffer[ind] = save;
-        ind++;
-        line_buffer += ind;
+        buffer[ind] = save;
+        buffer += ++ind;
         token_count++;
+    }
+
+    m_free(buffer);
+
+    if (err_code) {
+        show_error(err_code);
+        fprintf(stderr, "> '%s'\n", line);
+        full_exit(ERROR);
     }
 
     return ast_node;
@@ -251,24 +311,46 @@ Node* tokenize_line(char* line) {
 
 void print_node(Node* node) {
     Node* copy = node;
-    printf("Head token: %d\n", copy->token->type);
-    printf("Left: ");
+    printf("\tHead token: %d(%s)\n", copy->token->type, copy->token->type == KEYWORD ? copy->token->word : "");
+    printf("\tLeft: ");
 
+    copy = node->left;
     while (copy != NULL) {
-        printf("%d ", copy->token->type);
+        printf("%d(%d) ", copy->token->type, copy->token->value);
         copy = copy->left;
     }
 
     printf("\n");
-    copy = node;
-    printf("Right: ");
+    copy = node->right;
+    printf("\tRight: ");
 
     while (copy != NULL) {
-        printf("%d ", copy->token->type);
+        printf("%d(%d) ", copy->token->type, copy->token->value);
         copy = copy->right;
     }
 
-    printf("\n");
+    printf("\n\n");
+}
+
+int append_tree(Node*** arr_addr, size_t size, int* index, Node* obj) {
+    int status = OK;
+
+    if (*index >= size) {
+        size_t new_size = (size + (size / 2)) * sizeof(Node*);
+        Node** tmp = re_alloc(*arr_addr, new_size);
+
+        if (!is_null(tmp)) {
+            *arr_addr = tmp;
+            size = new_size;
+
+        } else {
+            status = MEM_ERROR;
+        }
+    }
+
+    (*arr_addr)[(*index)++] = obj;
+
+    return status;
 }
 
 int main(const int argc, const char** argv) {
@@ -281,15 +363,28 @@ int main(const int argc, const char** argv) {
     FILE* fd = fopen(filename, "r");
 
     if (is_null(fd)) {
-        fprintf(stderr, "Can't open file: %s\n", filename);
+        show_error(FILE_ERROR);
+        fprintf(stderr, "Can't open: %s\n", filename);
         perror("With Error: ");
-        exit(FILE_ERROR);
+        full_exit(FILE_ERROR);
     }
 
-    char* line = NULL;
-    size_t line_size = 0;
+    size_t trees_array_size = 30;
+    Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
+    int trees_array_index = 0;
 
-    while (!feof(fd)) {
+    if (is_null(trees_array)) {
+        show_error(MEM_ERROR);
+        fprintf(stderr, "main: trees_array\n");
+        full_exit(MEM_ERROR);
+    }
+
+    size_t line_size = 100;
+    char* line = c_alloc(line_size, sizeof(char));
+    int read_flag = 0;
+    int status = OK;
+
+    while (!read_flag && !feof(fd)) {
         ssize_t readed = getline(&line, &line_size, fd);
 
         if (readed == -1) {
@@ -298,23 +393,28 @@ int main(const int argc, const char** argv) {
 
         fix_new_line(line, line_size);
         Node* tokens_line = tokenize_line(line);
+        status = validate_token_tree(tokens_line);
+        status |= append_tree(&trees_array, trees_array_size, &trees_array_index, tokens_line);
 
-        if (DEBUG) {
-            print_node(tokens_line);
+        if (status) {
+            read_flag = 1;
+            continue;
         }
 
         //get tree for one line
         //append to array with tree's
 
-        //if (DEBUG) {
-            //fprintf(stderr, "\t[DEBUG]: read line: '%s'", line);
-        //}
         memset(line, 0, line_size);
     }
 
+    if (CMP_DEBUG) {
+        fprintf(stderr, "\t[CMP_DEBUG]: Tokens:\n");
+        for (int i = 0; i < trees_array_index; ++i) {
+            print_node(trees_array[i]);
+        }
+    }
 
-    //tokenize line
-    //append to token array
+
     //parse every AST in array
     //write bytecode into out file
 
@@ -322,8 +422,17 @@ int main(const int argc, const char** argv) {
         fclose(fd);
     }
 
+    if (!is_null(trees_array)) {
+        m_free(trees_array);
+    }
+
     if (!is_null(line)) {
-        free(line);
+        m_free(line);
+    }
+
+    if (status) {
+        show_error(status);
+        fprintf(stderr, "main\n");
     }
 
     m_destroy();

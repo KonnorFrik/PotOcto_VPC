@@ -12,9 +12,9 @@ static void exstand(void*** arr_addr, int* size_out) {
     int new_size = *size_out + EXSTAND_SIZE;
     void** new_mem = realloc(*arr_addr, new_size * sizeof(void*));
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: Exstand arr: %d -> %d\n", *size_out, new_size);
-        fprintf(stderr, "\t[DEBUG]: '%p' -> '%p'\n\n", *arr_addr, new_mem); 
+    if (MEM_DEBUG) {
+        fprintf(stderr, "\t[MEM_DEBUG]: Exstand arr: %d -> %d\n", *size_out, new_size);
+        fprintf(stderr, "\t[MEM_DEBUG]: '%p' -> '%p'\n\n", *arr_addr, new_mem); 
     }
 
     if (!is_null(new_mem)) {
@@ -58,8 +58,8 @@ static void command_add(void*** arr_addr, void* mem, int* size) {
             (*arr_addr)[i] = mem;
             run = 0;
 
-            if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Add mem: '%p' to pos: %d\n\n", mem, i);
+            if (MEM_DEBUG) {
+                fprintf(stderr, "\t[MEM_DEBUG]: Add mem: '%p' to pos: %d\n\n", mem, i);
             }
         }
     }
@@ -72,8 +72,8 @@ static void command_remove(void** memory_storage, int size, void* mem) {
             memory_storage[i] = NULL;
             run = 0;
 
-            if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Remove mem: '%p' from pos: %d\n\n", mem, i);
+            if (MEM_DEBUG) {
+                fprintf(stderr, "\t[MEM_DEBUG]: Remove mem: '%p' from pos: %d\n\n", mem, i);
             }
         }
     }
@@ -84,17 +84,17 @@ static void command_free_inside(void** memory_storage, int size) {
         if (!is_null(memory_storage[i])) {
             free(memory_storage[i]);
 
-            if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Remove unFree addr: #%d - '%p'\n", i, memory_storage[i]);
+            if (MEM_DEBUG) {
+                fprintf(stderr, "\t[MEM_DEBUG]: Remove unFree addr: #%d - '%p'\n", i, memory_storage[i]);
             }
 
             memory_storage[i] = NULL;
         }
     }
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: Free arr: %p\n", memory_storage);
-        fprintf(stderr, "\t[DEBUG]: memory_storage state at exit:\n");
+    if (MEM_DEBUG) {
+        fprintf(stderr, "\t[MEM_DEBUG]: Free arr: %p\n", memory_storage);
+        fprintf(stderr, "\t[MEM_DEBUG]: memory_storage state at exit:\n");
     
         for (int i = 0; i < size; ++i) {
             fprintf(stderr, "\t #%d - %p\n", i, memory_storage[i]);
@@ -114,8 +114,8 @@ static void command_update(void** memory_storage, int size, void* mem, void* pre
             memory_storage[i] = mem;
             run = 0;
 
-            if (DEBUG) {
-                fprintf(stderr, "\t[DEBUG]: Update pos #%d, '%p' -> '%p'\n", i, prev, mem);
+            if (MEM_DEBUG) {
+                fprintf(stderr, "\t[MEM_DEBUG]: Update pos #%d, '%p' -> '%p'\n", i, prev, mem);
             }
         }
     }
@@ -129,8 +129,8 @@ static void memory(void* mem, void* prev, int command) {
         memory_storage = calloc(BASIC_SIZE, sizeof(void*));
         size = BASIC_SIZE;
 
-        if (DEBUG) {
-            fprintf(stderr, "\t[DEBUG]: Alloc arr '%p' with size: %d bytes\n", memory_storage, size);
+        if (MEM_DEBUG) {
+            fprintf(stderr, "\t[MEM_DEBUG]: Alloc arr '%p' with size: %d bytes\n", memory_storage, size);
         }
     }
 
@@ -162,8 +162,8 @@ static void memory(void* mem, void* prev, int command) {
 void* m_alloc(size_t size) {
     void* mem = malloc(size);
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: Malloc %zu bytes on: '%p'\n", size, mem);
+    if (MEM_DEBUG) {
+        fprintf(stderr, "\t[MEM_DEBUG]: Malloc %zu bytes on: '%p'\n", size, mem);
     }
 
     memory(mem, NULL, ADD);
@@ -173,8 +173,8 @@ void* m_alloc(size_t size) {
 void* c_alloc(size_t count, size_t size) {
     void* mem = calloc(count, size);
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: Calloc %zu bytes(count: %zu, size: %zu) on: '%p'\n", count * size, count, size, mem);
+    if (MEM_DEBUG) {
+        fprintf(stderr, "\t[MEM_DEBUG]: Calloc %zu bytes(count: %zu, size: %zu) on: '%p'\n", count * size, count, size, mem);
     }
 
     memory(mem, NULL, ADD);
@@ -184,8 +184,8 @@ void* c_alloc(size_t count, size_t size) {
 void* re_alloc(void* mem, size_t size) {
     void* new_mem = realloc(mem, size);
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: Realloc: '%p' to '%p' with size: %zu bytes\n\n", mem, new_mem, size);
+    if (MEM_DEBUG) {
+        fprintf(stderr, "\t[MEM_DEBUG]: Realloc: '%p' to '%p' with size: %zu bytes\n\n", mem, new_mem, size);
     }
 
     memory(new_mem, mem, UPDATE);

@@ -8,29 +8,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../instructions.h" 
 #include "../config.h" 
+#include "../instructions.h" 
 #include "../mem_manager/mem_manager.h" 
 #include "../str_funcs/str_funcs.h"
+#include "../tree_validator/tree_validator.h"
+#include "ast.h"
+#include "keywords.h"
 
-enum Token_Type {
-    KEYWORD = 1,
-    MEM_ACCESS_OPERATOR,
-    REG_ACCESS_OPERATOR,
-    NUMBER,
+#define CMP_DEBUG 1
+
+#define REG_ACCESS_WORD 'r'
+#define MEM_ACCESS_WORD '$'
+
+enum Local_Errors {
+    SYNTAX = 1 << 10,
+    INVALID_LINE = 1 << 11,
+    INVALID_WORD = 1 << 12,
 };
-
-typedef struct {
-    int type;
-    dword value;
-} Token;
-
-struct node {
-    Token* token;
-    struct node* left; //operand 1
-    struct node* right; //operand 2
-};
-
-typedef struct node Node;
 
 #endif
+

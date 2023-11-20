@@ -32,9 +32,9 @@ int is_str_dec(const char* str) {
         }
     }
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: is_str_dec: '%s' len: %d\n", str, len);
-        fprintf(stderr, "\t[DEBUG]: is_str_dec: result; %d\n", result);
+    if (STR_DEBUG) {
+        fprintf(stderr, "\t[STR_DEBUG]: is_str_dec: '%s' len: %d\n", str, len);
+        fprintf(stderr, "\t[STR_DEBUG]: is_str_dec: result; %d\n", result);
     }
     
     return result;
@@ -58,9 +58,9 @@ int is_str_bin(const char* str) {
         }
     }
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: is_str_bin: '%s' len: %d\n", str, len);
-        fprintf(stderr, "\t[DEBUG]: is_str_bin: result; %d\n", result);
+    if (STR_DEBUG) {
+        fprintf(stderr, "\t[STR_DEBUG]: is_str_bin: '%s' len: %d\n", str, len);
+        fprintf(stderr, "\t[STR_DEBUG]: is_str_bin: result; %d\n", result);
     }
 
     return result;
@@ -84,9 +84,9 @@ int is_str_hex(const char* str) {
         }
     }
 
-    if (DEBUG) {
-        fprintf(stderr, "\t[DEBUG]: is_str_hex: '%s' len: %d\n", str, len);
-        fprintf(stderr, "\t[DEBUG]: is_str_hex: result; %d\n", result);
+    if (STR_DEBUG) {
+        fprintf(stderr, "\t[STR_DEBUG]: is_str_hex: '%s' len: %d\n", str, len);
+        fprintf(stderr, "\t[STR_DEBUG]: is_str_hex: result; %d\n\n", result);
     }
 
     return result;
