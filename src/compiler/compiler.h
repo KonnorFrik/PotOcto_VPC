@@ -12,7 +12,7 @@
 #include "../instructions.h" 
 #include "../mem_manager/mem_manager.h" 
 #include "../str_funcs/str_funcs.h"
-#include "../tree_validator/tree_validator.h"
+#include "../tree_translator/tree_translator.c"
 #include "ast.h"
 #include "keywords.h"
 
@@ -20,11 +20,13 @@
 
 #define REG_ACCESS_WORD 'r'
 #define MEM_ACCESS_WORD '$'
+#define COMMENT_SYMBOL ';'
 
 enum Local_Errors {
     SYNTAX = 1 << 10,
     INVALID_LINE = 1 << 11,
     INVALID_WORD = 1 << 12,
+    TRANSLATE_LINE = 1 << 13,
 };
 
 #endif

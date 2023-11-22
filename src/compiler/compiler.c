@@ -11,32 +11,28 @@ void usage(const char* prog_name) {
 }
 
 void show_error(int code) {
-    int showed = 0;
-
     if (code & MEM_ERROR) {
         fprintf(stderr, "Memory Alloc Error\n");
-        showed = 1;
-    }
 
-    if (!showed && (code & FILE_ERROR)) {
+    } else if (code & FILE_ERROR) {
         fprintf(stderr, "File Error\n");
-        showed = 1;
-    }
 
-    if (!showed && (code & SYNTAX)) {
+    } else if (code & SYNTAX) {
         fprintf(stderr, "Syntax Error\n");
-        showed = 1;
-    }
 
-    if (!showed && (code & INVALID_LINE)) {
+    } else if (code & INVALID_LINE) {
         fprintf(stderr, "Invalid line Error\n");
-        showed = 1;
-    }
 
-    if (!showed && (code & INVALID_WORD)) {
+    } else if (code & INVALID_WORD) {
         fprintf(stderr, "Invalid word Error\n");
-        showed = 1;
+
+    } else if (code & TRANSLATE_LINE) {
+        fprintf(stderr, "Translation Error\n");
+
+    } else {
+        fprintf(stderr, "Error\n");
     }
+    
 }
 
 Token* create_token(int type, char* word, dword value) {
@@ -56,7 +52,7 @@ Token* create_token(int type, char* word, dword value) {
 }
 
 int is_line_kw(char* line) {
-    int result = 0;
+    int result = OK;
     int ind = 0;
 
     while (!result && Keywords[ind] != NULL) {
@@ -243,7 +239,13 @@ int safe_create_append(char* line, Node* ast, int token_count) {
     return result;
 }
 
-Node* tokenize_line(char* line) {
+//void post_process_special_words(Node* head, char* line) {
+    //if (strcmp(head->token->word, KW_jmp) == 0) {
+        ////value = str_to_num(line);
+    //}
+//}
+
+Node* tokenize_line(char* line, size_t line_count) {
     size_t len = strlen(line);
     Node* ast_node = create_node();
 
@@ -302,9 +304,12 @@ Node* tokenize_line(char* line) {
 
     if (err_code) {
         show_error(err_code);
-        fprintf(stderr, "> '%s'\n", line);
+        fprintf(stderr, "#%lu > '%s'\n", line_count, line);
         full_exit(ERROR);
-    }
+
+    }// else {
+        //post_process_special_words(ast_node, line);
+    //}
 
     return ast_node;
 }
@@ -332,7 +337,7 @@ void print_node(Node* node) {
     printf("\n\n");
 }
 
-int append_tree(Node*** arr_addr, size_t size, int* index, Node* obj) {
+int append_tree(Node*** arr_addr, size_t size, size_t* index, Node* obj) {
     int status = OK;
 
     if (*index >= size) {
@@ -353,6 +358,24 @@ int append_tree(Node*** arr_addr, size_t size, int* index, Node* obj) {
     return status;
 }
 
+void split_comment(char* line, size_t* size) {
+    int splitted = 0;
+    int i = 0;
+
+    while (!splitted && line[i] != '\0') {
+        if (line[i] == COMMENT_SYMBOL) {
+            line[i] = '\0';
+            splitted = 1;
+        }
+
+        i++;
+    }
+
+    if (splitted) {
+        *size = --i;
+    }
+}
+
 int main(const int argc, const char** argv) {
     if (argc < 2) {
         usage(argv[0]);
@@ -371,7 +394,7 @@ int main(const int argc, const char** argv) {
 
     size_t trees_array_size = 30;
     Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
-    int trees_array_index = 0;
+    size_t trees_array_index = 0;
 
     if (is_null(trees_array)) {
         show_error(MEM_ERROR);
@@ -383,18 +406,25 @@ int main(const int argc, const char** argv) {
     char* line = c_alloc(line_size, sizeof(char));
     int read_flag = 0;
     int status = OK;
+    size_t line_count = 0;
 
     while (!read_flag && !feof(fd)) {
         ssize_t readed = getline(&line, &line_size, fd);
 
         if (readed == -1) {
+            read_flag = 1;
+            continue;
+        }
+
+        split_comment(line, &line_size);
+
+        if (line_size == 0) { //all line is comment
             continue;
         }
 
         fix_new_line(line, line_size);
-        Node* tokens_line = tokenize_line(line);
-        status = validate_token_tree(tokens_line);
-        status |= append_tree(&trees_array, trees_array_size, &trees_array_index, tokens_line);
+        Node* tokens_line = tokenize_line(line, line_count);
+        status = append_tree(&trees_array, trees_array_size, &trees_array_index, tokens_line);
 
         if (status) {
             read_flag = 1;
@@ -405,15 +435,54 @@ int main(const int argc, const char** argv) {
         //append to array with tree's
 
         memset(line, 0, line_size);
+        line_count++;
+    }
+
+    size_t bin_code_size = trees_array_index * 3;
+    int bin_code_index = 0;
+    byte* bin_code = c_alloc(bin_code_size, sizeof(byte));
+
+    if (is_null(bin_code)) {
+        show_error(MEM_ERROR);
+        fprintf(stderr, "main: bin_code\n");
+        full_exit(MEM_ERROR);
     }
 
     if (CMP_DEBUG) {
+        fprintf(stderr, "\n\t[CMP_DEBUG]: Tokens count: %ld\n", trees_array_index);
+        fprintf(stderr, "\t[CMP_DEBUG]: Result in bytes expect: %lu\n", bin_code_size);
         fprintf(stderr, "\t[CMP_DEBUG]: Tokens:\n");
-        for (int i = 0; i < trees_array_index; ++i) {
+        for (size_t i = 0; i < trees_array_index; ++i) {
             print_node(trees_array[i]);
         }
     }
 
+    int translate_code = OK;
+    size_t current_tree = 0;
+
+    for (; translate_code == OK && current_tree < trees_array_index; ++current_tree) {
+        translate_code = translate_token_tree(trees_array[current_tree], bin_code, &bin_code_index);
+    }
+
+    if (CMP_DEBUG) {
+        fprintf(stderr, "\t[CMP_DEBUG]: translate code: %d\n", translate_code);
+        fprintf(stderr, "\t[CMP_DEBUG]: Byte code:\n\t");
+
+        for (int i = 0; i < (int)bin_code_index; ++i) {
+            if ((i % 3) == 0) {
+                fprintf(stderr, "\n\t");
+            }
+
+            fprintf(stderr, "%x ", bin_code[i]);
+        }
+
+        fprintf(stderr, "\n");
+    }
+
+    if (translate_code) {
+        show_error(TRANSLATE_LINE);
+        fprintf(stderr, "main: translate tree: line #%lu\n", current_tree + 1);
+    }
 
     //parse every AST in array
     //write bytecode into out file

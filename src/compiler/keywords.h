@@ -1,13 +1,12 @@
 #ifndef __KEYWORDS_LIST__
 #define __KEYWORDS_LIST__
 
-#define KW_read "read"
+#define KW_mov "mov"
+#define KW_jmp "jmp"
 
 const char* Keywords[] = {
-    KW_read,
-    "write",
-    "mov",
-    "jmp",
+    KW_mov,
+    KW_jmp,
     "inc",
     "dec",
     "eq",

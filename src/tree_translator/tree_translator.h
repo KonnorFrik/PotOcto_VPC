@@ -7,6 +7,11 @@
 #include "../compiler/ast.h"
 #include "../compiler/keywords.h"
 
-#define VLD_DEBUG 0
+#define TRN_DEBUG 1
+
+typedef struct {
+    char* kw;
+    int (*translate_func)(Node*, byte*, int*);
+} Table;
 
 #endif
