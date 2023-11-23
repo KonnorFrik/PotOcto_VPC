@@ -6,5 +6,6 @@
 #include "../config.h"
 
 int is_null(void* mem);
+void mem_dump(FILE* fd, byte* arr, size_t size);
 
 #endif

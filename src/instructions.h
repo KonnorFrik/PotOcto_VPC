@@ -6,6 +6,8 @@
 
 #include <stdio.h>
 
+#define INST_DEBUG 1
+
 void memory_instructions(PC* vpc, word code, word op1, word op2);
 void logic_instructions(PC* vpc, word code, word op1, word op2);
 void jmp_instructions(PC* vpc, word code, word op1, word op2);

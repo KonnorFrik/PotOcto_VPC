@@ -204,7 +204,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
     }
 
     if (CMP_DEBUG) {
-        fprintf(stderr, "\t[CMP_DEBUG]: Append token: token: %d | count: %d\n\n", token->type, token_count);
+        fprintf(stderr, "\t[CMP_DEBUG]: Append token: token: %d | count: %d\n", token->type, token_count);
     }
     
     return result;
@@ -224,6 +224,11 @@ void fix_new_line(char* line, size_t line_size) {
 
 int safe_create_append(char* line, Node* ast, int token_count) {
     int result = OK; // 0
+
+    if (CMP_DEBUG) {
+        fprintf(stderr, "\t[CMP_DEBUG]: word: '%s'\n", line);
+    }
+
     Token* word_token = get_token(line);
 
     if (word_token->type == INVALID) {
@@ -286,8 +291,7 @@ Node* tokenize_line(char* line, size_t line_count) {
         err_code = safe_create_append(buffer, ast_node, token_count);
 
         if (CMP_DEBUG) {
-            fprintf(stderr, "\t[CMP_DEBUG]: word: '%s'\n", buffer);
-            fprintf(stderr, "\t[CMP_DEBUG]: append code: '%d'\n", err_code);
+            fprintf(stderr, "\t[CMP_DEBUG]: >append code: '%d'\n\n", err_code);
         }
 
         if (err_code) {
@@ -337,16 +341,16 @@ void print_node(Node* node) {
     printf("\n\n");
 }
 
-int append_tree(Node*** arr_addr, size_t size, size_t* index, Node* obj) {
+int append_tree(Node*** arr_addr, size_t* size, size_t* index, Node* obj) {
     int status = OK;
 
-    if (*index >= size) {
-        size_t new_size = (size + (size / 2)) * sizeof(Node*);
+    if (*index >= *size) {
+        size_t new_size = (*size + (*size / 2)) * sizeof(Node*);
         Node** tmp = re_alloc(*arr_addr, new_size);
 
         if (!is_null(tmp)) {
             *arr_addr = tmp;
-            size = new_size;
+            *size = new_size;
 
         } else {
             status = MEM_ERROR;
@@ -424,7 +428,7 @@ int main(const int argc, const char** argv) {
 
         fix_new_line(line, line_size);
         Node* tokens_line = tokenize_line(line, line_count);
-        status = append_tree(&trees_array, trees_array_size, &trees_array_index, tokens_line);
+        status = append_tree(&trees_array, &trees_array_size, &trees_array_index, tokens_line);
 
         if (status) {
             read_flag = 1;
@@ -438,8 +442,12 @@ int main(const int argc, const char** argv) {
         line_count++;
     }
 
+    if (!is_null(fd)) {
+        fclose(fd);
+    }
+
     size_t bin_code_size = trees_array_index * 3;
-    int bin_code_index = 0;
+    size_t bin_code_index = 0;
     byte* bin_code = c_alloc(bin_code_size, sizeof(byte));
 
     if (is_null(bin_code)) {
@@ -468,7 +476,7 @@ int main(const int argc, const char** argv) {
         fprintf(stderr, "\t[CMP_DEBUG]: translate code: %d\n", translate_code);
         fprintf(stderr, "\t[CMP_DEBUG]: Byte code:\n\t");
 
-        for (int i = 0; i < (int)bin_code_index; ++i) {
+        for (size_t i = 0; i < bin_code_index; ++i) {
             if ((i % 3) == 0) {
                 fprintf(stderr, "\n\t");
             }
@@ -482,10 +490,29 @@ int main(const int argc, const char** argv) {
     if (translate_code) {
         show_error(TRANSLATE_LINE);
         fprintf(stderr, "main: translate tree: line #%lu\n", current_tree + 1);
+        full_exit(TRANSLATE_LINE);
     }
 
-    //parse every AST in array
-    //write bytecode into out file
+    char* file_out = "prog.out";
+    fd = fopen(file_out, "wb");
+
+    if (is_null(fd)) {
+        show_error(FILE_ERROR);
+        fprintf(stderr, "main: fd is null");
+        perror("> ");
+        full_exit(FILE_ERROR);
+    }
+
+    size_t real_writen = fwrite(bin_code, 1, bin_code_index, fd);
+
+    if (real_writen != bin_code_index) {
+        fprintf(stderr, "expect write %ld, real writen: %ld\n", bin_code_index, real_writen);
+        show_error(FILE_ERROR);
+        perror("> ");
+
+    } else {
+        real_writen = 0;
+    }
 
     if (!is_null(fd)) {
         fclose(fd);

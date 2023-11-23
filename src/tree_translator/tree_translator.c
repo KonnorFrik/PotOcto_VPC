@@ -1,11 +1,19 @@
 #include "tree_translator.h"
 
-static int translate_mov(Node* head, byte* result_arr, int* result_index);
-static int translate_jmp(Node* head, byte* result_arr, int* result_index);
+static int translate_mov(Node* head, byte* result_arr, size_t* result_index);
+static int translate_jmp(Node* head, byte* result_arr, size_t* result_index);
+static int translate_hlt(Node* head, byte* result_arr, size_t* result_index);
+static int translate_set(Node* head, byte* result_arr, size_t* result_index);
+static int translate_read(Node* head, byte* result_arr, size_t* result_index);
+static int translate_write(Node* head, byte* result_arr, size_t* result_index);
 
 const Table table[] = {
     {KW_mov, translate_mov},
+    {KW_set, translate_set},
+    {KW_read, translate_read},
+    {KW_write, translate_write},
     {KW_jmp, translate_jmp},
+    {KW_hlt, translate_hlt},
     {NULL, NULL},
 };
 
@@ -29,7 +37,94 @@ static dword get_lnum_operand(Node* head) {
     return res->token->value;
 }
 
-static int translate_jmp(Node* head, byte* result_arr, int* result_index) {
+static void write_byte(byte* arr, size_t* ind, byte val) {
+    arr[(*ind)++] = val;
+}
+
+static int translate_set(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0x10;
+
+    if (head->token->type == INVALID) { // unreachable in theory
+        fprintf(stderr, "INVALID in translate\n");
+        return 1;
+    }
+
+    if (head->left->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        dword addr = get_lnum_operand(head);
+        write_byte(result_arr, result_index, ((addr & 0xff00) >> 8));
+        write_byte(result_arr, result_index, (addr & 0x00ff));
+
+    } else {
+        fprintf(stderr, "Transate: INVALID tree: write\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_write(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0x12;
+
+    if (head->token->type == INVALID) { // unreachable in theory
+        fprintf(stderr, "INVALID in translate\n");
+        return 1;
+    }
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->left->left->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, 0);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "Transate: INVALID tree: write\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_read(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0x11;
+
+    if (head->token->type == INVALID) { // unreachable in theory
+        fprintf(stderr, "INVALID in translate\n");
+        return 1;
+    }
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->left->left->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, 0);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "Transate: INVALID tree: read\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_hlt(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xff;
+
+    if (head->token->type == INVALID) { // unreachable in theory
+        fprintf(stderr, "INVALID in translate\n");
+        return 1;
+    }
+
+    write_byte(result_arr, result_index, code);
+    write_byte(result_arr, result_index, code);
+    write_byte(result_arr, result_index, code);
+
+    return result;
+}
+
+static int translate_jmp(Node* head, byte* result_arr, size_t* result_index) {
     // 30
     int result = OK;
     byte code = 0;
@@ -44,8 +139,8 @@ static int translate_jmp(Node* head, byte* result_arr, int* result_index) {
         result_arr[(*result_index)++] = code;
         dword addr = get_lnum_operand(head);
 
-        result_arr[(*result_index)++] = (word)((addr & 0xff00) >> 8);
-        result_arr[(*result_index)++] = (word)(addr & 0x00ff);
+        write_byte(result_arr, result_index, (word)((addr & 0xff00) >> 8));
+        write_byte(result_arr, result_index, (word)(addr & 0x00ff));
 
     } else {
         fprintf(stderr, "Transate: INVALID tree: jmp\n");
@@ -55,7 +150,7 @@ static int translate_jmp(Node* head, byte* result_arr, int* result_index) {
     return result;
 }
 
-static int translate_mov(Node* head, byte* result_arr, int* result_index) {
+static int translate_mov(Node* head, byte* result_arr, size_t* result_index) {
     // 11 12 31 32
     int result = OK;
     byte code = 0;
@@ -92,15 +187,15 @@ static int translate_mov(Node* head, byte* result_arr, int* result_index) {
     }
 
     if (!result) {
-        result_arr[(*result_index)++] = code;
-        result_arr[(*result_index)++] = get_lnum_operand(head);
-        result_arr[(*result_index)++] = get_rnum_operand(head);
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+        write_byte(result_arr, result_index, get_lnum_operand(head));
     }
 
     return result;
 }
 
-int translate_token_tree(Node* head, byte* result_arr, int* result_index) {
+int translate_token_tree(Node* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     int kw_ind = 0;
 

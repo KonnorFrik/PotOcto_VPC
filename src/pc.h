@@ -4,6 +4,7 @@
 #include "mem.h"
 #include "cpu.h"
 #include "config.h"
+#include "common/funcs.h"
 
 #define MEM_SIZE (0xffff + 1)
 

@@ -53,6 +53,7 @@ int main(const int argc, const char** argv) {
 
     void* file_map = NULL;
     file_map = mmap(0, file_stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
+
     if (file_map == MAP_FAILED) {
         perror("MAP Fail: ");
         exit(MAP_ERROR);
@@ -68,13 +69,16 @@ int main(const int argc, const char** argv) {
     executor(&vpc);
 
     printf("PC: STATS:\n");
-    printf("IP: %d\n", vpc.cpu.IP);
-    printf("MP: %d\n", vpc.cpu.MP);
+    printf("IP: dec(%d):hex(%x)\n", vpc.cpu.IP, vpc.cpu.IP);
+    printf("MP: dec(%d):hex(%x)\n", vpc.cpu.MP, vpc.cpu.MP);
     printf("Registers:\n");
 
     for (int i = 0; i < 10/*REG_COUNT*/; ++i) {
-        printf("%d - %d\n", i, vpc.cpu.reg[i]);
+        printf("%d - dec(%d):hex(%x)\n", i, vpc.cpu.reg[i], vpc.cpu.reg[i]);
     }
+
+    printf("\nMemory Dump:\n");
+    mem_dump(stdout, vpc.memory, 256);
 
     return OK;
 }

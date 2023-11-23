@@ -3,9 +3,9 @@
 
 enum Token_Type {
     KEYWORD = 1,
-    MEM_ACCESS_OPERATOR,
-    REG_ACCESS_OPERATOR,
-    NUMBER,
+    MEM_ACCESS_OPERATOR, // 2
+    REG_ACCESS_OPERATOR, // 3
+    NUMBER,              // 4
 };
 
 typedef struct {

@@ -11,7 +11,7 @@
 
 typedef struct {
     char* kw;
-    int (*translate_func)(Node*, byte*, int*);
+    int (*translate_func)(Node*, byte*, size_t*);
 } Table;
 
 #endif
