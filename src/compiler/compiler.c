@@ -489,7 +489,7 @@ int main(const int argc, const char** argv) {
 
     if (translate_code) {
         show_error(TRANSLATE_LINE);
-        fprintf(stderr, "main: translate tree: line #%lu\n", current_tree + 1);
+        fprintf(stderr, "main: translate tree: line #%lu\n", current_tree + 0);
         full_exit(TRANSLATE_LINE);
     }
 
