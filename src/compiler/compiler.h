@@ -3,6 +3,7 @@
 
 #define _GNU_SOURCE
 #define __INSTRUCTIONS_PARSE_H__ // turn off including funcs
+#define CMP_DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +17,6 @@
 #include "ast.h"
 #include "keywords.h"
 
-#define CMP_DEBUG 1
 
 #define REG_ACCESS_WORD 'r'
 #define MEM_ACCESS_WORD '$'

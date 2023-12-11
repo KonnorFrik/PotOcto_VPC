@@ -15,6 +15,12 @@ static int translate_le(Node* head, byte* result_arr, size_t* result_index);
 static int translate_gt(Node* head, byte* result_arr, size_t* result_index);
 static int translate_lt(Node* head, byte* result_arr, size_t* result_index);
 
+static int translate_add(Node* head, byte* result_arr, size_t* result_index);
+static int translate_sub(Node* head, byte* result_arr, size_t* result_index);
+static int translate_mul(Node* head, byte* result_arr, size_t* result_index);
+static int translate_div(Node* head, byte* result_arr, size_t* result_index);
+static int translate_mod(Node* head, byte* result_arr, size_t* result_index);
+
 const Table table[] = {
     {KW_set, translate_set},
     {KW_inc, translate_inc},
@@ -28,6 +34,12 @@ const Table table[] = {
     {KW_le, translate_le},
     {KW_gt, translate_gt},
     {KW_lt, translate_lt},
+
+    {KW_add, translate_add},
+    {KW_sub, translate_sub},
+    {KW_mul, translate_mul},
+    {KW_div, translate_div},
+    {KW_mod, translate_mod},
 
     {KW_jmp, translate_jmp},
     {KW_mov, translate_mov},
@@ -60,12 +72,152 @@ static void write_byte(byte* arr, size_t* ind, byte val) {
     arr[(*ind)++] = val;
 }
 
+static int translate_mod(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xe9; // with num operand
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xe4;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: mod\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_div(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xe8; // with num operand
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xe3;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: div\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_mul(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xe7; // with num operand
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xe2;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: mul\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_sub(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xe6; // with num operand
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xe1;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: sub\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_add(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xe5; // with num operand
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xe0;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: add\n");
+        result = 1;
+    }
+
+    return result;
+}
+
 static int translate_lt(Node* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0x2b;
 
     if (head->token->type == INVALID) { // unreachable in theory
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: lt\n");
         return 1;
     }
 
@@ -86,7 +238,7 @@ static int translate_lt(Node* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: lt\n");
         result = 1;
     }
 
@@ -98,7 +250,7 @@ static int translate_gt(Node* head, byte* result_arr, size_t* result_index) {
     byte code = 0x2a;
 
     if (head->token->type == INVALID) { // unreachable in theory
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: gt\n");
         return 1;
     }
 
@@ -119,7 +271,7 @@ static int translate_gt(Node* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: gt\n");
         result = 1;
     }
 
@@ -131,7 +283,7 @@ static int translate_le(Node* head, byte* result_arr, size_t* result_index) {
     byte code = 0x29;
 
     if (head->token->type == INVALID) { // unreachable in theory
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: le\n");
         return 1;
     }
 
@@ -152,7 +304,7 @@ static int translate_le(Node* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: le\n");
         result = 1;
     }
 
@@ -164,7 +316,7 @@ static int translate_ge(Node* head, byte* result_arr, size_t* result_index) {
     byte code = 0x28;
 
     if (head->token->type == INVALID) { // unreachable in theory
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: ge\n");
         return 1;
     }
 
@@ -185,7 +337,7 @@ static int translate_ge(Node* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: ge\n");
         result = 1;
     }
 
@@ -197,7 +349,7 @@ static int translate_ne(Node* head, byte* result_arr, size_t* result_index) {
     byte code = 0x27;
 
     if (head->token->type == INVALID) { // unreachable in theory
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: ne\n");
         return 1;
     }
 
@@ -218,7 +370,7 @@ static int translate_ne(Node* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
-        fprintf(stderr, "INVALID in translate: eq\n");
+        fprintf(stderr, "INVALID in translate: ne\n");
         result = 1;
     }
 

@@ -102,9 +102,9 @@ dword str_to_num(char* line) {
 
     result = (dword)strtol(line, NULL, base);
 
-    if (CMP_DEBUG) {
+    #if CMP_DEBUG == 1
         fprintf(stderr, "\t[CMP_DEBUG]: str_to_num: '%s':type(%d) -> '%d'\n", line, type, result);
-    }
+    #endif
 
     return result;
 }
@@ -138,9 +138,9 @@ Token* get_token(char* line) {
         fprintf(stderr, "get_token: token\n");
     }
 
-    if (CMP_DEBUG) {
+    #if CMP_DEBUG == 1
         fprintf(stderr, "\t[CMP_DEBUG]: Create Token: type: %d value: %u\n", token_type, value);
-    }
+    #endif
 
     return token;
 }
@@ -203,9 +203,9 @@ int append_to_node(Node* head, Token* token, int token_count) {
         }
     }
 
-    if (CMP_DEBUG) {
+    #if CMP_DEBUG == 1
         fprintf(stderr, "\t[CMP_DEBUG]: Append token: token: %d | count: %d\n", token->type, token_count);
-    }
+    #endif
     
     return result;
 }
@@ -225,9 +225,9 @@ void fix_new_line(char* line, size_t line_size) {
 int safe_create_append(char* line, Node* ast, int token_count) {
     int result = OK; // 0
 
-    if (CMP_DEBUG) {
+    #if CMP_DEBUG == 1
         fprintf(stderr, "\t[CMP_DEBUG]: word: '%s'\n", line);
-    }
+    #endif
 
     Token* word_token = get_token(line);
 
@@ -243,12 +243,6 @@ int safe_create_append(char* line, Node* ast, int token_count) {
 
     return result;
 }
-
-//void post_process_special_words(Node* head, char* line) {
-    //if (strcmp(head->token->word, KW_jmp) == 0) {
-        ////value = str_to_num(line);
-    //}
-//}
 
 Node* tokenize_line(char* line, size_t line_count) {
     size_t len = strlen(line);
@@ -290,9 +284,9 @@ Node* tokenize_line(char* line, size_t line_count) {
         buffer[ind] = '\0';
         err_code = safe_create_append(buffer, ast_node, token_count);
 
-        if (CMP_DEBUG) {
+        #if CMP_DEBUG == 1
             fprintf(stderr, "\t[CMP_DEBUG]: >append code: '%d'\n\n", err_code);
-        }
+        #endif
 
         if (err_code) {
             read_flag = 0;
@@ -319,6 +313,10 @@ Node* tokenize_line(char* line, size_t line_count) {
 }
 
 void print_node(Node* node) {
+    if (node->token == 0 || node->left == 0 || node->right == 0) {
+        return;
+    }
+
     Node* copy = node;
     printf("\tHead token: %d(%s)\n", copy->token->type, copy->token->type == KEYWORD ? copy->token->word : "");
     printf("\tLeft: ");
@@ -412,11 +410,19 @@ int main(const int argc, const char** argv) {
     int status = OK;
     size_t line_count = 0;
 
+    //read line, tokenize it, append
     while (!read_flag && !feof(fd)) {
         ssize_t readed = getline(&line, &line_size, fd);
 
         if (readed == -1) {
             read_flag = 1;
+            continue;
+        }
+
+        fix_new_line(line, line_size);
+
+        if (line && line[0] == 0) { // empty line
+            line_count++;
             continue;
         }
 
@@ -426,7 +432,6 @@ int main(const int argc, const char** argv) {
             continue;
         }
 
-        fix_new_line(line, line_size);
         Node* tokens_line = tokenize_line(line, line_count);
         status = append_tree(&trees_array, &trees_array_size, &trees_array_index, tokens_line);
 
@@ -434,9 +439,6 @@ int main(const int argc, const char** argv) {
             read_flag = 1;
             continue;
         }
-
-        //get tree for one line
-        //append to array with tree's
 
         memset(line, 0, line_size);
         line_count++;
@@ -456,14 +458,14 @@ int main(const int argc, const char** argv) {
         full_exit(MEM_ERROR);
     }
 
-    if (CMP_DEBUG) {
+    #if CMP_DEBUG == 1
         fprintf(stderr, "\n\t[CMP_DEBUG]: Tokens count: %ld\n", trees_array_index);
         fprintf(stderr, "\t[CMP_DEBUG]: Result in bytes expect: %lu\n", bin_code_size);
         fprintf(stderr, "\t[CMP_DEBUG]: Tokens:\n");
         for (size_t i = 0; i < trees_array_index; ++i) {
             print_node(trees_array[i]);
         }
-    }
+    #endif
 
     int translate_code = OK;
     size_t current_tree = 0;
@@ -472,7 +474,7 @@ int main(const int argc, const char** argv) {
         translate_code = translate_token_tree(trees_array[current_tree], bin_code, &bin_code_index);
     }
 
-    if (CMP_DEBUG) {
+    #if CMP_DEBUG == 1
         fprintf(stderr, "\t[CMP_DEBUG]: translate code: %d\n", translate_code);
         fprintf(stderr, "\t[CMP_DEBUG]: Byte code:\n\t");
 
@@ -485,14 +487,18 @@ int main(const int argc, const char** argv) {
         }
 
         fprintf(stderr, "\n");
-    }
+    #endif
 
     if (translate_code) {
         show_error(TRANSLATE_LINE);
-        fprintf(stderr, "main: translate tree: line #%lu\n", current_tree + 0);
+        fprintf(stderr, "main: translate tree: valid line #%lu\n", current_tree + 0);
         full_exit(TRANSLATE_LINE);
     }
 
+    //TODO get line -> translate to byte_code as fast as possible
+    //      instead collect trees in arr
+
+    //TODO get out filename from argv (mb parse argv with getopt)
     char* file_out = "prog.out";
     fd = fopen(file_out, "wb");
 
