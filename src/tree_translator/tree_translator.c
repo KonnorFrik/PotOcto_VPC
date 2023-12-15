@@ -14,12 +14,18 @@ static int translate_ge(Node* head, byte* result_arr, size_t* result_index);
 static int translate_le(Node* head, byte* result_arr, size_t* result_index);
 static int translate_gt(Node* head, byte* result_arr, size_t* result_index);
 static int translate_lt(Node* head, byte* result_arr, size_t* result_index);
-
 static int translate_add(Node* head, byte* result_arr, size_t* result_index);
 static int translate_sub(Node* head, byte* result_arr, size_t* result_index);
 static int translate_mul(Node* head, byte* result_arr, size_t* result_index);
 static int translate_div(Node* head, byte* result_arr, size_t* result_index);
 static int translate_mod(Node* head, byte* result_arr, size_t* result_index);
+
+static int translate_and(Node* head, byte* result_arr, size_t* result_index);
+static int translate_or(Node* head, byte* result_arr, size_t* result_index);
+static int translate_xor(Node* head, byte* result_arr, size_t* result_index);
+static int translate_inv(Node* head, byte* result_arr, size_t* result_index);
+static int translate_lsh(Node* head, byte* result_arr, size_t* result_index);
+static int translate_rsh(Node* head, byte* result_arr, size_t* result_index);
 
 const Table table[] = {
     {KW_set, translate_set},
@@ -40,6 +46,13 @@ const Table table[] = {
     {KW_mul, translate_mul},
     {KW_div, translate_div},
     {KW_mod, translate_mod},
+
+    {KW_and, translate_and},
+    {KW_or, translate_or},
+    {KW_xor, translate_xor},
+    {KW_inv, translate_inv},
+    {KW_lsh, translate_lsh},
+    {KW_rsh, translate_rsh},
 
     {KW_jmp, translate_jmp},
     {KW_mov, translate_mov},
@@ -70,6 +83,174 @@ static dword get_lnum_operand(Node* head) {
 
 static void write_byte(byte* arr, size_t* ind, byte val) {
     arr[(*ind)++] = val;
+}
+
+static int translate_rsh(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xfb;
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xf5;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: lsh\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_lsh(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xfa;
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xf4;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: lsh\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_inv(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xf9;
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xf3;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: inv\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_xor(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xf8;
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xf2;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: xor\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_or(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xf7;
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xf1;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: or\n");
+        result = 1;
+    }
+
+    return result;
+}
+
+static int translate_and(Node* head, byte* result_arr, size_t* result_index) {
+    int result = OK;
+    byte code = 0xf6;
+
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == REG_ACCESS_OPERATOR) {
+        code = 0xf0;
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    } else if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
+        write_byte(result_arr, result_index, code);
+        write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
+
+    //} else if (head->left->token->type == NUMBER && head->right->token->type == REG_ACCESS_OPERATOR) {
+        //write_byte(result_arr, result_index, code);
+        //write_byte(result_arr, result_index, get_rnum_operand(head));
+        //write_byte(result_arr, result_index, get_lnum_operand(head));
+
+    } else {
+        fprintf(stderr, "INVALID in translate: and\n");
+        result = 1;
+    }
+
+    return result;
 }
 
 static int translate_mod(Node* head, byte* result_arr, size_t* result_index) {
@@ -593,27 +774,29 @@ static int translate_mov(Node* head, byte* result_arr, size_t* result_index) {
     byte code = 0;
 
     if (head->token->type == INVALID) { // unreachable in theory
-        fprintf(stderr, "INVALID in translate\n");
+        fprintf(stderr, "INVALID in translate: mov\n");
         return 1;
     }
 
-    if (head->left == NULL || head->right == NULL) { // invalid command
+    if (head->left == NULL || head->right == NULL) { // invalid command & bad parsing before
         fprintf(stderr, "NULL in translate: mov\n");
         return 1;
     }
 
-    if (head->left->token->type == MEM_ACCESS_OPERATOR && !(head->right->token->type == MEM_ACCESS_OPERATOR || head->right->token->type == NUMBER)) {
-        // 11 mov mem[MP] rXX
-        code = 0x11;
+    //if (head->left->token->type == MEM_ACCESS_OPERATOR && !(head->right->token->type == MEM_ACCESS_OPERATOR || head->right->token->type == NUMBER)) { // deprecated
+        //// 11 mov mem[MP] rXX
+        //code = 0x11;
+//
+    //} else if (head->right->token->type == MEM_ACCESS_OPERATOR && !(head->left->token->type == MEM_ACCESS_OPERATOR || head->left->token->type == NUMBER)) { // deprecated
+        //// 12 mov rXX mem[MP]
+        //code = 0x12;
 
-    } else if (head->right->token->type == MEM_ACCESS_OPERATOR && !(head->left->token->type == MEM_ACCESS_OPERATOR || head->left->token->type == NUMBER)) {
-        // 12 mov rXX mem[MP]
-        code = 0x12;
-
-    } else if (head->right->token->type == REG_ACCESS_OPERATOR && !(head->left->token->type == REG_ACCESS_OPERATOR)) {
+        // mov 5 r0 -> 32 0 5
+    if (head->left->token->type == REG_ACCESS_OPERATOR && head->right->token->type == NUMBER) {
         // 12 mov 0xDD rXX
         code = 0x32;
 
+        // mov r0 r1 -> 31 1 0
     } else if (head->right->token->type == REG_ACCESS_OPERATOR && head->left->token->type == REG_ACCESS_OPERATOR) {
         // 12 mov rXX rYY
         code = 0x31;
@@ -625,8 +808,8 @@ static int translate_mov(Node* head, byte* result_arr, size_t* result_index) {
 
     if (!result) {
         write_byte(result_arr, result_index, code);
-        write_byte(result_arr, result_index, get_rnum_operand(head));
         write_byte(result_arr, result_index, get_lnum_operand(head));
+        write_byte(result_arr, result_index, get_rnum_operand(head));
     }
 
     return result;
