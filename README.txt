@@ -57,19 +57,19 @@
 |       E9YYDD - YY = YY % DD                        |
 |----------------------------------------------------|
 |                  * Bitwise *                       |
-|       F0YYXX - bitwise YY AND XX, result in YY     |
-|       F1YYXX - bitwise YY OR  XX, result in YY     |
-|       F2YYXX - bitwise YY XOR XX, result in YY     |
-|       F3YYXX - bitwise invert XX, result in YY     |
-|       F4YYXX - bitwise lshift YY on count in XX    |
-|       F5YYXX - bitwise rshift YY on count in XX    |
+|       F0YYXX - YY AND XX, result in YY             |
+|       F1YYXX - YY OR  XX, result in YY             |
+|       F2YYXX - YY XOR XX, result in YY             |
+|       F3YYXX - invert XX, result in YY             |
+|       F4YYXX - lshift YY on count in XX            |
+|       F5YYXX - rshift YY on count in XX            |
 |                                                    |
-|       F6YYDD - bitwise YY AND DD, result in YY     |
-|       F7YYDD - bitwise YY OR  DD, result in YY     |
-|       F8YYDD - bitwise YY XOR DD, result in YY     |
-|       F9YYDD - bitwise invert DD, result in YY     |
-|       FAYYDD - bitwise lshift YY on count DD       |
-|       FBYYDD - bitwise rshift YY on count DD       |
+|       F6YYDD - YY AND DD, result in YY             |
+|       F7YYDD - YY OR  DD, result in YY             |
+|       F8YYDD - YY XOR DD, result in YY             |
+|       F9YYDD - invert DD, result in YY             |
+|       FAYYDD - lshift YY on count DD               |
+|       FBYYDD - rshift YY on count DD               |
 |----------------------------------------------------|
 |                  * Other *                         |
 |       FFFFFF - Halt                                |
