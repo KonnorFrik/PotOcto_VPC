@@ -5,7 +5,8 @@
 #include <string.h>
 #include "../config.h"
 #include "../compiler/ast.h"
-#include "../compiler/keywords.h"
+#include "../compiler/keywords_defines.h"
+#include "../str_funcs/str_funcs.h"
 
 #define TRN_DEBUG 1
 

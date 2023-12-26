@@ -1,5 +1,5 @@
-#ifndef __KEYWORDS_LIST__
-#define __KEYWORDS_LIST__
+#ifndef __KEYWORDS_DEFINES__
+#define __KEYWORDS_DEFINES__
 
 #define KW_set "set"
 #define KW_read "read"
@@ -27,33 +27,4 @@
 #define KW_inv "inv"
 #define KW_hlt "hlt"
 
-const char* Keywords[] = {
-    KW_set,
-    KW_read,
-    KW_write,
-    KW_mov,
-    KW_jmp,
-    KW_inc,
-    KW_dec,
-    KW_eq,
-    KW_ne,
-    KW_ge,
-    KW_le,
-    KW_gt,
-    KW_lt,
-    KW_add,
-    KW_sub,
-    KW_mul,
-    KW_div,
-    KW_mod,
-    KW_and,
-    KW_or,
-    KW_xor,
-    KW_inv,
-    KW_lsh,
-    KW_rsh,
-    KW_hlt,
-    NULL,
-};
 #endif
-

@@ -17,7 +17,8 @@ build_dir := build
 virt_pc_src := $(src_dir)/pc.c $(src_dir)/instructions.c $(common_dir)/funcs.c
 virt_pc_obj := $(virt_pc_src:.c=.o)
 
-cmp_src := $(foreach dir, $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
+#cmp_src := $(foreach dir, $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
+cmp_src := $(foreach dir, $(translator_dir) $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
 cmp_obj := $(cmp_src:.c=.o)
 
 test_src := $(foreach dir, $(test_dir), $(wildcard $(dir)/*.c))

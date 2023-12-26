@@ -11,12 +11,11 @@
 
 #include "../config.h" 
 #include "../instructions.h" 
-#include "../mem_manager/mem_manager.h" 
 #include "../str_funcs/str_funcs.h"
-#include "../tree_translator/tree_translator.c"
+#include "../mem_manager/mem_manager.h" 
+#include "../tree_translator/tree_translator.h"
+#include "keywords_array.h"
 #include "ast.h"
-#include "keywords.h"
-
 
 #define REG_ACCESS_WORD 'r'
 #define MEM_ACCESS_WORD '$'

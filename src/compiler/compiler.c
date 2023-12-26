@@ -1,5 +1,5 @@
 #include "compiler.h"
-// \w\+\s[r\$]\?\(0x|0b\)\?[0-9a-f]\+\s[r\$]\?\(0x|0b\)[0-9a-f]\+
+// \w\+\s[r]\?\(0x|0b\)\?[0-9a-f]\+\s[r]\?\(0x|0b\)[0-9a-f]\+
 
 void full_exit(int code) {
     m_destroy();
@@ -566,10 +566,6 @@ int main(const int argc, const char** argv) {
     if (!is_null(trees_array)) {
         m_free(trees_array);
     }
-
-    //if (!is_null(line)) {
-        //m_free(line);
-    //}
 
     if (status) {
         show_error(status);
