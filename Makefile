@@ -12,7 +12,6 @@ str_funcs_dir := $(src_dir)/str_funcs
 translator_dir := $(src_dir)/tree_translator
 test_dir := $(src_dir)/tests
 
-obj_dir := objects
 build_dir := build
 
 virt_pc_src := $(src_dir)/pc.c $(src_dir)/instructions.c $(common_dir)/funcs.c
@@ -24,21 +23,21 @@ cmp_obj := $(cmp_src:.c=.o)
 test_src := $(foreach dir, $(test_dir), $(wildcard $(dir)/*.c))
 test_obj := $(test_src:.c=.o)
 
-targets = virt_pc cmp str_funcs_tests
+targets = virt_pc cmp #str_funcs_tests
 
 
-all: virt_pc cmp
+all: $(targets)
 tests: str_funcs_tests
 
 virt_pc: $(virt_pc_obj)
-> $(cmp) $(flags) -g $? -o $(build_dir)/$@
+> $(cmp) $(flags) -g $(virt_pc_obj) -o $(build_dir)/$@
 
 cmp: $(cmp_obj)
-> $(cmp) $(flags) -g $? -o $(build_dir)/$@
+> $(cmp) $(flags) -g $(cmp_obj) -o $(build_dir)/$@
 
 
 str_funcs_tests: $(test_obj)
-> $(cmp) -g $? -o $(build_dir)/$@
+> $(cmp) -g $(test_obj) -o $(build_dir)/$@
 
 
 clean:
@@ -47,8 +46,8 @@ clean:
 > rm -f $(test_obj)
 
 clean_all: clean
-#> rm -f $(build_dir)/$(targets)
 > rm -f $(foreach targ, $(targets), $(build_dir)/$(targ))
+> rm -f $(foreach test, $(tests), $(build_dir)/$(test))
 
 
 %.o: %.c

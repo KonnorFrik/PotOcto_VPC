@@ -302,7 +302,7 @@ Node* tokenize_line(char* line, size_t line_count) {
 
     if (err_code) {
         show_error(err_code);
-        fprintf(stderr, "#%lu > '%s'\n", line_count, line);
+        fprintf(stderr, "#%zu > '%s'\n", line_count, line);
         full_exit(ERROR);
 
     }// else {
@@ -378,41 +378,28 @@ void split_comment(char* line, size_t* size) {
     }
 }
 
-int main(const int argc, const char** argv) {
-    if (argc < 2) {
-        usage(argv[0]);
-        exit(WRONG_ARGS);
-    }
+int compile_file(FILE* fd, Node*** trees_array, size_t* trees_array_size, size_t* trees_array_index, size_t* line_count_out) {
+    size_t line_size = 100;
+    char* line = c_alloc(line_size, sizeof(char));
 
-    const char* filename = argv[1];
-    FILE* fd = fopen(filename, "r");
-
-    if (is_null(fd)) {
-        show_error(FILE_ERROR);
-        fprintf(stderr, "Can't open: %s\n", filename);
-        perror("With Error: ");
-        full_exit(FILE_ERROR);
-    }
-
-    size_t trees_array_size = 30;
-    Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
-    size_t trees_array_index = 0;
-
-    if (is_null(trees_array)) {
+    if (is_null(line)) {
         show_error(MEM_ERROR);
-        fprintf(stderr, "main: trees_array\n");
+        fprintf(stderr, "Compiler: main: c_alloc\n");
         full_exit(MEM_ERROR);
     }
 
-    size_t line_size = 100;
-    char* line = c_alloc(line_size, sizeof(char));
-    int read_flag = 0;
     int status = OK;
+    int read_flag = 0;
     size_t line_count = 0;
 
-    //read line, tokenize it, append
     while (!read_flag && !feof(fd)) {
         ssize_t readed = getline(&line, &line_size, fd);
+
+        if (is_null(line)) {
+            show_error(MEM_ERROR);
+            fprintf(stderr, "Compiler: main: getline return NULL\n");
+            full_exit(MEM_ERROR);
+        }
 
         if (readed == -1) {
             read_flag = 1;
@@ -433,7 +420,7 @@ int main(const int argc, const char** argv) {
         }
 
         Node* tokens_line = tokenize_line(line, line_count);
-        status = append_tree(&trees_array, &trees_array_size, &trees_array_index, tokens_line);
+        status = append_tree(trees_array, trees_array_size, trees_array_index, tokens_line);
 
         if (status) {
             read_flag = 1;
@@ -444,11 +431,111 @@ int main(const int argc, const char** argv) {
         line_count++;
     }
 
+    *line_count_out = line_count;
+
+    if (!is_null(line)) {
+        m_free(line);
+    }
+
+    return status;
+}
+
+int main(const int argc, const char** argv) {
+    if (argc < 2) {
+        usage(argv[0]);
+        exit(WRONG_ARGS);
+    }
+
+    // open file and check for exist
+    const char* filename = argv[1];
+    FILE* fd = fopen(filename, "r");
+
+    if (is_null(fd)) {
+        show_error(FILE_ERROR);
+        fprintf(stderr, "Can't open: %s\n", filename);
+        perror("With Error: ");
+        full_exit(FILE_ERROR);
+    }
+
+    // alloc mem for array with AST's
+    size_t trees_array_size = 30;
+    Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
+    size_t trees_array_index = 0;
+
+    if (is_null(trees_array)) {
+        show_error(MEM_ERROR);
+        fprintf(stderr, "main: trees_array\n");
+        full_exit(MEM_ERROR);
+    }
+
+    //size_t line_size = 100;
+    //char* line = c_alloc(line_size, sizeof(char));
+//
+    //if (is_null(line)) {
+        //show_error(MEM_ERROR);
+        //fprintf(stderr, "Compiler: main: c_alloc\n");
+        //full_exit(MEM_ERROR);
+    //}
+
+    //int read_flag = 0;
+    int status = OK;
+    size_t line_count = 0;
+
+    //read line, tokenize it, append
+    status = compile_file(fd, &trees_array, &trees_array_size, &trees_array_index, &line_count);
+
+    if (status) {
+        show_error(status);
+        perror("Compiler: main: ");
+        full_exit(status);
+    }
+    //VVVVVVVVVVVVVV TO FUNC
+    //while (!read_flag && !feof(fd)) {
+        //ssize_t readed = getline(&line, &line_size, fd);
+//
+        //if (is_null(line)) {
+            //show_error(MEM_ERROR);
+            //fprintf(stderr, "Compiler: main: getline return NULL\n");
+            //full_exit(MEM_ERROR);
+        //}
+//
+        //if (readed == -1) {
+            //read_flag = 1;
+            //continue;
+        //}
+//
+        //fix_new_line(line, line_size);
+//
+        //if (line && line[0] == 0) { // empty line
+            //line_count++;
+            //continue;
+        //}
+//
+        //split_comment(line, &line_size);
+//
+        //if (line_size == 0) { //all line is comment
+            //continue;
+        //}
+//
+        //Node* tokens_line = tokenize_line(line, line_count);
+        //status = append_tree(&trees_array, &trees_array_size, &trees_array_index, tokens_line);
+//
+        //if (status) {
+            //read_flag = 1;
+            //continue;
+        //}
+//
+        //memset(line, 0, line_size);
+        //line_count++;
+    //}
+    //^^^^^^^^^^^^^^ TO FUNC
+
     if (!is_null(fd)) {
         fclose(fd);
     }
 
-    size_t bin_code_size = trees_array_index * 3;
+    // alloc mem for array with byte code
+    size_t bin_code_size = trees_array_index * 3; // 3 for 1.instruction, 2.operand_1, 3.operand_2
     size_t bin_code_index = 0;
     byte* bin_code = c_alloc(bin_code_size, sizeof(byte));
 
@@ -459,8 +546,9 @@ int main(const int argc, const char** argv) {
     }
 
     #if CMP_DEBUG == 1
-        fprintf(stderr, "\n\t[CMP_DEBUG]: Tokens count: %ld\n", trees_array_index);
-        fprintf(stderr, "\t[CMP_DEBUG]: Result in bytes expect: %lu\n", bin_code_size);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "\t[CMP_DEBUG]: Tokens count: %zu\n", trees_array_index);
+        fprintf(stderr, "\t[CMP_DEBUG]: Result in bytes expect: %zu\n", bin_code_size);
         fprintf(stderr, "\t[CMP_DEBUG]: Tokens:\n");
         for (size_t i = 0; i < trees_array_index; ++i) {
             print_node(trees_array[i]);
@@ -470,6 +558,7 @@ int main(const int argc, const char** argv) {
     int translate_code = OK;
     size_t current_tree = 0;
 
+    // iterate for AST's and compile it
     for (; translate_code == OK && current_tree < trees_array_index; ++current_tree) {
         translate_code = translate_token_tree(trees_array[current_tree], bin_code, &bin_code_index);
     }
@@ -491,7 +580,7 @@ int main(const int argc, const char** argv) {
 
     if (translate_code) {
         show_error(TRANSLATE_LINE);
-        fprintf(stderr, "main: translate tree: valid line #%lu\n", current_tree + 0);
+        fprintf(stderr, "main: translate tree: valid line #%zu\n", current_tree + 0);
         full_exit(TRANSLATE_LINE);
     }
 
@@ -512,7 +601,7 @@ int main(const int argc, const char** argv) {
     size_t real_writen = fwrite(bin_code, 1, bin_code_index, fd);
 
     if (real_writen != bin_code_index) {
-        fprintf(stderr, "expect write %ld, real writen: %ld\n", bin_code_index, real_writen);
+        fprintf(stderr, "expect write %zu, real writen: %zu\n", bin_code_index, real_writen);
         show_error(FILE_ERROR);
         perror("> ");
 
@@ -528,9 +617,9 @@ int main(const int argc, const char** argv) {
         m_free(trees_array);
     }
 
-    if (!is_null(line)) {
-        m_free(line);
-    }
+    //if (!is_null(line)) {
+        //m_free(line);
+    //}
 
     if (status) {
         show_error(status);

@@ -593,7 +593,7 @@ static int translate_eq(Node* head, byte* result_arr, size_t* result_index) {
 
 static int translate_set(Node* head, byte* result_arr, size_t* result_index) {
     int result = OK;
-    byte code = 0x10;
+    //byte code = 0x10;
 
     if (head->token->type == INVALID) { // unreachable in theory
         fprintf(stderr, "INVALID in translate\n");
@@ -601,6 +601,7 @@ static int translate_set(Node* head, byte* result_arr, size_t* result_index) {
     }
 
     if (head->left->token->type == NUMBER) {
+        byte code = 0x10;
         write_byte(result_arr, result_index, code);
         dword addr = get_lnum_operand(head);
         write_byte(result_arr, result_index, ((addr & 0xff00) >> 8));
@@ -684,7 +685,7 @@ static int translate_inc(Node* head, byte* result_arr, size_t* result_index) {
 
 static int translate_write(Node* head, byte* result_arr, size_t* result_index) {
     int result = OK;
-    byte code = 0x12;
+    //byte code = 0x12;
 
     if (head->token->type == INVALID) { // unreachable in theory
         fprintf(stderr, "INVALID in translate\n");
@@ -692,6 +693,7 @@ static int translate_write(Node* head, byte* result_arr, size_t* result_index) {
     }
 
     if (head->left->token->type == REG_ACCESS_OPERATOR && head->left->left->token->type == NUMBER) {
+        byte code = 0x12;
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, 0);
         write_byte(result_arr, result_index, get_lnum_operand(head));
@@ -706,7 +708,7 @@ static int translate_write(Node* head, byte* result_arr, size_t* result_index) {
 
 static int translate_read(Node* head, byte* result_arr, size_t* result_index) {
     int result = OK;
-    byte code = 0x11;
+    //byte code = 0x11;
 
     if (head->token->type == INVALID) { // unreachable in theory
         fprintf(stderr, "INVALID in translate\n");
@@ -714,6 +716,7 @@ static int translate_read(Node* head, byte* result_arr, size_t* result_index) {
     }
 
     if (head->left->token->type == REG_ACCESS_OPERATOR && head->left->left->token->type == NUMBER) {
+        byte code = 0x11;
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, 0);
         write_byte(result_arr, result_index, get_lnum_operand(head));
@@ -745,7 +748,7 @@ static int translate_hlt(Node* head, byte* result_arr, size_t* result_index) {
 static int translate_jmp(Node* head, byte* result_arr, size_t* result_index) {
     // 30
     int result = OK;
-    byte code = 0;
+    //byte code = 0;
 
     if (head->token->type == INVALID) { // unreachable in theory
         fprintf(stderr, "INVALID in translate\n");
@@ -753,7 +756,7 @@ static int translate_jmp(Node* head, byte* result_arr, size_t* result_index) {
     }
 
     if (head->left->token->type == NUMBER) {
-        code = 0x30;
+        byte code = 0x30;
         result_arr[(*result_index)++] = code;
         dword addr = get_lnum_operand(head);
 

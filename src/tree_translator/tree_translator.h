@@ -14,4 +14,6 @@ typedef struct {
     int (*translate_func)(Node*, byte*, size_t*);
 } Table;
 
+int translate_token_tree(Node* head, byte* result_arr, size_t* result_index);
+
 #endif
