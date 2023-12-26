@@ -468,16 +468,6 @@ int main(const int argc, const char** argv) {
         full_exit(MEM_ERROR);
     }
 
-    //size_t line_size = 100;
-    //char* line = c_alloc(line_size, sizeof(char));
-//
-    //if (is_null(line)) {
-        //show_error(MEM_ERROR);
-        //fprintf(stderr, "Compiler: main: c_alloc\n");
-        //full_exit(MEM_ERROR);
-    //}
-
-    //int read_flag = 0;
     int status = OK;
     size_t line_count = 0;
 
@@ -489,46 +479,6 @@ int main(const int argc, const char** argv) {
         perror("Compiler: main: ");
         full_exit(status);
     }
-    //VVVVVVVVVVVVVV TO FUNC
-    //while (!read_flag && !feof(fd)) {
-        //ssize_t readed = getline(&line, &line_size, fd);
-//
-        //if (is_null(line)) {
-            //show_error(MEM_ERROR);
-            //fprintf(stderr, "Compiler: main: getline return NULL\n");
-            //full_exit(MEM_ERROR);
-        //}
-//
-        //if (readed == -1) {
-            //read_flag = 1;
-            //continue;
-        //}
-//
-        //fix_new_line(line, line_size);
-//
-        //if (line && line[0] == 0) { // empty line
-            //line_count++;
-            //continue;
-        //}
-//
-        //split_comment(line, &line_size);
-//
-        //if (line_size == 0) { //all line is comment
-            //continue;
-        //}
-//
-        //Node* tokens_line = tokenize_line(line, line_count);
-        //status = append_tree(&trees_array, &trees_array_size, &trees_array_index, tokens_line);
-//
-        //if (status) {
-            //read_flag = 1;
-            //continue;
-        //}
-//
-        //memset(line, 0, line_size);
-        //line_count++;
-    //}
-    //^^^^^^^^^^^^^^ TO FUNC
 
     if (!is_null(fd)) {
         fclose(fd);
