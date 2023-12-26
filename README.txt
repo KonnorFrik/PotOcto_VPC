@@ -1,7 +1,7 @@
 +====================================================+
-| Virtual PC with own CPU                            |
-|                     Instructions set               |
-|                     Compiler                       |
+| Virtual PC with own CPU,                           |
+|                     Instructions set,              |
+|                     Compiler,                      |
 |                     Virtual machine                |
 +====================================================+
 |                 * Registers *                      |
