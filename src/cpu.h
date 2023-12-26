@@ -6,7 +6,7 @@
 typedef struct {
     unsigned short IP;
     unsigned short MP;
-    unsigned short reg[REG_COUNT];
+    unsigned char reg[REG_COUNT];
 } CPU;
 
 #endif
