@@ -3,9 +3,7 @@
 
 #define _GNU_SOURCE
 #define __INSTRUCTIONS_PARSE_H__ // turn off including funcs
-#define CMP_DEBUG 1
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

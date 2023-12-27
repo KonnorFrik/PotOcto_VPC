@@ -1,6 +1,7 @@
 #include "mem_manager.h"
 
-#define MEM_DEBUG 0
+#define MEM_DEBUG 1
+
 #define BASIC_SIZE 10
 #define EXSTAND_SIZE 5
 
@@ -105,7 +106,7 @@ static void command_free_inside(void** memory_storage, int size) {
             free(memory_storage[i]);
 
 #if MEM_DEBUG == 1
-                fprintf(stderr, "\t[MEM_DEBUG]: Remove unFree addr: #%d - '%p'\n", i, memory_storage[i]);
+                fprintf(stderr, "\t[MEM_DEBUG]: Remove non-Free addr: #%3d - '%p'\n", i, memory_storage[i]);
 #endif
 
             memory_storage[i] = NULL;
@@ -117,7 +118,7 @@ static void command_free_inside(void** memory_storage, int size) {
         fprintf(stderr, "\t[MEM_DEBUG]: memory_storage state at exit:\n");
     
         for (int i = 0; i < size; ++i) {
-            fprintf(stderr, "\t #%d - %p\n", i, memory_storage[i]);
+            fprintf(stderr, "\t #%3d - %p\n", i, memory_storage[i]);
         }
     
         fprintf(stderr, "\n");
@@ -146,11 +147,11 @@ static void memory_manage(void* mem, void* prev, int command) {
     static int size = 0;
 
     if (is_null(memory_storage)) {
-        memory_storage = calloc(BASIC_SIZE, sizeof(void*));
         size = BASIC_SIZE;
+        memory_storage = calloc(size, sizeof(void*));
 
         #if MEM_DEBUG == 1
-        fprintf(stderr, "\t[MEM_DEBUG]: Alloc arr '%p' with size: %d bytes\n", memory_storage, size);
+        fprintf(stderr, "\t[MEM_DEBUG]: Alloc arr '%p' with size: %d position's\n", memory_storage, size);
         #endif
         }
 
@@ -183,7 +184,7 @@ void* m_alloc(size_t size) {
     void* mem = malloc(size);
 
     #if MEM_DEBUG == 1
-    fprintf(stderr, "\t[MEM_DEBUG]: Malloc %zu bytes on: '%p'\n", size, mem);
+    fprintf(stderr, "\t[MEM_DEBUG]: Malloc %10zu bytes on: '%p'\n", size, mem);
     #endif
 
     memory_manage(mem, NULL, ADD);
@@ -194,7 +195,7 @@ void* c_alloc(size_t count, size_t size) {
     void* mem = calloc(count, size);
 
     #if MEM_DEBUG == 1
-    fprintf(stderr, "\t[MEM_DEBUG]: Calloc %zu bytes(count: %zu, size: %zu) on: '%p'\n", count * size, count, size, mem);
+    fprintf(stderr, "\t[MEM_DEBUG]: Calloc %10zu bytes(count: %5zu, size: %5zu) on: '%p'\n", count * size, count, size, mem);
     #endif
 
     memory_manage(mem, NULL, ADD);

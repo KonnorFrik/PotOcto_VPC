@@ -1,15 +1,14 @@
 #ifndef __TREE_VALIDATOR_H__
 #define __TREE_VALIDATOR_H__
 
-#include <stdio.h>
 #include <string.h>
+
 #include "../config.h"
 #include "../compiler/ast.h"
 #include "../compiler/keywords_defines.h"
 #include "../str_funcs/str_funcs.h"
 #include "../error_codes.h"
 
-#define TRN_DEBUG 1
 
 typedef struct {
     char* kw;

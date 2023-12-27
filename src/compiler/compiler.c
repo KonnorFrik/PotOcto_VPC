@@ -1,6 +1,12 @@
 #include "compiler.h"
 // \w\+\s[r]\?\(0x|0b\)\?[0-9a-f]\+\s[r]\?\(0x|0b\)[0-9a-f]\+
 
+#define CMP_DEBUG 0
+
+#if CMP_DEBUG == 1
+#endif
+#include <stdio.h>
+
 #define STD_FILENAME_OUT "prog.out"
 
 typedef struct {
@@ -375,8 +381,11 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
     int read_flag = 0;
     size_t line_count = 0;
 
+    //printf("line addr: %p\n", line);
     while (!read_flag && !feof(fd)) {
+        //this shit leak  VVVVV
         ssize_t readed = getline(&line, &line_size, fd);
+        //printf("line addr loop: %p\n", line);
 
         if (is_null(line)) {
             show_error(MEM_ERROR);

@@ -1,4 +1,9 @@
 #include "tree_translator.h"
+#define TRN_DEBUG 0
+
+#if TRN_DEBUG == 1
+#endif
+#include <stdio.h>
 
 static int translate_mov(Node* head, byte* result_arr, size_t* result_index);
 static int translate_jmp(Node* head, byte* result_arr, size_t* result_index);
@@ -822,9 +827,9 @@ int translate_token_tree(Node* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     int kw_ind = 0;
 
-    if (TRN_DEBUG) {
+#if TRN_DEBUG == 1
         fprintf(stderr, "\t[TRN_DEBUG]: Translate tree: %s\n", head->token->word);
-    }
+#endif
 
     while (result == OK && (table[kw_ind]).kw != NULL) {
         if (strcmp(head->token->word, (table[kw_ind]).kw) == 0) {
