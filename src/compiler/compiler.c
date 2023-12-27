@@ -2,10 +2,6 @@
 // \w\+\s[r]\?\(0x|0b\)\?[0-9a-f]\+\s[r]\?\(0x|0b\)[0-9a-f]\+
 
 #define STD_FILENAME_OUT "prog.out"
-#define DEFAULT_SIZE 100
-
-void full_exit(int code);
-void show_error(int code);
 
 typedef struct {
     Node** array;
@@ -13,78 +9,25 @@ typedef struct {
     size_t index;
 } AST;
 
-typedef struct {
-    byte* array;
-    size_t size;
-    size_t index;
-} ByteCode;
+void usage(const char* prog_name);
+Token* create_token(int type, char* word, dword value);
+int is_line_kw(char* line);
+int is_line_access_op(char* line);
+int is_line_number(char* line);
+dword str_to_num(char* line);
+Token* get_token(char* line);
+Node* create_node();
+int append_to_node(Node* head, Token* token, int token_count);
+void fix_new_line(char* line, size_t line_size);
+int safe_create_append(char* line, Node* ast, int token_count);
+Node* tokenize_line(char* line, size_t line_count);
+void print_node(Node* node);
+int append_tree(AST* asts_obj, Node* obj);
+int compile_file(FILE* fd, ByteArray* byte_code);
 
-static void init_byte_code(ByteCode* obj) {
-    obj->size = DEFAULT_SIZE;
-    obj->array = c_alloc(obj->size, sizeof(byte));
-    obj->index = 0;
-}
-
-static ByteCode* create_bytearray() {
-    ByteCode* obj = c_alloc(1, sizeof(ByteCode));
-
-    if (!is_null(obj)) {
-        init_byte_code(obj);
-    }
-
-    return obj;
-}
-
-static void increase_bytearray_size(ByteCode* obj) {
-    /*check if size of array less then minimum and realloc if yes*/
-    if ((obj->index + 5) < obj->size) { // min num for check - '+3'
-        size_t new_size = obj->size + (obj->size / 2);
-        byte* tmp = re_alloc(obj->array, new_size);
-
-        if (!is_null(tmp)) {
-            obj->size = new_size;
-            obj->array = tmp;
-
-        } else {
-            show_error(MEM_ERROR);
-            fprintf(stderr, "increase_bytecode_size: new mem is NULL\n");
-            full_exit(MEM_ERROR);
-        }
-    }
-}
-
-void full_exit(int code) {
-    m_destroy();
-    exit(code);
-}
 
 void usage(const char* prog_name) {
     printf("Usage: %s file\n", prog_name);
-}
-
-void show_error(int code) {
-    if (code & MEM_ERROR) {
-        fprintf(stderr, "Memory Alloc Error\n");
-
-    } else if (code & FILE_ERROR) {
-        fprintf(stderr, "File Error\n");
-
-    } else if (code & SYNTAX) {
-        fprintf(stderr, "Syntax Error\n");
-
-    } else if (code & INVALID_LINE) {
-        fprintf(stderr, "Invalid line Error\n");
-
-    } else if (code & INVALID_WORD) {
-        fprintf(stderr, "Invalid word Error\n");
-
-    } else if (code & TRANSLATE_LINE) {
-        fprintf(stderr, "Translation Error\n");
-
-    } else {
-        fprintf(stderr, "Error\n");
-    }
-    
 }
 
 Token* create_token(int type, char* word, dword value) {
@@ -417,27 +360,7 @@ int append_tree(AST* asts_obj, Node* obj) {
     return status;
 }
 
-void split_comment(char* line, size_t* size) {
-    /*Found comment symbol and replace it with \0*/
-    int splitted = 0;
-    int i = 0;
-
-    while (!splitted && line[i] != '\0') {
-        if (line[i] == COMMENT_SYMBOL) {
-            line[i] = '\0';
-            splitted = 1;
-        }
-
-        i++;
-    }
-
-    if (splitted) {
-        *size = --i;
-    }
-}
-
-//int compile_file(FILE* fd, Node*** trees_array, size_t* trees_array_size, size_t* trees_array_index, size_t* line_count_out) {
-int compile_file(FILE* fd, ByteCode* byte_code) {
+int compile_file(FILE* fd, ByteArray* byte_code) {
     /*Read lines from file and compile it immediately*/
     size_t line_size = DEFAULT_SIZE;
     char* line = c_alloc(line_size, sizeof(char));
@@ -473,7 +396,7 @@ int compile_file(FILE* fd, ByteCode* byte_code) {
             continue;
         }
 
-        split_comment(line, &line_size);
+        line_size = replace(line, COMMENT_SYMBOL, 0);
 
         if (line_size == 0) { //all line is comment
             continue;
@@ -537,7 +460,7 @@ int main(const int argc, const char** argv) {
     //}
 
     // alloc mem for array with byte code
-    ByteCode* bin_code = create_bytearray();
+    ByteArray* bin_code = create_bytearray();
 
     if (is_null(bin_code)) {
         show_error(MEM_ERROR);
@@ -623,15 +546,13 @@ int main(const int argc, const char** argv) {
         fclose(fd);
     }
 
-    //if (!is_null(trees_array)) {
-        //m_free(trees_array);
-    //}
+    destroy_bytearray(bin_code);
 
     if (status) {
         show_error(status);
-        fprintf(stderr, "main\n");
+        fprintf(stderr, "Unknown at: main\n");
     }
 
     m_destroy();
-    return OK;
+    return status;
 }

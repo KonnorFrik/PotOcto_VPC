@@ -1,16 +1,21 @@
 #include "funcs.h"
 
+static char decode_symb(byte symb);
+static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr);
+
 int is_null(void* mem) {
     return mem == NULL;
 }
 
-// max4 16 per row  16 per row
-// addr bytes       decoded
-// FFFF 00 00 .. 00 ....
+// max4 | 16 per row  | 16 symb's per row
+// addr | bytes       | decoded symbol's
+// FFFF | 00 00 .. 00 | ....
 
 static char decode_symb(byte symb) {
     char result = '.';
 
+    // mb isascii will be better
+    // need check only is symb printable as normal symb
     if (symb > 31 && symb < 127) {
         result = (char)symb;
     }
@@ -18,13 +23,14 @@ static char decode_symb(byte symb) {
     return result;
 }
 
-static void fprintf_decoded_row(FILE* fd, byte* arr, dword start_addr) {
+static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr) {
     for (dword addr = start_addr - 16; addr < start_addr; ++addr) {
         fprintf(fd, "%c", decode_symb(arr[addr]));
     }
 }
 
-void mem_dump(FILE* fd, byte* arr, size_t size) {
+void mem_dump(FILE* fd, void* mem, size_t size) {
+    unsigned char* arr = (unsigned char*)mem;
     fprintf(fd, "       "); // 4 space for addr and 1 for space
 
     for (int i = 0; i < 16; ++i) {
@@ -55,3 +61,27 @@ void mem_dump(FILE* fd, byte* arr, size_t size) {
     fprintf(fd, "\n");
 }
 
+void show_error(int code) {
+    if (code & MEM_ERROR) {
+        fprintf(stderr, "Memory Alloc Error\n");
+
+    } else if (code & FILE_ERROR) {
+        fprintf(stderr, "File Error\n");
+
+    } else if (code & SYNTAX) {
+        fprintf(stderr, "Syntax Error\n");
+
+    } else if (code & INVALID_LINE) {
+        fprintf(stderr, "Invalid line Error\n");
+
+    } else if (code & INVALID_WORD) {
+        fprintf(stderr, "Invalid word Error\n");
+
+    } else if (code & TRANSLATE_LINE) {
+        fprintf(stderr, "Translation Error\n");
+
+    } else {
+        fprintf(stderr, "Error\n");
+    }
+    
+}

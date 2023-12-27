@@ -3,11 +3,9 @@
 
 #include <string.h>
 #include <ctype.h>
-#include <stdio.h>
 
 #include "../config.h" 
 
-#define STR_DEBUG 0
 
 enum str_type {
     BIN = 2,
@@ -22,5 +20,6 @@ int is_str_bin(const char* str);
 int is_str_hex(const char* str);
 int is_hex(char s);
 int string_type(const char* str);
+size_t replace(char* line, char from, char to);
 
 #endif

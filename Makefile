@@ -7,6 +7,7 @@ flags := -Wall -Werror -Wextra -std=c1x
 src_dir := src
 cmp_dir := $(src_dir)/compiler
 common_dir := $(src_dir)/common
+bytearray_dir := $(src_dir)/byte_array
 mem_manager_dir := $(src_dir)/mem_manager
 str_funcs_dir := $(src_dir)/str_funcs
 translator_dir := $(src_dir)/tree_translator
@@ -17,8 +18,7 @@ build_dir := build
 virt_pc_src := $(src_dir)/pc.c $(src_dir)/instructions.c $(common_dir)/funcs.c
 virt_pc_obj := $(virt_pc_src:.c=.o)
 
-#cmp_src := $(foreach dir, $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
-cmp_src := $(foreach dir, $(translator_dir) $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
+cmp_src := $(foreach dir, $(bytearray_dir) $(translator_dir) $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
 cmp_obj := $(cmp_src:.c=.o)
 
 test_src := $(foreach dir, $(test_dir), $(wildcard $(dir)/*.c))
@@ -52,7 +52,7 @@ clean_all: clean
 
 
 %.o: %.c
-> $(cmp) -c $(flags) $? -o $@
+> $(cmp) -c $(flags) $? -g -o $@
 
 show:
 > @echo $(virt_pc_src)

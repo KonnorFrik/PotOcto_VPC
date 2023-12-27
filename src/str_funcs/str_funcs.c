@@ -1,5 +1,28 @@
 #include "str_funcs.h"
 
+#define STR_DEBUG 0
+
+#if STR_DEBUG == 1
+    #include <stdio.h>
+#endif
+
+size_t replace(char* line, char from, char to) {
+    size_t new_len = 0;
+    int loop = 1;
+
+    while (loop && line[new_len] != 0) {
+        if (line[new_len] == from) {
+            line[new_len] = to;
+            loop = 0;
+            continue;
+        }
+
+        new_len++;
+    }
+
+    return new_len;
+}
+
 int startswith(const char* str, const char* format) {
   int result = 1;
 
@@ -32,10 +55,10 @@ int is_str_dec(const char* str) {
         }
     }
 
-    if (STR_DEBUG) {
+#if STR_DEBUG == 1
         fprintf(stderr, "\t[STR_DEBUG]: is_str_dec: '%s' len: %d\n", str, len);
         fprintf(stderr, "\t[STR_DEBUG]: is_str_dec: result; %d\n", result);
-    }
+#endif
     
     return result;
 }
@@ -58,10 +81,10 @@ int is_str_bin(const char* str) {
         }
     }
 
-    if (STR_DEBUG) {
+#if STR_DEBUG == 1
         fprintf(stderr, "\t[STR_DEBUG]: is_str_bin: '%s' len: %d\n", str, len);
         fprintf(stderr, "\t[STR_DEBUG]: is_str_bin: result; %d\n", result);
-    }
+#endif
 
     return result;
 }
@@ -84,10 +107,10 @@ int is_str_hex(const char* str) {
         }
     }
 
-    if (STR_DEBUG) {
+#if STR_DEBUG == 1
         fprintf(stderr, "\t[STR_DEBUG]: is_str_hex: '%s' len: %d\n", str, len);
         fprintf(stderr, "\t[STR_DEBUG]: is_str_hex: result; %d\n\n", result);
-    }
+#endif
 
     return result;
 }

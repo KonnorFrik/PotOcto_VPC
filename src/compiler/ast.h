@@ -1,7 +1,7 @@
 #ifndef __AST__
 #define __AST__
 
-enum Token_Type {
+enum {
     KEYWORD = 1,
     MEM_ACCESS_OPERATOR, // 2
     REG_ACCESS_OPERATOR, // 3
@@ -14,13 +14,11 @@ typedef struct {
     dword value;
 } Token;
 
-struct node {
+typedef struct node {
     Token* token;
     struct node* left; //operand 1
     struct node* right; //operand 2
-};
-
-typedef struct node Node;
+} Node;
 
 #endif
 

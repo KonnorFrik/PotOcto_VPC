@@ -1,21 +1,41 @@
 #include "mem_manager.h"
 
+#define MEM_DEBUG 0
+#define BASIC_SIZE 10
+#define EXSTAND_SIZE 5
+
+#if MEM_DEBUG == 1
+    #include <stdio.h>
+#endif
+
+enum {
+    ADD = 0,
+    REMOVE,
+    UPDATE,
+    SELF_DESTROY,
+};
+
 static void command_add(void*** arr_addr, void* mem, int* size);
 static void command_remove(void** memory_storage, int size, void* mem);
 static void command_free_inside(void** memory_storage, int size);
 
 static int is_full(void** arr, int size);
 static void exstand(void*** arr_addr, int* size_out);
-static void memory(void* mem, void* prev, int command);
+static void memory_manage(void* mem, void* prev, int command);
+static int is_null(void* mem);
+
+static int is_null(void* mem) {
+    return mem == NULL;
+}
 
 static void exstand(void*** arr_addr, int* size_out) {
     int new_size = *size_out + EXSTAND_SIZE;
     void** new_mem = realloc(*arr_addr, new_size * sizeof(void*));
 
-    if (MEM_DEBUG) {
+#if MEM_DEBUG == 1
         fprintf(stderr, "\t[MEM_DEBUG]: Exstand arr: %d -> %d\n", *size_out, new_size);
         fprintf(stderr, "\t[MEM_DEBUG]: '%p' -> '%p'\n\n", *arr_addr, new_mem); 
-    }
+#endif
 
     if (!is_null(new_mem)) {
         //free(*arr_addr);
@@ -58,9 +78,9 @@ static void command_add(void*** arr_addr, void* mem, int* size) {
             (*arr_addr)[i] = mem;
             run = 0;
 
-            if (MEM_DEBUG) {
+#if MEM_DEBUG == 1
                 fprintf(stderr, "\t[MEM_DEBUG]: Add mem: '%p' to pos: %d\n\n", mem, i);
-            }
+#endif
         }
     }
 }
@@ -72,9 +92,9 @@ static void command_remove(void** memory_storage, int size, void* mem) {
             memory_storage[i] = NULL;
             run = 0;
 
-            if (MEM_DEBUG) {
+#if MEM_DEBUG == 1
                 fprintf(stderr, "\t[MEM_DEBUG]: Remove mem: '%p' from pos: %d\n\n", mem, i);
-            }
+#endif
         }
     }
 }
@@ -84,15 +104,15 @@ static void command_free_inside(void** memory_storage, int size) {
         if (!is_null(memory_storage[i])) {
             free(memory_storage[i]);
 
-            if (MEM_DEBUG) {
+#if MEM_DEBUG == 1
                 fprintf(stderr, "\t[MEM_DEBUG]: Remove unFree addr: #%d - '%p'\n", i, memory_storage[i]);
-            }
+#endif
 
             memory_storage[i] = NULL;
         }
     }
 
-    if (MEM_DEBUG) {
+#if MEM_DEBUG == 1
         fprintf(stderr, "\t[MEM_DEBUG]: Free arr: %p\n", memory_storage);
         fprintf(stderr, "\t[MEM_DEBUG]: memory_storage state at exit:\n");
     
@@ -101,7 +121,7 @@ static void command_free_inside(void** memory_storage, int size) {
         }
     
         fprintf(stderr, "\n");
-    }
+#endif
 }
 
 static void command_update(void** memory_storage, int size, void* mem, void* prev) {
@@ -114,14 +134,14 @@ static void command_update(void** memory_storage, int size, void* mem, void* pre
             memory_storage[i] = mem;
             run = 0;
 
-            if (MEM_DEBUG) {
+#if MEM_DEBUG == 1
                 fprintf(stderr, "\t[MEM_DEBUG]: Update pos #%d, '%p' -> '%p'\n", i, prev, mem);
-            }
+#endif
         }
     }
 }
 
-static void memory(void* mem, void* prev, int command) {
+static void memory_manage(void* mem, void* prev, int command) {
     static void** memory_storage = NULL;
     static int size = 0;
 
@@ -129,10 +149,10 @@ static void memory(void* mem, void* prev, int command) {
         memory_storage = calloc(BASIC_SIZE, sizeof(void*));
         size = BASIC_SIZE;
 
-        if (MEM_DEBUG) {
-            fprintf(stderr, "\t[MEM_DEBUG]: Alloc arr '%p' with size: %d bytes\n", memory_storage, size);
+        #if MEM_DEBUG == 1
+        fprintf(stderr, "\t[MEM_DEBUG]: Alloc arr '%p' with size: %d bytes\n", memory_storage, size);
+        #endif
         }
-    }
 
     switch (command) {
         case ADD:
@@ -162,41 +182,47 @@ static void memory(void* mem, void* prev, int command) {
 void* m_alloc(size_t size) {
     void* mem = malloc(size);
 
-    if (MEM_DEBUG) {
-        fprintf(stderr, "\t[MEM_DEBUG]: Malloc %zu bytes on: '%p'\n", size, mem);
-    }
+    #if MEM_DEBUG == 1
+    fprintf(stderr, "\t[MEM_DEBUG]: Malloc %zu bytes on: '%p'\n", size, mem);
+    #endif
 
-    memory(mem, NULL, ADD);
+    memory_manage(mem, NULL, ADD);
     return mem;
 }
 
 void* c_alloc(size_t count, size_t size) {
     void* mem = calloc(count, size);
 
-    if (MEM_DEBUG) {
-        fprintf(stderr, "\t[MEM_DEBUG]: Calloc %zu bytes(count: %zu, size: %zu) on: '%p'\n", count * size, count, size, mem);
-    }
+    #if MEM_DEBUG == 1
+    fprintf(stderr, "\t[MEM_DEBUG]: Calloc %zu bytes(count: %zu, size: %zu) on: '%p'\n", count * size, count, size, mem);
+    #endif
 
-    memory(mem, NULL, ADD);
+    memory_manage(mem, NULL, ADD);
     return mem;
 }
 
 void* re_alloc(void* mem, size_t size) {
     void* new_mem = realloc(mem, size);
 
-    if (MEM_DEBUG) {
-        fprintf(stderr, "\t[MEM_DEBUG]: Realloc: '%p' to '%p' with size: %zu bytes\n\n", mem, new_mem, size);
-    }
+    #if MEM_DEBUG == 1
+    fprintf(stderr, "\t[MEM_DEBUG]: Realloc: '%p' to '%p' with size: %zu bytes\n\n", mem, new_mem, size);
+    #endif
 
-    memory(new_mem, mem, UPDATE);
+    memory_manage(new_mem, mem, UPDATE);
 
     return new_mem;
 }
 
 void m_free(void* mem) {
-    memory(mem, NULL, REMOVE);
+    memory_manage(mem, NULL, REMOVE);
 }
 
 void m_destroy() {
-    memory(NULL, NULL, SELF_DESTROY);
+    memory_manage(NULL, NULL, SELF_DESTROY);
 }
+
+void full_exit(int code) {
+    m_destroy();
+    exit(code);
+}
+

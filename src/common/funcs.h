@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "../config.h"
+#include "../error_codes.h"
 
 int is_null(void* mem);
-void mem_dump(FILE* fd, byte* arr, size_t size);
+void mem_dump(FILE* fd, void* mem, size_t size);
+void show_error(int code);
 
 #endif
