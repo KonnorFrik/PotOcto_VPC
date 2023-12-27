@@ -1,6 +1,58 @@
 #include "compiler.h"
 // \w\+\s[r]\?\(0x|0b\)\?[0-9a-f]\+\s[r]\?\(0x|0b\)[0-9a-f]\+
 
+#define STD_FILENAME_OUT "prog.out"
+#define DEFAULT_SIZE 100
+
+void full_exit(int code);
+void show_error(int code);
+
+typedef struct {
+    Node** array;
+    size_t size;
+    size_t index;
+} AST;
+
+typedef struct {
+    byte* array;
+    size_t size;
+    size_t index;
+} ByteCode;
+
+static void init_byte_code(ByteCode* obj) {
+    obj->size = DEFAULT_SIZE;
+    obj->array = c_alloc(obj->size, sizeof(byte));
+    obj->index = 0;
+}
+
+static ByteCode* create_bytearray() {
+    ByteCode* obj = c_alloc(1, sizeof(ByteCode));
+
+    if (!is_null(obj)) {
+        init_byte_code(obj);
+    }
+
+    return obj;
+}
+
+static void increase_bytearray_size(ByteCode* obj) {
+    /*check if size of array less then minimum and realloc if yes*/
+    if ((obj->index + 5) < obj->size) { // min num for check - '+3'
+        size_t new_size = obj->size + (obj->size / 2);
+        byte* tmp = re_alloc(obj->array, new_size);
+
+        if (!is_null(tmp)) {
+            obj->size = new_size;
+            obj->array = tmp;
+
+        } else {
+            show_error(MEM_ERROR);
+            fprintf(stderr, "increase_bytecode_size: new mem is NULL\n");
+            full_exit(MEM_ERROR);
+        }
+    }
+}
+
 void full_exit(int code) {
     m_destroy();
     exit(code);
@@ -211,6 +263,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
 }
 
 void fix_new_line(char* line, size_t line_size) {
+    /*Replace \n to \0*/
     size_t len = strlen(line);
 
     if (line[len - 1] == '\n') {
@@ -223,6 +276,7 @@ void fix_new_line(char* line, size_t line_size) {
 }
 
 int safe_create_append(char* line, Node* ast, int token_count) {
+    /*append token to AST if it not invalid*/
     int result = OK; // 0
 
     #if CMP_DEBUG == 1
@@ -245,12 +299,13 @@ int safe_create_append(char* line, Node* ast, int token_count) {
 }
 
 Node* tokenize_line(char* line, size_t line_count) {
+    /*Create AST from line*/
     size_t len = strlen(line);
     Node* ast_node = create_node();
 
     if (is_null(ast_node)) {
         show_error(MEM_ERROR);
-        fprintf(stderr, "Tokens_line: ast_node\n");
+        fprintf(stderr, "Tokens_line: ast_node is NULL\n");
         full_exit(MEM_ERROR);
     }
 
@@ -258,7 +313,7 @@ Node* tokenize_line(char* line, size_t line_count) {
     
     if (is_null(buffer)) {
         show_error(MEM_ERROR);
-        fprintf(stderr, "Tokens_line: buffer line\n");
+        fprintf(stderr, "Tokens_line: buffer line is NULL\n");
         full_exit(MEM_ERROR);
     }
 
@@ -266,6 +321,7 @@ Node* tokenize_line(char* line, size_t line_count) {
 
     int err_code = 0;
     int read_flag = 1;
+    //TODO replace magic numbers with enum
     int token_count = 0; //0-kw 1-op1 2-op2
 
     while (read_flag) {
@@ -305,14 +361,13 @@ Node* tokenize_line(char* line, size_t line_count) {
         fprintf(stderr, "#%zu > '%s'\n", line_count, line);
         full_exit(ERROR);
 
-    }// else {
-        //post_process_special_words(ast_node, line);
-    //}
+    }
 
     return ast_node;
 }
 
 void print_node(Node* node) {
+    /*For debug*/
     if (node->token == 0 || node->left == 0 || node->right == 0) {
         return;
     }
@@ -339,28 +394,31 @@ void print_node(Node* node) {
     printf("\n\n");
 }
 
-int append_tree(Node*** arr_addr, size_t* size, size_t* index, Node* obj) {
+int append_tree(AST* asts_obj, Node* obj) {
+    /*Append one ast to array 
+     * Potential depricated */
     int status = OK;
 
-    if (*index >= *size) {
-        size_t new_size = (*size + (*size / 2)) * sizeof(Node*);
-        Node** tmp = re_alloc(*arr_addr, new_size);
+    if (asts_obj->index >= asts_obj->size) {
+        size_t new_size = (asts_obj->size + (asts_obj->size / 2)) * sizeof(Node*);
+        Node** tmp = re_alloc(asts_obj->array, new_size);
 
         if (!is_null(tmp)) {
-            *arr_addr = tmp;
-            *size = new_size;
+            asts_obj->array = tmp;
+            asts_obj->size = new_size;
 
         } else {
             status = MEM_ERROR;
         }
     }
 
-    (*arr_addr)[(*index)++] = obj;
+    (asts_obj->array)[(asts_obj->index)++] = obj;
 
     return status;
 }
 
 void split_comment(char* line, size_t* size) {
+    /*Found comment symbol and replace it with \0*/
     int splitted = 0;
     int i = 0;
 
@@ -378,13 +436,15 @@ void split_comment(char* line, size_t* size) {
     }
 }
 
-int compile_file(FILE* fd, Node*** trees_array, size_t* trees_array_size, size_t* trees_array_index, size_t* line_count_out) {
-    size_t line_size = 100;
+//int compile_file(FILE* fd, Node*** trees_array, size_t* trees_array_size, size_t* trees_array_index, size_t* line_count_out) {
+int compile_file(FILE* fd, ByteCode* byte_code) {
+    /*Read lines from file and compile it immediately*/
+    size_t line_size = DEFAULT_SIZE;
     char* line = c_alloc(line_size, sizeof(char));
 
     if (is_null(line)) {
         show_error(MEM_ERROR);
-        fprintf(stderr, "Compiler: main: c_alloc\n");
+        fprintf(stderr, "Compiler: compile_file: c_alloc return NULL for 'line' var\n");
         full_exit(MEM_ERROR);
     }
 
@@ -397,7 +457,7 @@ int compile_file(FILE* fd, Node*** trees_array, size_t* trees_array_size, size_t
 
         if (is_null(line)) {
             show_error(MEM_ERROR);
-            fprintf(stderr, "Compiler: main: getline return NULL\n");
+            fprintf(stderr, "Compiler: compile_file: getline return NULL\n");
             full_exit(MEM_ERROR);
         }
 
@@ -420,18 +480,26 @@ int compile_file(FILE* fd, Node*** trees_array, size_t* trees_array_size, size_t
         }
 
         Node* tokens_line = tokenize_line(line, line_count);
-        status = append_tree(trees_array, trees_array_size, trees_array_index, tokens_line);
+        int ret_code = translate_token_tree(tokens_line, 
+                                            byte_code->array,
+                                            &byte_code->index
+                                            );
+
+        if (ret_code) {
+            show_error(TRANSLATE_LINE);
+            fprintf(stderr, "compile_file: translate tree: invalid line #%zu\n", line_count);
+            status = MEM_ERROR;
+        }
+
+        increase_bytearray_size(byte_code);
+        memset(line, 0, line_size);
+        line_count++;
 
         if (status) {
             read_flag = 1;
             continue;
         }
-
-        memset(line, 0, line_size);
-        line_count++;
     }
-
-    *line_count_out = line_count;
 
     if (!is_null(line)) {
         m_free(line);
@@ -458,21 +526,29 @@ int main(const int argc, const char** argv) {
     }
 
     // alloc mem for array with AST's
-    size_t trees_array_size = 30;
-    Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
-    size_t trees_array_index = 0;
+    //size_t trees_array_size = 30;
+    //Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
+    //size_t trees_array_index = 0;
 
-    if (is_null(trees_array)) {
+    //if (is_null(trees_array)) {
+        //show_error(MEM_ERROR);
+        //fprintf(stderr, "main: trees_array\n");
+        //full_exit(MEM_ERROR);
+    //}
+
+    // alloc mem for array with byte code
+    ByteCode* bin_code = create_bytearray();
+
+    if (is_null(bin_code)) {
         show_error(MEM_ERROR);
-        fprintf(stderr, "main: trees_array\n");
+        fprintf(stderr, "main: bin_code is NULL\n");
         full_exit(MEM_ERROR);
     }
 
     int status = OK;
-    size_t line_count = 0;
 
     //read line, tokenize it, append
-    status = compile_file(fd, &trees_array, &trees_array_size, &trees_array_index, &line_count);
+    status = compile_file(fd, bin_code);
 
     if (status) {
         show_error(status);
@@ -484,55 +560,34 @@ int main(const int argc, const char** argv) {
         fclose(fd);
     }
 
-    // alloc mem for array with byte code
-    size_t bin_code_size = trees_array_index * 3; // 3 for 1.instruction, 2.operand_1, 3.operand_2
-    size_t bin_code_index = 0;
-    byte* bin_code = c_alloc(bin_code_size, sizeof(byte));
-
-    if (is_null(bin_code)) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "main: bin_code\n");
-        full_exit(MEM_ERROR);
-    }
-
-    #if CMP_DEBUG == 1
-        fprintf(stderr, "\n");
-        fprintf(stderr, "\t[CMP_DEBUG]: Tokens count: %zu\n", trees_array_index);
-        fprintf(stderr, "\t[CMP_DEBUG]: Result in bytes expect: %zu\n", bin_code_size);
-        fprintf(stderr, "\t[CMP_DEBUG]: Tokens:\n");
-        for (size_t i = 0; i < trees_array_index; ++i) {
-            print_node(trees_array[i]);
-        }
-    #endif
-
-    int translate_code = OK;
-    size_t current_tree = 0;
+    //int translate_code = OK;
+    //size_t current_tree = 0;
 
     // iterate for AST's and compile it
-    for (; translate_code == OK && current_tree < trees_array_index; ++current_tree) {
-        translate_code = translate_token_tree(trees_array[current_tree], bin_code, &bin_code_index);
-    }
+    //for (; translate_code == OK && current_tree < trees_array_index; ++current_tree) {
+        //translate_code = translate_token_tree(trees_array[current_tree], bin_code, &bin_code_index);
+    //}
 
-    #if CMP_DEBUG == 1
-        fprintf(stderr, "\t[CMP_DEBUG]: translate code: %d\n", translate_code);
-        fprintf(stderr, "\t[CMP_DEBUG]: Byte code:\n\t");
+    //#if CMP_DEBUG == 1
+        //fprintf(stderr, "\t[CMP_DEBUG]: translate code: %d\n", translate_code);
+        //fprintf(stderr, "\t[CMP_DEBUG]: Byte code:\n\t");
+//
+        //for (size_t i = 0; i < bin_code_index; ++i) {
+            //if ((i % 3) == 0) {
+                //fprintf(stderr, "\n\t");
+            //}
+//
+            //fprintf(stderr, "%x ", bin_code[i]);
+        //}
+//
+        //fprintf(stderr, "\n");
+    //#endif
 
-        for (size_t i = 0; i < bin_code_index; ++i) {
-            if ((i % 3) == 0) {
-                fprintf(stderr, "\n\t");
-            }
-
-            fprintf(stderr, "%x ", bin_code[i]);
-        }
-
-        fprintf(stderr, "\n");
-    #endif
-
-    if (translate_code) {
-        show_error(TRANSLATE_LINE);
-        fprintf(stderr, "main: translate tree: valid line #%zu\n", current_tree + 0);
-        full_exit(TRANSLATE_LINE);
-    }
+    //if (translate_code) {
+        //show_error(TRANSLATE_LINE);
+        //fprintf(stderr, "main: translate tree: valid line #%zu\n", current_tree + 0);
+        //full_exit(TRANSLATE_LINE);
+    //}
 
     //TODO get line -> translate to byte_code as fast as possible
     //      instead collect trees in arr
@@ -543,7 +598,7 @@ int main(const int argc, const char** argv) {
     //  srand(time(0)); // init rand
     //  num = rand(); 
     //  sprintf(name, "tmp_name_%x", num);
-    char* file_out = "prog.out";
+    char* file_out = STD_FILENAME_OUT;
     fd = fopen(file_out, "wb");
 
     if (is_null(fd)) {
@@ -553,10 +608,10 @@ int main(const int argc, const char** argv) {
         full_exit(FILE_ERROR);
     }
 
-    size_t real_writen = fwrite(bin_code, 1, bin_code_index, fd);
+    size_t real_writen = fwrite(bin_code->array, 1, bin_code->index, fd);
 
-    if (real_writen != bin_code_index) {
-        fprintf(stderr, "expect write %zu, real writen: %zu\n", bin_code_index, real_writen);
+    if (real_writen != bin_code->index) {
+        fprintf(stderr, "expect write %zu, real writen: %zu\n", bin_code->index, real_writen);
         show_error(FILE_ERROR);
         perror("> ");
 
@@ -568,9 +623,9 @@ int main(const int argc, const char** argv) {
         fclose(fd);
     }
 
-    if (!is_null(trees_array)) {
-        m_free(trees_array);
-    }
+    //if (!is_null(trees_array)) {
+        //m_free(trees_array);
+    //}
 
     if (status) {
         show_error(status);
