@@ -538,6 +538,11 @@ int main(const int argc, const char** argv) {
     //      instead collect trees in arr
 
     //TODO get out filename from argv (mb parse argv with getopt)
+
+    //TODO Generate tmp file with:
+    //  srand(time(0)); // init rand
+    //  num = rand(); 
+    //  sprintf(name, "tmp_name_%x", num);
     char* file_out = "prog.out";
     fd = fopen(file_out, "wb");
 
