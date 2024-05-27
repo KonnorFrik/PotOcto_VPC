@@ -14,27 +14,30 @@ TESTS_DIR := $(SRC_DIR)/tests
 
 virt_pc_src := $(SRC_DIR)/pc.c $(SRC_DIR)/instructions.c $(COMMON_DIR)/funcs.c
 virt_pc_obj := $(virt_pc_src:.c=.o)
+virt_pc_target = pototo
 
 cmp_src := $(foreach dir, $(BYTEARRAY_DIR) $(TRANSLATOR_DIR) $(COMPILER_DIR) $(STR_FUNCS_DIR) $(COMMON_DIR), $(wildcard $(dir)/*.c))
 cmp_obj := $(cmp_src:.c=.o)
+compiler_target = pan
 
 test_src := $(foreach dir, $(TESTS_DIR), $(wildcard $(dir)/*.c))
 test_obj := $(test_src:.c=.o)
+test_target = str_funcs_tests
 
-targets = virt_pc cmp
+targets = $(virt_pc_target) $(compiler_target)
 
 
-all: $(targets) str_funcs_tests
-tests: str_funcs_tests
+all: $(targets) 
+tests: $(test_target)
 
-virt_pc: $(virt_pc_obj)
+$(virt_pc_target): $(virt_pc_obj)
 > $(CC) $(CFLAGS) $^ -o $@
 
-cmp: $(cmp_obj)
+$(compiler_target): $(cmp_obj)
 > $(CC) $(CFLAGS) $^ -o $@
 
 
-str_funcs_tests: $(test_obj)
+$(test_target): $(test_obj)
 > $(CC) -g $^ -o $@
 
 
@@ -46,6 +49,7 @@ clean:
 clean_all: clean
 > $(RM) $(targets)
 > $(RM) $(tests)
+> $(RM) $(test_target)
 
 show:
 > @echo $(virt_pc_src)
