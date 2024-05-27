@@ -1,4 +1,8 @@
+#include <stdlib.h>
+
+#include "../config.h"
 #include "funcs.h"
+#include "../error_codes.h"
 
 static char decode_symb(byte symb);
 static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr);
@@ -68,7 +72,7 @@ void show_error(int code) {
     } else if (code & FILE_ERROR) {
         fprintf(stderr, "File Error\n");
 
-    } else if (code & SYNTAX) {
+    } else if (code & SYNTAX_ERR) {
         fprintf(stderr, "Syntax Error\n");
 
     } else if (code & INVALID_LINE) {
@@ -77,7 +81,7 @@ void show_error(int code) {
     } else if (code & INVALID_WORD) {
         fprintf(stderr, "Invalid word Error\n");
 
-    } else if (code & TRANSLATE_LINE) {
+    } else if (code & TRANSLATE_LINE_ERR) {
         fprintf(stderr, "Translation Error\n");
 
     } else {

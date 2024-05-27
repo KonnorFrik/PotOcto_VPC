@@ -8,7 +8,8 @@
 #include <fcntl.h>
 
 #include "pc.h"
-#include "instructions.h"
+#include "instructions_executors.h"
+#include "error_codes.h"
 
 void usage(const char* prog_name) {
     fprintf(stderr, "Usage: %s <bin file>\n", prog_name);

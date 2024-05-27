@@ -1,11 +1,7 @@
 #ifndef __STR_FUNCS_H__
 #define __STR_FUNCS_H__
 
-#include <string.h>
-#include <ctype.h>
-
-#include "../config.h" 
-
+#include <stddef.h>
 
 enum str_type {
     BIN = 2,

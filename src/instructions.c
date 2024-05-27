@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "instructions.h"
+#include "instructions_executors.h"
 
 #define INST_DEBUG 1
 

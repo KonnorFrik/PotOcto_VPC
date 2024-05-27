@@ -7,14 +7,13 @@
 #include <string.h>
 
 #include "../config.h" 
+#include "../error_codes.h"
 #include "../common/funcs.h"
-#include "../instructions.h" 
 #include "../str_funcs/str_funcs.h"
 #include "../byte_array/byte_array.h" 
 #include "../tree_translator/tree_translator.h"
 #include "ast.h"
 #include "keywords_array.h"
-#include "../error_codes.h"
 
 #define REG_ACCESS_WORD 'r'
 #define MEM_ACCESS_WORD '$'
@@ -243,7 +242,7 @@ int safe_create_append(char* line, Node* ast, int token_count) {
     Token* word_token = get_token(line);
 
     if (word_token->type == INVALID) {
-        result = SYNTAX;
+        result = SYNTAX_ERR;
     }
 
     result |= append_to_node(ast, word_token, token_count);
@@ -426,7 +425,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
                                             );
 
         if (ret_code) {
-            show_error(TRANSLATE_LINE);
+            show_error(TRANSLATE_LINE_ERR);
             fprintf(stderr, "compile_file: translate tree: invalid line #%zu\n", line_count);
             status = MEM_ERROR;
         }

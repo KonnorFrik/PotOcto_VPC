@@ -1,5 +1,5 @@
-#ifndef __BYTE_ARRAY_STRUCT__
-#define __BYTE_ARRAY_STRUCT__
+#ifndef __BYTE_ARRAY__
+#define __BYTE_ARRAY__
 
 #include "../config.h"
 #include <stddef.h>
@@ -9,11 +9,6 @@ typedef struct {
     size_t size;
     size_t index;
 } ByteArray;
-
-#endif /* __BYTE_ARRAY_STRUCT__ */
-
-#ifndef __BYTE_ARRAY__
-#define __BYTE_ARRAY__
 
 ByteArray* create_bytearray();
 void init_bytearray(ByteArray* obj);

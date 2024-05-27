@@ -1,9 +1,19 @@
+#include <string.h>
+
 #include "tree_translator.h"
+#include "../compiler/keywords_defines.h"
+#include "../str_funcs/str_funcs.h"
+#include "../error_codes.h"
+
 #define TRN_DEBUG 0
 
-#if TRN_DEBUG == 1
-#endif
 #include <stdio.h>
+
+typedef struct {
+    char* kw;
+    int (*translate_func)(Node*, byte*, size_t*);
+} Table;
+
 
 static int translate_mov(Node* head, byte* result_arr, size_t* result_index);
 static int translate_jmp(Node* head, byte* result_arr, size_t* result_index);

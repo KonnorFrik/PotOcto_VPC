@@ -1,3 +1,6 @@
+#include <string.h>
+#include <ctype.h>
+
 #include "str_funcs.h"
 
 #define STR_DEBUG 0

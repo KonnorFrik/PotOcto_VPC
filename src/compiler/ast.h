@@ -24,7 +24,6 @@ typedef struct node {
     struct node* right; //operand 2
 } Node;
 
-
 typedef struct {
     Node** array;
     size_t size;
