@@ -1,19 +1,27 @@
-#include "compiler.h"
+// #include "compiler.h"
 // \w\+\s[r]\?\(0x|0b\)\?[0-9a-f]\+\s[r]\?\(0x|0b\)[0-9a-f]\+
-
-#define CMP_DEBUG 0
-
-#if CMP_DEBUG == 1
-#endif
+#define _GNU_SOURCE
+#define __INSTRUCTIONS_PARSE_H__ // turn off including funcs
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
+#include "../config.h" 
+#include "../common/funcs.h"
+#include "../instructions.h" 
+#include "../str_funcs/str_funcs.h"
+#include "../byte_array/byte_array.h" 
+#include "../tree_translator/tree_translator.h"
+#include "ast.h"
+#include "keywords_array.h"
+#include "../error_codes.h"
+
+#define REG_ACCESS_WORD 'r'
+#define MEM_ACCESS_WORD '$'
+#define COMMENT_SYMBOL ';'
 #define STD_FILENAME_OUT "prog.out"
 
-typedef struct {
-    Node** array;
-    size_t size;
-    size_t index;
-} AST;
+#define CMP_DEBUG 0
 
 void usage(const char* prog_name);
 Token* create_token(int type, char* word, dword value);

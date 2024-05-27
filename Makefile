@@ -48,7 +48,6 @@ clean:
 
 clean_all: clean
 > $(RM) $(targets)
-> $(RM) $(tests)
 > $(RM) $(test_target)
 
 show:

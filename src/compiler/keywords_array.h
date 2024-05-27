@@ -28,7 +28,7 @@ static const char* Keywords[] = {
     KW_lsh,
     KW_rsh,
     KW_hlt,
-    NULL,
+    0,
 };
 #endif
 
