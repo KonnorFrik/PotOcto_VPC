@@ -37,12 +37,12 @@ void usage(const char* prog_name) {
 }
 
 Token* create_token(int type, char* word, dword value) {
-    Token* obj = c_alloc(1, sizeof(Token));
+    Token* obj = calloc(1, sizeof(Token));
 
-    if (!is_null(obj)) {
+   if (!is_null(obj)) {
         obj->type = type;
         obj->value = value;
-        obj->word = c_alloc(strlen(word) + 1, sizeof(char));
+        obj->word = calloc(strlen(word) + 1, sizeof(char));
 
         if (!is_null(obj->word)) {
             strcpy(obj->word, word);
@@ -147,7 +147,7 @@ Token* get_token(char* line) {
 }
 
 Node* create_node() {
-    Node* obj = c_alloc(1, sizeof(Node));
+    Node* obj = calloc(1, sizeof(Node));
 
     if (!is_null(obj)) {
         obj->token = NULL;
@@ -255,15 +255,15 @@ Node* tokenize_line(char* line, size_t line_count) {
     if (is_null(ast_node)) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Tokens_line: ast_node is NULL\n");
-        full_exit(MEM_ERROR);
+        exit(MEM_ERROR);
     }
 
-    char* buffer = c_alloc(len + 2, sizeof(char));
+    char* buffer = calloc(len + 2, sizeof(char));
     
     if (is_null(buffer)) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Tokens_line: buffer line is NULL\n");
-        full_exit(MEM_ERROR);
+        exit(MEM_ERROR);
     }
 
     strcpy(buffer, line);
@@ -303,12 +303,12 @@ Node* tokenize_line(char* line, size_t line_count) {
         token_count++;
     }
 
-    m_free(buffer);
+    free(buffer);
 
     if (err_code) {
         show_error(err_code);
         fprintf(stderr, "#%zu > '%s'\n", line_count, line);
-        full_exit(ERROR);
+        exit(ERROR);
 
     }
 
@@ -350,7 +350,7 @@ int append_tree(AST* asts_obj, Node* obj) {
 
     if (asts_obj->index >= asts_obj->size) {
         size_t new_size = (asts_obj->size + (asts_obj->size / 2)) * sizeof(Node*);
-        Node** tmp = re_alloc(asts_obj->array, new_size);
+        Node** tmp = realloc(asts_obj->array, new_size);
 
         if (!is_null(tmp)) {
             asts_obj->array = tmp;
@@ -369,12 +369,12 @@ int append_tree(AST* asts_obj, Node* obj) {
 int compile_file(FILE* fd, ByteArray* byte_code) {
     /*Read lines from file and compile it immediately*/
     size_t line_size = DEFAULT_SIZE;
-    char* line = c_alloc(line_size, sizeof(char));
+    char* line = calloc(line_size, sizeof(char));
 
     if (is_null(line)) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Compiler: compile_file: c_alloc return NULL for 'line' var\n");
-        full_exit(MEM_ERROR);
+        exit(MEM_ERROR);
     }
 
     int status = OK;
@@ -390,7 +390,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
         if (is_null(line)) {
             show_error(MEM_ERROR);
             fprintf(stderr, "Compiler: compile_file: getline return NULL\n");
-            full_exit(MEM_ERROR);
+            exit(MEM_ERROR);
         }
 
         if (readed == -1) {
@@ -434,7 +434,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
     }
 
     if (!is_null(line)) {
-        m_free(line);
+        free(line);
     }
 
     return status;
@@ -454,7 +454,7 @@ int main(const int argc, const char** argv) {
         show_error(FILE_ERROR);
         fprintf(stderr, "Can't open: %s\n", filename);
         perror("With Error: ");
-        full_exit(FILE_ERROR);
+        exit(FILE_ERROR);
     }
 
     // alloc mem for array with AST's
@@ -474,7 +474,7 @@ int main(const int argc, const char** argv) {
     if (is_null(bin_code)) {
         show_error(MEM_ERROR);
         fprintf(stderr, "main: bin_code is NULL\n");
-        full_exit(MEM_ERROR);
+        exit(MEM_ERROR);
     }
 
     int status = OK;
@@ -485,7 +485,7 @@ int main(const int argc, const char** argv) {
     if (status) {
         show_error(status);
         perror("Compiler: main: ");
-        full_exit(status);
+        exit(status);
     }
 
     if (!is_null(fd)) {
@@ -537,7 +537,7 @@ int main(const int argc, const char** argv) {
         show_error(FILE_ERROR);
         fprintf(stderr, "main: fd is null");
         perror("> ");
-        full_exit(FILE_ERROR);
+        exit(FILE_ERROR);
     }
 
     size_t real_writen = fwrite(bin_code->array, 1, bin_code->index, fd);
@@ -562,6 +562,5 @@ int main(const int argc, const char** argv) {
         fprintf(stderr, "Unknown at: main\n");
     }
 
-    m_destroy();
     return status;
 }

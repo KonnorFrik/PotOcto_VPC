@@ -11,7 +11,6 @@
 #include "../common/funcs.h"
 #include "../instructions.h" 
 #include "../str_funcs/str_funcs.h"
-#include "../mem_manager/mem_manager.h" 
 #include "../byte_array/byte_array.h" 
 #include "../tree_translator/tree_translator.h"
 #include "ast.h"
