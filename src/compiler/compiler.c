@@ -259,7 +259,7 @@ Node* tokenize_line(char* line, size_t line_count) {
     size_t len = strlen(line);
     Node* ast_node = create_node();
 
-    if ( ast_node ) {
+    if ( !ast_node ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Tokens_line: ast_node is NULL\n");
         exit(MEM_ERROR);
@@ -267,47 +267,51 @@ Node* tokenize_line(char* line, size_t line_count) {
 
     char* buffer = calloc(len + 2, sizeof(char));
     
-    if ( buffer ) {
+    if ( !buffer ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Tokens_line: buffer line is NULL\n");
         exit(MEM_ERROR);
     }
 
     strcpy(buffer, line);
+    const char* delim = " ";
+    char* token = strtok(buffer, delim);
 
     int err_code = 0;
-    int read_flag = 1;
+    // int read_flag = 1;
     //TODO replace magic numbers with enum
     int token_count = 0; //0-kw 1-op1 2-op2
 
-    while (read_flag) {
-        long unsigned int ind = 0;
+    while ( token ) {
+        // long unsigned int ind = 0;
 
-        if (buffer[ind] == '\0' || buffer[ind] == '\n') {
-            read_flag = 0;
-            continue;
-        }
+        // if (buffer[ind] == '\0' || buffer[ind] == '\n') {
+        //     read_flag = 0;
+        //     continue;
+        // }
 
-        while (buffer[ind] != ' ' && !(buffer[ind] == '\0' || buffer[ind] == '\n')) {
-            ind++;
-        }
+        // while (buffer[ind] != ' ' && !(buffer[ind] == '\0' || buffer[ind] == '\n')) {
+        //     ind++;
+        // }
 
-        char save = buffer[ind];
-        buffer[ind] = '\0';
-        err_code = safe_create_append(buffer, ast_node, token_count);
+        // char save = buffer[ind];
+        // buffer[ind] = '\0';
+        // err_code = safe_create_append(buffer, ast_node, token_count);
+        err_code = safe_create_append(token, ast_node, token_count);
 
         #if CMP_DEBUG == 1
             fprintf(stderr, "\t[CMP_DEBUG]: >append code: '%d'\n\n", err_code);
         #endif
 
         if (err_code) {
-            read_flag = 0;
+            // read_flag = 0;
             continue;
         }
 
-        buffer[ind] = save;
-        buffer += ++ind;
+        // buffer[ind] = save;
+        // buffer += ++ind;
         token_count++;
+        token = strtok(NULL, delim);
     }
 
     free(buffer);
@@ -378,9 +382,9 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
     size_t line_size = DEFAULT_SIZE;
     char* line = calloc(line_size, sizeof(char));
 
-    if ( line ) {
+    if ( !line ) {
         show_error(MEM_ERROR);
-        fprintf(stderr, "Compiler: compile_file: c_alloc return NULL for 'line' var\n");
+        fprintf(stderr, "Compiler: compile_file: calloc return NULL for 'line' var\n");
         exit(MEM_ERROR);
     }
 
@@ -389,18 +393,18 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
     size_t line_count = 0;
 
     //printf("line addr: %p\n", line);
-    while (!read_flag && !feof(fd)) {
+    while ( !read_flag && !feof(fd) ) {
         //this shit leak  VVVVV
         ssize_t readed = getline(&line, &line_size, fd);
         //printf("line addr loop: %p\n", line);
 
-        if ( line ) {
+        if ( !line ) {
             show_error(MEM_ERROR);
             fprintf(stderr, "Compiler: compile_file: getline return NULL\n");
             exit(MEM_ERROR);
         }
 
-        if (readed == -1) {
+        if ( readed == -1 ) {
             read_flag = 1;
             continue;
         }
@@ -414,7 +418,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
 
         line_size = replace(line, COMMENT_SYMBOL, 0);
 
-        if (line_size == 0) { //all line is comment
+        if ( line_size == 0 ) { //all line is comment
             continue;
         }
 
@@ -424,7 +428,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
                                             &byte_code->index
                                             );
 
-        if (ret_code) {
+        if ( ret_code ) {
             show_error(TRANSLATE_LINE_ERR);
             fprintf(stderr, "compile_file: translate tree: invalid line #%zu\n", line_count);
             status = MEM_ERROR;
@@ -457,7 +461,7 @@ int main(const int argc, const char** argv) {
     const char* filename = argv[1];
     FILE* fd = fopen(filename, "r");
 
-    if ( fd ) {
+    if ( !fd ) {
         show_error(FILE_ERROR);
         fprintf(stderr, "Can't open: %s\n", filename);
         perror("With Error: ");
@@ -478,7 +482,7 @@ int main(const int argc, const char** argv) {
     // alloc mem for array with byte code
     ByteArray* bin_code = create_bytearray();
 
-    if ( bin_code ) {
+    if ( !bin_code ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "main: bin_code is NULL\n");
         exit(MEM_ERROR);
@@ -489,7 +493,7 @@ int main(const int argc, const char** argv) {
     //read line, tokenize it, append
     status = compile_file(fd, bin_code);
 
-    if (status) {
+    if ( status != OK ) {
         show_error(status);
         perror("Compiler: main: ");
         exit(status);
@@ -540,7 +544,7 @@ int main(const int argc, const char** argv) {
     char* file_out = STD_FILENAME_OUT;
     fd = fopen(file_out, "wb");
 
-    if ( fd ) {
+    if ( !fd ) {
         show_error(FILE_ERROR);
         fprintf(stderr, "main: fd is null");
         perror("> ");
