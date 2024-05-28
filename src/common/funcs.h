@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 
-int is_null(void* mem);
 void mem_dump(FILE* fd, void* mem, size_t size);
 void show_error(int code);
 

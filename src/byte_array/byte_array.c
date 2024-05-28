@@ -8,7 +8,7 @@
 ByteArray* create_bytearray() {
     ByteArray* obj = calloc(1, sizeof(ByteArray));
 
-    if (!is_null(obj)) {
+    if ( obj ) {
         init_bytearray(obj);
     }
 
@@ -27,7 +27,7 @@ void increase_bytearray_size(ByteArray* obj) {
         size_t new_size = obj->size + (obj->size / 2);
         byte* tmp = realloc(obj->array, new_size);
 
-        if (!is_null(tmp)) {
+        if ( tmp ) {
             obj->size = new_size;
             obj->array = tmp;
 
@@ -40,8 +40,8 @@ void increase_bytearray_size(ByteArray* obj) {
 }
 
 void destroy_bytearray(ByteArray* obj) {
-    if (!is_null(obj)) {
-        if (!is_null(obj->array)) {
+    if ( obj ) {
+        if ( obj->array ) {
             free(obj->array);
         }
 

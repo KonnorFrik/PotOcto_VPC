@@ -46,12 +46,12 @@ void usage(const char* prog_name) {
 Token* create_token(int type, char* word, dword value) {
     Token* obj = calloc(1, sizeof(Token));
 
-   if (!is_null(obj)) {
+   if ( obj ) {
         obj->type = type;
         obj->value = value;
         obj->word = calloc(strlen(word) + 1, sizeof(char));
 
-        if (!is_null(obj->word)) {
+        if ( obj->word ) {
             strcpy(obj->word, word);
         }
     }
@@ -141,7 +141,7 @@ Token* get_token(char* line) {
 
     Token* token = create_token(token_type, word, value);
 
-    if (is_null(token)) {
+    if ( !token ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "get_token: token\n");
     }
@@ -156,7 +156,7 @@ Token* get_token(char* line) {
 Node* create_node() {
     Node* obj = calloc(1, sizeof(Node));
 
-    if (!is_null(obj)) {
+    if ( obj ) {
         obj->token = NULL;
         obj->left = NULL;
         obj->right = NULL;
@@ -188,7 +188,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
 
         copy->left = create_node();
 
-        if (!is_null(copy->left)) {
+        if ( copy->left ) {
             copy->left->token = token;
 
         } else {
@@ -203,7 +203,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
 
         copy->right = create_node();
 
-        if (!is_null(copy->right)) {
+        if ( copy->right ) {
             copy->right->token = token;
 
         } else {
@@ -259,7 +259,7 @@ Node* tokenize_line(char* line, size_t line_count) {
     size_t len = strlen(line);
     Node* ast_node = create_node();
 
-    if (is_null(ast_node)) {
+    if ( ast_node ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Tokens_line: ast_node is NULL\n");
         exit(MEM_ERROR);
@@ -267,7 +267,7 @@ Node* tokenize_line(char* line, size_t line_count) {
 
     char* buffer = calloc(len + 2, sizeof(char));
     
-    if (is_null(buffer)) {
+    if ( buffer ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Tokens_line: buffer line is NULL\n");
         exit(MEM_ERROR);
@@ -359,7 +359,7 @@ int append_tree(AST* asts_obj, Node* obj) {
         size_t new_size = (asts_obj->size + (asts_obj->size / 2)) * sizeof(Node*);
         Node** tmp = realloc(asts_obj->array, new_size);
 
-        if (!is_null(tmp)) {
+        if ( tmp ) {
             asts_obj->array = tmp;
             asts_obj->size = new_size;
 
@@ -378,7 +378,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
     size_t line_size = DEFAULT_SIZE;
     char* line = calloc(line_size, sizeof(char));
 
-    if (is_null(line)) {
+    if ( line ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "Compiler: compile_file: c_alloc return NULL for 'line' var\n");
         exit(MEM_ERROR);
@@ -394,7 +394,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
         ssize_t readed = getline(&line, &line_size, fd);
         //printf("line addr loop: %p\n", line);
 
-        if (is_null(line)) {
+        if ( line ) {
             show_error(MEM_ERROR);
             fprintf(stderr, "Compiler: compile_file: getline return NULL\n");
             exit(MEM_ERROR);
@@ -440,7 +440,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
         }
     }
 
-    if (!is_null(line)) {
+    if ( line ) {
         free(line);
     }
 
@@ -457,7 +457,7 @@ int main(const int argc, const char** argv) {
     const char* filename = argv[1];
     FILE* fd = fopen(filename, "r");
 
-    if (is_null(fd)) {
+    if ( fd ) {
         show_error(FILE_ERROR);
         fprintf(stderr, "Can't open: %s\n", filename);
         perror("With Error: ");
@@ -478,7 +478,7 @@ int main(const int argc, const char** argv) {
     // alloc mem for array with byte code
     ByteArray* bin_code = create_bytearray();
 
-    if (is_null(bin_code)) {
+    if ( bin_code ) {
         show_error(MEM_ERROR);
         fprintf(stderr, "main: bin_code is NULL\n");
         exit(MEM_ERROR);
@@ -495,7 +495,7 @@ int main(const int argc, const char** argv) {
         exit(status);
     }
 
-    if (!is_null(fd)) {
+    if ( fd ) {
         fclose(fd);
     }
 
@@ -540,7 +540,7 @@ int main(const int argc, const char** argv) {
     char* file_out = STD_FILENAME_OUT;
     fd = fopen(file_out, "wb");
 
-    if (is_null(fd)) {
+    if ( fd ) {
         show_error(FILE_ERROR);
         fprintf(stderr, "main: fd is null");
         perror("> ");
@@ -558,7 +558,7 @@ int main(const int argc, const char** argv) {
         real_writen = 0;
     }
 
-    if (!is_null(fd)) {
+    if ( fd ) {
         fclose(fd);
     }
 
