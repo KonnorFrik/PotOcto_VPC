@@ -1,7 +1,15 @@
 #include <stdio.h>
 
-#include "instructions.h"
 #include "instructions_executors.h"
+
+enum INSTRUCTIONS {
+    MEMORY_SECTION = 0x10,
+    LOGIC_SECTION = 0x20,
+    STUFF_SECTION = 0x30,
+    MATH_SECTION = 0xe0,
+    BITWISE_SECTION = 0xf0,
+};
+
 
 #define INST_DEBUG 1
 

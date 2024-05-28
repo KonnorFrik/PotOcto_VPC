@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "byte_array.h"
-#include "../error_codes.h"
+#include "../common/error_codes.h"
 #include "../common/funcs.h"
 
 ByteArray* create_bytearray() {

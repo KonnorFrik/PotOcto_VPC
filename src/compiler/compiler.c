@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../config.h" 
-#include "../error_codes.h"
+#include "../hardware/config.h" 
+#include "../common/error_codes.h"
 #include "../common/funcs.h"
 #include "../str_funcs/str_funcs.h"
 #include "../byte_array/byte_array.h" 
-#include "../tree_translator/tree_translator.h"
+#include "tree_translator/tree_translator.h"
 #include "ast.h"
 #include "keywords_array.h"
 

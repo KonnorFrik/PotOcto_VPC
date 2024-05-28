@@ -1,9 +1,9 @@
 #include <string.h>
 
 #include "tree_translator.h"
-#include "../compiler/keywords_defines.h"
-#include "../str_funcs/str_funcs.h"
-#include "../error_codes.h"
+#include "../keywords_defines.h"
+#include "../../str_funcs/str_funcs.h"
+#include "../../common/error_codes.h"
 
 #define TRN_DEBUG 0
 

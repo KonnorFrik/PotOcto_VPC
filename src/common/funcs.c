@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
-#include "../config.h"
+#include "../hardware/config.h"
 #include "funcs.h"
-#include "../error_codes.h"
+#include "error_codes.h"
 
 static char decode_symb(byte symb);
 static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr);

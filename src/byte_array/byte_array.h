@@ -1,8 +1,9 @@
 #ifndef __BYTE_ARRAY__
 #define __BYTE_ARRAY__
 
-#include "../config.h"
 #include <stddef.h>
+
+#include "../hardware/config.h"
 
 typedef struct {
     byte* array;

@@ -1,9 +1,9 @@
 #ifndef __VIRT_PC_H__
 #define __VIRT_PC_H__
 
-#include "mem.h"
-#include "cpu.h"
-#include "config.h"
+#include "hardware/memory.h"
+#include "hardware/cpu.h"
+#include "hardware/config.h"
 #include "common/funcs.h"
 
 #define MEM_SIZE (0xffff + 1)

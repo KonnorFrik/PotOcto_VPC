@@ -1,7 +1,7 @@
 #ifndef __AST__
 #define __AST__
 
-#include "../config.h" 
+#include "../hardware/config.h" 
 #include <stddef.h>
 
 enum {
