@@ -222,7 +222,7 @@ void string_type_test() {
 }
 
 int main() {
-    printf("TEST: str_funcs\n");
+    printf("[TEST]: str_funcs\n");
     printf("Startswith:\n"); 
     startswith_test();
 

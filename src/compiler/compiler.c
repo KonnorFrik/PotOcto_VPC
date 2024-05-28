@@ -279,7 +279,7 @@ Node* tokenize_line(char* line, size_t line_count) {
 
     int err_code = 0;
     // int read_flag = 1;
-    //TODO replace magic numbers with enum
+    //TODO: replace magic numbers with enum
     int token_count = 0; //0-kw 1-op1 2-op2
 
     while ( token ) {
@@ -411,14 +411,15 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
 
         fix_new_line(line, line_size);
 
+        // TODO: delete 'line &&' or find why it here
         if (line && line[0] == 0) { // empty line
             line_count++;
             continue;
         }
 
-        line_size = replace(line, COMMENT_SYMBOL, 0);
+        size_t accessible_size = replace(line, COMMENT_SYMBOL, 0);
 
-        if ( line_size == 0 ) { //all line is comment
+        if ( accessible_size == 0 ) { //all line is comment
             continue;
         }
 
