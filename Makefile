@@ -2,14 +2,14 @@
 .PHONY = all
 
 CC = gcc
-CFLAGS := -std=c11 -Wall -Wextra -Werror -g
+CFLAGS := -std=c11 -Wall -Wextra -Werror -g#-I $(shell pwd)/src
 
 SRC_DIR := src
 COMPILER_DIR := $(SRC_DIR)/compiler
 COMMON_DIR := $(SRC_DIR)/common
 BYTEARRAY_DIR := $(SRC_DIR)/byte_array
 STR_FUNCS_DIR := $(SRC_DIR)/str_funcs
-TRANSLATOR_DIR := $(SRC_DIR)/tree_translator
+TRANSLATOR_DIR := $(COMPILER_DIR)/tree_translator
 TESTS_DIR := $(SRC_DIR)/tests
 
 virt_pc_src := $(SRC_DIR)/pc.c $(SRC_DIR)/instructions.c $(COMMON_DIR)/funcs.c
