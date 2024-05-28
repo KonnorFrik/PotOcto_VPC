@@ -9,4 +9,4 @@ typedef struct {
     unsigned char reg[REG_COUNT];
 } CPU;
 
-#endif
+#endif /* __CPU_H__ */

@@ -608,7 +608,6 @@ static int translate_eq(Node* head, byte* result_arr, size_t* result_index) {
 
 static int translate_set(Node* head, byte* result_arr, size_t* result_index) {
     int result = OK;
-    //byte code = 0x10;
 
     if (head->token->type == INVALID) { // unreachable in theory
         fprintf(stderr, "INVALID in translate\n");

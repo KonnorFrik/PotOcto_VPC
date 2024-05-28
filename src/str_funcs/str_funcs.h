@@ -18,4 +18,4 @@ int is_hex(char s);
 int string_type(const char* str);
 size_t replace(char* line, char from, char to);
 
-#endif
+#endif /* __STR_FUNCS_H__ */

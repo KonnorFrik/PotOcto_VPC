@@ -30,5 +30,4 @@ typedef struct {
     size_t index;
 } AST;
 
-#endif
-
+#endif /* __AST__ */

@@ -7,4 +7,4 @@ typedef unsigned char byte;
 typedef unsigned char word;
 typedef unsigned short dword;
 
-#endif
+#endif /* __CONFIG_H__ */

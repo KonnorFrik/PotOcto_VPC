@@ -7,4 +7,4 @@
 
 int translate_token_tree(Node* head, byte* result_arr, size_t* result_index);
 
-#endif
+#endif /* __TREE_VALIDATOR_H__ */

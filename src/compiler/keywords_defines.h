@@ -27,4 +27,4 @@
 #define KW_inv "inv"
 #define KW_hlt "hlt"
 
-#endif
+#endif /* __KEYWORDS_DEFINES__ */

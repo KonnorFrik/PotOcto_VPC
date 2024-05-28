@@ -7,4 +7,4 @@ typedef unsigned char MEMORY;
 
 void mem_dump(FILE* fd, void* mem, size_t size);
 
-#endif
+#endif /* __MEM_H__ */

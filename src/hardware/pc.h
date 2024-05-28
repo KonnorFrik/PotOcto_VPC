@@ -1,10 +1,10 @@
 #ifndef __VIRT_PC_H__
 #define __VIRT_PC_H__
 
-#include "hardware/memory.h"
-#include "hardware/cpu.h"
-#include "hardware/config.h"
-#include "common/funcs.h"
+#include "memory.h"
+#include "cpu.h"
+#include "config.h"
+#include "../common/funcs.h"
 
 #define MEM_SIZE (0xffff + 1)
 
@@ -13,4 +13,4 @@ typedef struct {
     MEMORY memory [MEM_SIZE];
 } PC;
 
-#endif
+#endif /* __VIRT_PC_H__ */

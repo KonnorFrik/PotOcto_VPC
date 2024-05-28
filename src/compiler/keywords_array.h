@@ -1,7 +1,7 @@
-#include "keywords_defines.h"
-
 #ifndef __KEYWORDS_ARRAY__
 #define __KEYWORDS_ARRAY__
+
+#include "keywords_defines.h"
 static const char* Keywords[] = {
     KW_set,
     KW_read,
@@ -30,5 +30,4 @@ static const char* Keywords[] = {
     KW_hlt,
     0,
 };
-#endif
-
+#endif /* __KEYWORDS_ARRAY__ */

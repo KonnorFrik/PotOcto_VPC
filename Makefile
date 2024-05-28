@@ -10,9 +10,10 @@ COMMON_DIR := $(SRC_DIR)/common
 BYTEARRAY_DIR := $(SRC_DIR)/byte_array
 STR_FUNCS_DIR := $(SRC_DIR)/str_funcs
 TRANSLATOR_DIR := $(COMPILER_DIR)/tree_translator
+HARDWARE_DIR = $(SRC_DIR)/hardware
 TESTS_DIR := $(SRC_DIR)/tests
 
-virt_pc_src := $(SRC_DIR)/pc.c $(SRC_DIR)/instructions.c $(COMMON_DIR)/funcs.c
+virt_pc_src := $(wildcard $(HARDWARE_DIR)/*.c) $(COMMON_DIR)/funcs.c
 virt_pc_obj := $(virt_pc_src:.c=.o)
 virt_pc_target = pototo
 

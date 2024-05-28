@@ -9,7 +9,7 @@
 
 #include "pc.h"
 #include "instructions_executors.h"
-#include "common/error_codes.h"
+#include "../common/error_codes.h"
 
 void usage(const char* prog_name) {
     fprintf(stderr, "Usage: %s <bin file>\n", prog_name);
@@ -29,9 +29,6 @@ void executor(PC* vpc) {
         execute = do_instruction(vpc, instr_code, operand_1, operand_2);
     }
 }
-
-//void memory_dump() {
-//}
 
 int main(const int argc, const char** argv) {
     if (argc < 2) {

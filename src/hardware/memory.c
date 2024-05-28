@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "../hardware/config.h"
+#include "config.h"
 
 static char decode_symb(byte symb);
 static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr);

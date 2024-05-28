@@ -13,4 +13,4 @@ enum {
     TRANSLATE_LINE_ERR,
 };
 
-#endif
+#endif /* __ERROR_CODES__ */

@@ -3,4 +3,4 @@
 
 void show_error(int code);
 
-#endif
+#endif /* __COMMON_FUNCS_H__ */
