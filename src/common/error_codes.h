@@ -1,8 +1,12 @@
 #ifndef __ERROR_CODES__
 #define __ERROR_CODES__
+
+/**
+ * @brief Error codes for all programm
+ */
 enum {
-    ERROR = -1,
-    OK = 0,
+    ERROR = -1, ///< Unknown error
+    OK = 0,     ///< No error
     WRONG_ARGS,
     FILE_ERROR,
     MAP_ERROR,

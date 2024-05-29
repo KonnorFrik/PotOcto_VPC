@@ -4,26 +4,34 @@
 #include "error_codes.h"
 
 void show_error(int code) {
-    if (code & MEM_ERROR) {
-        fprintf(stderr, "Memory Alloc Error\n");
+    switch ( code ) {
+        case MEM_ERROR:
+            fprintf(stderr, "Memory Alloc Error\n");
+            break;
 
-    } else if (code & FILE_ERROR) {
-        fprintf(stderr, "File Error\n");
+        case FILE_ERROR:
+            fprintf(stderr, "File Error\n");
+            break;
 
-    } else if (code & SYNTAX_ERR) {
-        fprintf(stderr, "Syntax Error\n");
+        case SYNTAX_ERR:
+            fprintf(stderr, "Syntax Error\n");
+            break;
 
-    } else if (code & INVALID_LINE) {
-        fprintf(stderr, "Invalid line Error\n");
+        case INVALID_LINE:
+            fprintf(stderr, "Invalid line Error\n");
+            break;
 
-    } else if (code & INVALID_WORD) {
-        fprintf(stderr, "Invalid word Error\n");
+        case INVALID_WORD:
+            fprintf(stderr, "Invalid word Error\n");
+            break;
 
-    } else if (code & TRANSLATE_LINE_ERR) {
-        fprintf(stderr, "Translation Error\n");
+        case TRANSLATE_LINE_ERR:
+            fprintf(stderr, "Translation Error\n");
+            break;
 
-    } else {
-        fprintf(stderr, "Error\n");
+        default:
+            fprintf(stderr, "Error\n");
+            break;
     }
     
 }
