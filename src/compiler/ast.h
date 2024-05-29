@@ -11,23 +11,32 @@ enum {
     NUMBER,              // 4
 };
 
-
+/**
+ * @brief Struct with one toke
+ */
 typedef struct {
-    int type;
-    char* word;
-    dword value;
+    int type;    ///< Token type
+    char* word;  ///< line with current word
+    dword value; ///< value for numbers
 } Token;
 
+/**
+ * @brief One token tree
+ * literally this is AST, but with wrong naming
+ */
 typedef struct node {
-    Token* token;
-    struct node* left; //operand 1
-    struct node* right; //operand 2
+    Token* token;       ///< Token object
+    struct node* left;  ///< Pointer for next same struct with operator/operand
+    struct node* right; ///< Pointer for next same struct with operator/operand
 } Node;
 
+/**
+ * @brief Array with Nodes (aka ast)
+ */
 typedef struct {
-    Node** array;
-    size_t size;
-    size_t index;
+    Node** array; ///< Array with nodes
+    size_t size;  ///< current size
+    size_t index; ///< current empty cell index for write
 } AST;
 
 #endif /* __AST__ */
