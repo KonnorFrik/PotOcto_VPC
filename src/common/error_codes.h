@@ -4,7 +4,7 @@
 /**
  * @brief Error codes for all programm
  */
-enum {
+enum ERROR_CODES {
     ERROR = -1, ///< Unknown error
     OK = 0,     ///< No error
     WRONG_ARGS,

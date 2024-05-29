@@ -833,20 +833,20 @@ static int translate_mov(Node* head, byte* result_arr, size_t* result_index) {
 }
 
 int translate_token_tree(Node* head, byte* result_arr, size_t* result_index) {
-    int result = OK;
+    int status = OK;
     int kw_ind = 0;
 
 #if TRN_DEBUG == 1
         fprintf(stderr, "\t[TRN_DEBUG]: Translate tree: %s\n", head->token->word);
 #endif
 
-    while (result == OK && (table[kw_ind]).kw != NULL) {
+    while (status == OK && (table[kw_ind]).kw != NULL) {
         if (strcmp(head->token->word, (table[kw_ind]).kw) == 0) {
-            result = (table[kw_ind]).translate_func(head, result_arr, result_index);
+            status = (table[kw_ind]).translate_func(head, result_arr, result_index);
         }
 
         kw_ind++;
     }
 
-    return result;
+    return status;
 }
