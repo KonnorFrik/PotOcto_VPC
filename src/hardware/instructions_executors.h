@@ -2,7 +2,7 @@
 #define __INSTRUCTIONS_EXECUTORS_H__
 
 #include "pc.h"
-#include "config.h"
+#include "basic_types.h"
 
 /*
 * @brief Each *_instructions function RUN instruction in PC object

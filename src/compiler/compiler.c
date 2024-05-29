@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../hardware/config.h" 
+#include "../hardware/basic_types.h" 
 #include "../common/error_codes.h"
 #include "../common/funcs.h"
 #include "../str_funcs/str_funcs.h"

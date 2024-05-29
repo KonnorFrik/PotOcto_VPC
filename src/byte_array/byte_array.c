@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #include "byte_array.h"
-#include "../common/error_codes.h"
-#include "../common/funcs.h"
+// #include "../common/error_codes.h"
+// #include "../common/funcs.h"
 
 ByteArray* create_bytearray() {
     ByteArray* obj = calloc(1, sizeof(ByteArray));

@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#include "../hardware/config.h"
+#include "../hardware/basic_types.h"
 
 /**
  * @brief Struct with array of bytes

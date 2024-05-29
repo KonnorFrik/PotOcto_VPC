@@ -1,6 +1,8 @@
 #ifndef __KEYWORDS_DEFINES__
 #define __KEYWORDS_DEFINES__
 
+/** @file All keyword defines here */
+
 #define KW_set "set"
 #define KW_read "read"
 #define KW_write "write"

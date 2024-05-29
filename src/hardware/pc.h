@@ -3,7 +3,7 @@
 
 #include "memory.h"
 #include "cpu.h"
-#include "config.h"
+#include "basic_types.h"
 #include "../common/funcs.h"
 
 #define MEM_SIZE (0xffff + 1)

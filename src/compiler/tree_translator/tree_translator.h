@@ -2,7 +2,7 @@
 #define __TREE_VALIDATOR_H__
 
 #include <stddef.h>
-#include "../../hardware/config.h"
+#include "../../hardware/basic_types.h"
 #include "../ast.h"
 
 /**

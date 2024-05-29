@@ -2,6 +2,8 @@
 #define __KEYWORDS_ARRAY__
 
 #include "keywords_defines.h"
+
+/** @brief array with all keywords */
 static const char* Keywords[] = {
     KW_set,
     KW_read,
