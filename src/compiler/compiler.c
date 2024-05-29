@@ -39,10 +39,23 @@ int append_tree(AST* asts_obj, Node* obj);
 int compile_file(FILE* fd, ByteArray* byte_code);
 
 
+/**
+ * @brief Print Usage of compiler to stdout
+ * @param[in] prog_name Current path to this program
+ * @return void
+ */
 void usage(const char* prog_name) {
     printf("Usage: %s file\n", prog_name);
 }
 
+/**
+ * @brief Create Token object and init it
+ * @return NULL if can't allocate memory
+ * @param[in] type Token type
+ * @param[in] word Word for token
+ * @param[in] value Value for token
+ * @return obj or NULL
+ */
 Token* create_token(int type, char* word, dword value) {
     Token* obj = calloc(1, sizeof(Token));
 
@@ -53,18 +66,28 @@ Token* create_token(int type, char* word, dword value) {
 
         if ( obj->word ) {
             strcpy(obj->word, word);
+
+        } else {
+            free(obj);
+            obj = NULL;
         }
     }
 
     return obj;
 }
 
+// TODO: change logic int to bool everywhere
+/**
+ * @brief Determine if given word is Keyword
+ * @param[in] line Line with word for check
+ * @return result 0:NO 1:YES
+ */
 int is_line_kw(char* line) {
-    int result = OK;
+    int result = 0;
     int ind = 0;
 
-    while (!result && Keywords[ind] != NULL) {
-        if (strcmp(line, Keywords[ind]) == 0) {
+    while ( !result && Keywords[ind] != NULL ) {
+        if ( strcmp(line, Keywords[ind]) == 0 ) {
             result = 1;
         }
 
@@ -74,6 +97,11 @@ int is_line_kw(char* line) {
     return result;
 }
 
+/**
+ * @brief Determine if given word starts with any access operator
+ * @param[in] line Line with word for check
+ * @return result 0:NO 1:YES
+ */
 int is_line_access_op(char* line) {
     int result = 0;
 
@@ -84,6 +112,11 @@ int is_line_access_op(char* line) {
     return result;
 }
 
+/**
+ * @brief Determine if given word is number
+ * @param[in] line Line with word for check
+ * @return result 0:NO 1:YES
+ */
 int is_line_number(char* line) {
     int result = 0;
 
@@ -94,6 +127,11 @@ int is_line_number(char* line) {
     return result;
 }
 
+/**
+ * @brief Determine number base and convert given word to number
+ * @param[in] line Word for convert
+ * @return result Converted number 
+ */
 dword str_to_num(char* line) {
     dword result = 0;
     int type = string_type(line);
@@ -117,24 +155,30 @@ dword str_to_num(char* line) {
     return result;
 }
 
+/**
+ * @brief Create Token object from given line
+ * @warning Exit from program if error occured
+ * @param[in] line Line for convert to Token
+ * @return token Valid Token object
+ */
 Token* get_token(char* line) {
     int token_type = INVALID;
     char* word = "";
     dword value = 0;
 
-    if (is_line_kw(line)) {
+    if ( is_line_kw(line) ) {
         token_type = KEYWORD;
         word = line;
 
-    } else if (is_line_access_op(line)) {
-        if (line[0] == 'r') {
+    } else if ( is_line_access_op(line) ) {
+        if ( line[0] == 'r' ) {
             token_type = REG_ACCESS_OPERATOR;
 
-        } else if (line[0] == '$') {
+        } else if ( line[0] == '$' ) {
             token_type = MEM_ACCESS_OPERATOR;
         }
 
-    } else if (is_line_number(line)) {
+    } else if ( is_line_number(line) ) {
         token_type = NUMBER;
         value = str_to_num(line);
     }
@@ -143,7 +187,8 @@ Token* get_token(char* line) {
 
     if ( !token ) {
         show_error(MEM_ERROR);
-        fprintf(stderr, "get_token: token\n");
+        fprintf(stderr, "get_token: token is NULL\n");
+        exit(MEM_ERROR);
     }
 
     #if CMP_DEBUG == 1
@@ -153,36 +198,53 @@ Token* get_token(char* line) {
     return token;
 }
 
+/**
+ * @brief Create Node object. Allocate memory and init
+ * @note Return NULL if Error occured
+ * @return obj Node object or NULL
+ */
 Node* create_node() {
     Node* obj = calloc(1, sizeof(Node));
 
-    if ( obj ) {
-        obj->token = NULL;
-        obj->left = NULL;
-        obj->right = NULL;
-    }
+    // if ( obj ) {
+    //     obj->token = NULL;
+    //     obj->left = NULL;
+    //     obj->right = NULL;
+    // }
 
     return obj;
 }
 
+// TODO: Change appendig 'system' to node. Head is Keyword, append left, append right
+// Appending to Node(aka AST) use token_count for determine append token to left or right
+// in language(asm like) i have only 3 words per line
+// 1 word - Keyword
+// 2 word - Left operand
+// 3 word - Right operand
+/**
+ * @brief Part of constructing Node. Append new Token to Node
+ * @param[in, out] head Head of Node
+ * @param[in]      token Token object for append
+ * @param[in]      token_count value for determine where append token
+ */
 int append_to_node(Node* head, Token* token, int token_count) {
-    if (token_count > 2) {
+    if ( token_count > 2 ) {
         return INVALID_LINE;
     }
 
-    if (token->type == INVALID) {
+    if ( token->type == INVALID ) {
         return INVALID_WORD;
     }
 
     int result = 0;
     Node* copy = head;
 
-    if (token_count == 0) { //kw
+    if ( token_count == 0 ) { //kw
         copy->token = token;
     }
 
-    if (token_count == 1) { //op1
-        while (copy->left != NULL) {
+    if ( token_count == 1 ) { //op1
+        while ( copy->left != NULL ) {
             copy = copy->left;
         }
 
@@ -196,8 +258,8 @@ int append_to_node(Node* head, Token* token, int token_count) {
         }
     }
 
-    if (token_count == 2) { //op2
-        while (copy->right != NULL) {
+    if ( token_count == 2 ) { //op2
+        while ( copy->right != NULL ) {
             copy = copy->right;
         }
 
@@ -218,6 +280,12 @@ int append_to_node(Node* head, Token* token, int token_count) {
     return result;
 }
 
+// TODO: mb better will be change 'fix_new_line' function to 'replace' from 'str_funcs'
+/**
+ * @brief Replace '\n' to '\0' in given line
+ * @param[in, out] line Line for replace in
+ * @param[in]      line_size Current size of line
+ */
 void fix_new_line(char* line, size_t line_size) {
     /*Replace \n to \0*/
     size_t len = strlen(line);
@@ -231,6 +299,14 @@ void fix_new_line(char* line, size_t line_size) {
     }
 }
 
+/**
+ * @brief Wrap for 'append_to_node' for manage appending
+ * IN: one word, OUT: Node filled with new one token
+ * @param[in]      line Current line for create tokens from
+ * @param[in, out] ast  Node object for fill it 
+ * @param[in]      token_count Number of current word in line
+ * @return result Error code or OK
+ */
 int safe_create_append(char* line, Node* ast, int token_count) {
     /*append token to AST if it not invalid*/
     int result = OK; // 0
@@ -254,6 +330,13 @@ int safe_create_append(char* line, Node* ast, int token_count) {
     return result;
 }
 
+/**
+ * @brief Parse given line for tokens
+ * @note Abort program if any error occured
+ * @param[in] line Current line with words
+ * @param[in] line_count Current line number
+ * @return ast_node Valid Node object
+ */
 Node* tokenize_line(char* line, size_t line_count) {
     /*Create AST from line*/
     size_t len = strlen(line);
@@ -278,25 +361,10 @@ Node* tokenize_line(char* line, size_t line_count) {
     char* token = strtok(buffer, delim);
 
     int err_code = 0;
-    // int read_flag = 1;
     //TODO: replace magic numbers with enum
     int token_count = 0; //0-kw 1-op1 2-op2
 
     while ( token ) {
-        // long unsigned int ind = 0;
-
-        // if (buffer[ind] == '\0' || buffer[ind] == '\n') {
-        //     read_flag = 0;
-        //     continue;
-        // }
-
-        // while (buffer[ind] != ' ' && !(buffer[ind] == '\0' || buffer[ind] == '\n')) {
-        //     ind++;
-        // }
-
-        // char save = buffer[ind];
-        // buffer[ind] = '\0';
-        // err_code = safe_create_append(buffer, ast_node, token_count);
         err_code = safe_create_append(token, ast_node, token_count);
 
         #if CMP_DEBUG == 1
@@ -304,12 +372,9 @@ Node* tokenize_line(char* line, size_t line_count) {
         #endif
 
         if (err_code) {
-            // read_flag = 0;
             continue;
         }
 
-        // buffer[ind] = save;
-        // buffer += ++ind;
         token_count++;
         token = strtok(NULL, delim);
     }
@@ -318,14 +383,18 @@ Node* tokenize_line(char* line, size_t line_count) {
 
     if (err_code) {
         show_error(err_code);
-        fprintf(stderr, "#%zu > '%s'\n", line_count, line);
+        fprintf(stderr, "[ERROR] Syntax problem with: #%zu > '%s'\n", line_count, line);
         exit(ERROR);
-
     }
 
     return ast_node;
 }
 
+#if CMP_DEBUG == 1
+/**
+ * @brief Print given Node object to stdout
+ * @note For debug use
+ */
 void print_node(Node* node) {
     /*For debug*/
     if (node->token == 0 || node->left == 0 || node->right == 0) {
@@ -353,7 +422,15 @@ void print_node(Node* node) {
 
     printf("\n\n");
 }
+#endif
 
+// TODO: move function for ast to private file
+/**
+ * @brief Append Node object to Nodes array (AST object)
+ * @param[in, out] asts_obj Valid AST object for append in
+ * @param[in]      obj      Valid Node object
+ * @return status OK or Error code
+ */
 int append_tree(AST* asts_obj, Node* obj) {
     /*Append one ast to array 
      * Potential depricated */
@@ -377,6 +454,14 @@ int append_tree(AST* asts_obj, Node* obj) {
     return status;
 }
 
+// TODO: find way to split function to smaller function
+/**
+ * @brief Read lines from opened file and compiled them
+ * @note Abort program if any Error occured
+ * @param[in] fd Opened file with program
+ * @param[in, out] byte_code Valid ByteArray object from write bytes in
+ * @return status OK or Error code
+ */
 int compile_file(FILE* fd, ByteArray* byte_code) {
     /*Read lines from file and compile it immediately*/
     size_t line_size = DEFAULT_SIZE;
@@ -473,17 +558,6 @@ int main(const int argc, const char** argv) {
         exit(FILE_ERROR);
     }
 
-    // alloc mem for array with AST's
-    //size_t trees_array_size = 30;
-    //Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
-    //size_t trees_array_index = 0;
-
-    //if (is_null(trees_array)) {
-        //show_error(MEM_ERROR);
-        //fprintf(stderr, "main: trees_array\n");
-        //full_exit(MEM_ERROR);
-    //}
-
     // alloc mem for array with byte code
     ByteArray* bin_code = create_bytearray();
 
@@ -508,41 +582,12 @@ int main(const int argc, const char** argv) {
         fclose(fd);
     }
 
-    //int translate_code = OK;
-    //size_t current_tree = 0;
-
-    // iterate for AST's and compile it
-    //for (; translate_code == OK && current_tree < trees_array_index; ++current_tree) {
-        //translate_code = translate_token_tree(trees_array[current_tree], bin_code, &bin_code_index);
-    //}
-
-    //#if CMP_DEBUG == 1
-        //fprintf(stderr, "\t[CMP_DEBUG]: translate code: %d\n", translate_code);
-        //fprintf(stderr, "\t[CMP_DEBUG]: Byte code:\n\t");
-//
-        //for (size_t i = 0; i < bin_code_index; ++i) {
-            //if ((i % 3) == 0) {
-                //fprintf(stderr, "\n\t");
-            //}
-//
-            //fprintf(stderr, "%x ", bin_code[i]);
-        //}
-//
-        //fprintf(stderr, "\n");
-    //#endif
-
-    //if (translate_code) {
-        //show_error(TRANSLATE_LINE);
-        //fprintf(stderr, "main: translate tree: valid line #%zu\n", current_tree + 0);
-        //full_exit(TRANSLATE_LINE);
-    //}
-
-    //TODO get line -> translate to byte_code as fast as possible
+    // TODO: get line -> translate to byte_code as fast as possible
     //      instead collect trees in arr
 
-    //TODO get out filename from argv (mb parse argv with getopt)
+    // TODO: get out filename from argv (mb parse argv with getopt)
 
-    //TODO Generate tmp file with:
+    // TODO: Generate tmp file with:
     //  srand(time(0)); // init rand
     //  num = rand(); 
     //  sprintf(name, "tmp_name_%x", num);
