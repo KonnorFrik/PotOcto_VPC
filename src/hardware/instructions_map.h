@@ -1,3 +1,7 @@
+/**
+ * @file Declaration of instructions section and each instructions in each section
+ */
+
 #ifndef __INSTRUCTIONS_MAP_H__
 #define __INSTRUCTIONS_MAP_H__
 

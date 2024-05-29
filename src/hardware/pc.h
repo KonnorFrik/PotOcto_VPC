@@ -8,6 +8,9 @@
 
 #define MEM_SIZE (0xffff + 1)
 
+/**
+ * @brief Struct with VirtPC configuration
+ */
 typedef struct {
     CPU cpu;
     MEMORY memory [MEM_SIZE];

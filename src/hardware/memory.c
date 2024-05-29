@@ -4,6 +4,7 @@
 static char decode_symb(byte symb);
 static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr);
 
+// for dump
 // max4 | 16 per row  | 16 symb's per row
 // addr | bytes       | decoded symbol's
 // FFFF | 00 00 .. 00 | ....
