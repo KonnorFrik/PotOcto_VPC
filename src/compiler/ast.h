@@ -20,6 +20,7 @@ typedef struct {
     dword value; ///< value for numbers
 } Token;
 
+// TODO: Change name 'Node' to 'AST'. 'AST' to smth like 'AST_ARRAY'
 /**
  * @brief One token tree
  * literally this is AST, but with wrong naming
