@@ -435,7 +435,11 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
             status = MEM_ERROR;
         }
 
-        increase_bytearray_size(byte_code);
+        if ( !increase_bytearray_size(byte_code) ) {
+            show_error(MEM_ERROR);
+            fprintf(stderr, "[COMPILER]: increase_bytearray_size: ERROR\n");
+            exit(MEM_ERROR);
+        }
         memset(line, 0, line_size);
         line_count++;
 

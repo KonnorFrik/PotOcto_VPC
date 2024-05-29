@@ -9,21 +9,26 @@ ByteArray* create_bytearray() {
     ByteArray* obj = calloc(1, sizeof(ByteArray));
 
     if ( obj ) {
-        init_bytearray(obj);
+        obj->size = DEFAULT_SIZE;
+        obj->index = 0;
+        obj->array = calloc(obj->size, sizeof(byte));
+
+        if ( !obj->array ) {
+            free(obj);
+            obj = NULL;
+        }
     }
 
     return obj;
 }
 
-void init_bytearray(ByteArray* obj) {
-    obj->size = DEFAULT_SIZE;
-    obj->array = calloc(obj->size, sizeof(byte));
-    obj->index = 0;
-}
-
-void increase_bytearray_size(ByteArray* obj) {
+int increase_bytearray_size(ByteArray* obj) {
+    if ( !obj ) {
+        return 0;
+    }
     /*check if size of array less then minimum and realloc if yes*/
-    if ((obj->index + 5) < obj->size) { // min num for check - '+3'
+    int status = 1;
+    if ( (obj->index + 5) < obj->size ) { // min num for check - '+3'
         size_t new_size = obj->size + (obj->size / 2);
         byte* tmp = realloc(obj->array, new_size);
 
@@ -32,14 +37,18 @@ void increase_bytearray_size(ByteArray* obj) {
             obj->array = tmp;
 
         } else {
-            show_error(MEM_ERROR);
-            fprintf(stderr, "increase_bytecode_size: new mem is NULL\n");
-            exit(MEM_ERROR);
+            status = 0;
         }
     }
+
+    return status;
 }
 
 void destroy_bytearray(ByteArray* obj) {
+    if ( !obj ) {
+        return;
+    }
+
     if ( obj ) {
         if ( obj->array ) {
             free(obj->array);
