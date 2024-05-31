@@ -474,7 +474,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
             continue;
         }
 
-        replace(line, '\n', 0);
+        replace_f(line, '\n', 0);
 
         // TODO: delete 'line &&' or find why it here
         if (line && line[0] == 0) { // empty line
@@ -482,7 +482,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
             continue;
         }
 
-        size_t accessible_size = replace(line, COMMENT_SYMBOL, 0);
+        size_t accessible_size = replace_f(line, COMMENT_SYMBOL, 0);
 
         if ( accessible_size == 0 ) { //all line is comment
             continue;

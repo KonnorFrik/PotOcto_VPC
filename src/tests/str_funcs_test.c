@@ -226,27 +226,31 @@ void replace_test() {
     char from = 'H';
     char to = 'e';
     assert(s1[0] == from);
-    // size_t bef_repl = 
-    replace(s1, from, to);
+    int bef_repl = replace_f(s1, from, to);
     assert(s1[0] == to);
-    // assert(bef_repl == 0);
+    assert(bef_repl);
 
     char s2[] = "Hello";
     from = 'o';
     to = 'd';
     assert(s2[4] == from);
-    // bef_repl = 
-    replace(s2, from, to);
+    bef_repl = replace_f(s2, from, to);
     assert(s2[4] == to);
-    // assert(bef_repl == 4);
+    assert(bef_repl);
 
     char s3[] = "Hello\n";
     from = '\n';
     to = 0;
     assert(s3[5] == from);
-    // bef_repl = 
-    replace(s3, from, to);
+    bef_repl = replace_f(s3, from, to);
     assert(s3[5] == to);
+    assert(bef_repl);
+
+    char s4[] = "Hello\n";
+    from = 'd';
+    to = 'D';
+    bef_repl = replace_f(s4, from, to);
+    assert(bef_repl == 0);
 
     printf("DONE\n");
 }

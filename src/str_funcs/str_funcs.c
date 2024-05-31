@@ -14,21 +14,21 @@
 // make different versions of this function for 
 // replace all
 // replace first from end
-size_t replace(char* line, char from, char to) {
-    size_t new_len = 0;
+int replace_f(char* line, char from, char to) {
+    size_t ind = 0;
     int loop = 1;
 
-    while (loop && line[new_len] != 0) {
-        if (line[new_len] == from) {
-            line[new_len] = to;
+    while (loop && line[ind] != 0) {
+        if (line[ind] == from) {
+            line[ind] = to;
             loop = 0;
             continue;
         }
 
-        new_len++;
+        ind++;
     }
 
-    return new_len;
+    return !loop;
 }
 
 int startswith(const char* str, const char* format) {

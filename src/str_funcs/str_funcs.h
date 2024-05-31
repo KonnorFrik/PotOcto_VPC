@@ -54,12 +54,12 @@ int is_hex(char s);
 int string_type(const char* str);
 
 /**
- * @brief Replace letters in given string
+ * @brief Replace first matched with 'from' letter in given string
  * @param[in] line String for replace it letters
  * @param[in] from Letter for replace this
- * @param[in] to   Letter for replace to this
- * @return new_len Length of string before replaced letter
+ * @param[in] to   Letter for replace with this
+ * @return status 0:NotReplaced 1:Replaced
  */
-size_t replace(char* line, char from, char to);
+int replace_f(char* line, char from, char to);
 
 #endif /* __STR_FUNCS_H__ */
