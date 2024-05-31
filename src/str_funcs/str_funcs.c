@@ -14,14 +14,14 @@
 // make different versions of this function for 
 // replace all
 // replace first from end
-int replace_f(char* line, char from, char to) {
+bool replace_f(char* line, char from, char to) {
     size_t ind = 0;
-    int loop = 1;
+    bool loop = true;
 
     while (loop && line[ind] != 0) {
         if (line[ind] == from) {
             line[ind] = to;
-            loop = 0;
+            loop = false;
             continue;
         }
 
@@ -31,15 +31,15 @@ int replace_f(char* line, char from, char to) {
     return !loop;
 }
 
-int startswith(const char* str, const char* format) {
-  int result = 1;
+bool startswith(const char* str, const char* format) {
+  bool result = true;
 
   int ind = 0;
   int run_flag = 1;
 
   while (str[ind] != '\0' && format[ind] != '\0' && run_flag) {
     if (str[ind] != format[ind]) {
-      result = 0;
+      result = false;
       run_flag = 0;
     }
 
@@ -49,17 +49,17 @@ int startswith(const char* str, const char* format) {
   return result;
 }
 
-int is_str_dec(const char* str) {
-    int result = 1;
+bool is_str_dec(const char* str) {
+    bool result = true;
     int len = strlen(str);
 
     if (len < 1) {
-        result = 0;
+        result = false;
     }
 
     for (int i = 0; result && i < len; ++i) {
         if (!isdigit(str[i])) {
-            result = 0;
+            result = false;
         }
     }
 
@@ -71,12 +71,12 @@ int is_str_dec(const char* str) {
     return result;
 }
 
-int is_str_bin(const char* str) {
-    int result = 1;
+bool is_str_bin(const char* str) {
+    bool result = true;
     int len = strlen(str);
 
     if (len < 3 || !startswith(str, "0b")) {
-        result = 0;
+        result = false;
 
     } else {
         str += 2; // skip '0b'
@@ -85,7 +85,7 @@ int is_str_bin(const char* str) {
 
     for (int i = 0; result && i < len; ++i) {
         if (str[i] != '0' && str[i] != '1') {
-            result = 0;
+            result = false;
         }
     }
 
@@ -97,12 +97,12 @@ int is_str_bin(const char* str) {
     return result;
 }
 
-int is_str_hex(const char* str) {
-    int result = 1;
+bool is_str_hex(const char* str) {
+    bool result = true;
     int len = strlen(str);
 
     if (len < 3 || !startswith(str, "0x")) {
-        result = 0;
+        result = false;
 
     } else {
         str += 2; // skip '0x'
@@ -111,7 +111,7 @@ int is_str_hex(const char* str) {
 
     for (int i = 0; result && i < len; ++i) {
         if (!is_hex(str[i])) {
-            result = 0;
+            result = false;
         }
     }
 
@@ -123,7 +123,7 @@ int is_str_hex(const char* str) {
     return result;
 }
 
-int is_hex(char s) {
+bool is_hex(char s) {
     int is_num = isdigit(s);
     int is_hex_small = (s >= 'a' && s <= 'f');
     int is_hex_big = (s >= 'A' && s <= 'F');
@@ -131,7 +131,7 @@ int is_hex(char s) {
     return is_num || (is_hex_small || is_hex_big);
 }
 
-int string_type(const char* str) {
+str_type string_type(const char* str) {
     int result = INVALID;
 
     if (is_str_bin(str)) {

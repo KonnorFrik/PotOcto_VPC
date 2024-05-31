@@ -3,6 +3,7 @@
 #define _GNU_SOURCE
 #define __INSTRUCTIONS_PARSE_H__ // turn off including funcs
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -24,9 +25,9 @@
 
 void usage(const char* prog_name);
 Token* create_token(int type, char* word, dword value);
-int is_line_kw(char* line);
-int is_line_access_op(char* line);
-int is_line_number(char* line);
+bool is_line_kw(char* line);
+bool is_line_access_op(char* line);
+bool is_line_number(char* line);
 dword str_to_num(char* line);
 Token* get_token(char* line);
 Node* create_node();
@@ -75,19 +76,18 @@ Token* create_token(int type, char* word, dword value) {
     return obj;
 }
 
-// TODO: change logic int to bool everywhere
 /**
  * @brief Determine if given word is Keyword
  * @param[in] line Line with word for check
  * @return result 0:NO 1:YES
  */
-int is_line_kw(char* line) {
-    int result = 0;
+bool is_line_kw(char* line) {
+    bool result = false;
     int ind = 0;
 
     while ( !result && Keywords[ind] != NULL ) {
         if ( strcmp(line, Keywords[ind]) == 0 ) {
-            result = 1;
+            result = true;
         }
 
         ind++;
@@ -101,11 +101,11 @@ int is_line_kw(char* line) {
  * @param[in] line Line with word for check
  * @return result 0:NO 1:YES
  */
-int is_line_access_op(char* line) {
-    int result = 0;
+bool is_line_access_op(char* line) {
+    bool result = false;
 
     if (line[0] == REG_ACCESS_WORD || line[0] == MEM_ACCESS_WORD) {
-        result = 1;
+        result = true;
     }
 
     return result;
@@ -116,11 +116,11 @@ int is_line_access_op(char* line) {
  * @param[in] line Line with word for check
  * @return result 0:NO 1:YES
  */
-int is_line_number(char* line) {
-    int result = 0;
+bool is_line_number(char* line) {
+    bool result = false;
 
-    if (string_type((const char*)line) != INVALID) {
-        result = 1;
+    if ( string_type((const char*)line) != INVALID ) {
+        result = true;
     }
 
     return result;
@@ -133,14 +133,14 @@ int is_line_number(char* line) {
  */
 dword str_to_num(char* line) {
     dword result = 0;
-    int type = string_type(line);
+    str_type type = string_type(line);
     int base = 0;
 
-    if (type == BIN) {
+    if ( type == BIN ) {
         base = 2;
         line += 2;
 
-    } else if (type == HEX) {
+    } else if ( type == HEX ) {
         base = 16;
         line += 2;
     }
@@ -204,13 +204,6 @@ Token* get_token(char* line) {
  */
 Node* create_node() {
     Node* obj = calloc(1, sizeof(Node));
-
-    // if ( obj ) {
-    //     obj->token = NULL;
-    //     obj->left = NULL;
-    //     obj->right = NULL;
-    // }
-
     return obj;
 }
 
@@ -435,6 +428,7 @@ int append_tree(AST* asts_obj, Node* obj) {
 }
 
 // TODO: find way to split function to smaller function
+// TODO: replace 'exit' with 'status=<ERR>' and check it
 /**
  * @brief Read lines from opened file and compiled them
  * @note Abort program if any Error occured
@@ -476,17 +470,13 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
 
         replace_f(line, '\n', 0);
 
-        // TODO: delete 'line &&' or find why it here
-        if (line && line[0] == 0) { // empty line
+        if ( line[0] == 0 ||
+             line[0] == COMMENT_SYMBOL ) { // empty line
             line_count++;
             continue;
         }
 
-        size_t accessible_size = replace_f(line, COMMENT_SYMBOL, 0);
-
-        if ( accessible_size == 0 ) { //all line is comment
-            continue;
-        }
+        replace_f(line, COMMENT_SYMBOL, 0);
 
         Node* tokens_line = tokenize_line(line, line_count);
         int ret_code = translate_token_tree(tokens_line, 
