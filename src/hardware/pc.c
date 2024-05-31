@@ -15,17 +15,23 @@ void usage(const char* prog_name) {
     fprintf(stderr, "Usage: %s <bin file>\n", prog_name);
 }
 
+/**
+ * @breif Return next word from memory, also increase IP
+ * @param[in, out] vpc Valid PC object
+ * @return result word from memory
+ */
+word pc_get_next_word(PC* vpc) {
+    word result = vpc->memory[vpc->cpu.IP++];
+    return result;
+}
+
 void executor(PC* vpc) {
     int execute = 1;
 
     while (execute) {
-        // TODO: separate geters in function
-        word instr_code = vpc->memory[vpc->cpu.IP];
-        vpc->cpu.IP++;
-        word operand_1 = vpc->memory[vpc->cpu.IP];
-        vpc->cpu.IP++;
-        word operand_2 = vpc->memory[vpc->cpu.IP];
-        vpc->cpu.IP++;
+        word instr_code = pc_get_next_word(vpc);
+        word operand_1 = pc_get_next_word(vpc);
+        word operand_2 = pc_get_next_word(vpc);
 
         execute = do_instruction(vpc, instr_code, operand_1, operand_2);
     }
