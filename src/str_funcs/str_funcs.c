@@ -9,11 +9,9 @@
     #include <stdio.h>
 #endif
 
-// TODO: change return type for 1:Changed 0:NOT changed
-// change name to 'replace_f'
-// make different versions of this function for 
-// replace all
-// replace first from end
+// TODO: make different versions of this function for 
+// TODO: replace all
+// TODO: replace first from end
 bool replace_f(char* line, char from, char to) {
     size_t ind = 0;
     bool loop = true;

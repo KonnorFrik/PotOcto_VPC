@@ -1,7 +1,9 @@
+/** @file All keyword defines here */
+
 #ifndef __KEYWORDS_DEFINES__
 #define __KEYWORDS_DEFINES__
 
-/** @file All keyword defines here */
+// TODO: add push/pop instructions
 
 #define KW_set "set"
 #define KW_read "read"
