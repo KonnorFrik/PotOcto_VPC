@@ -31,7 +31,6 @@ dword str_to_num(char* line);
 Token* get_token(char* line);
 Node* create_node();
 int append_to_node(Node* head, Token* token, int token_count);
-void fix_new_line(char* line, size_t line_size);
 int safe_create_append(char* line, Node* ast, int token_count);
 Node* tokenize_line(char* line, size_t line_count);
 void print_node(Node* node);
@@ -280,25 +279,6 @@ int append_to_node(Node* head, Token* token, int token_count) {
     return result;
 }
 
-// TODO: mb better will be change 'fix_new_line' function to 'replace' from 'str_funcs'
-/**
- * @brief Replace '\n' to '\0' in given line
- * @param[in, out] line Line for replace in
- * @param[in]      line_size Current size of line
- */
-void fix_new_line(char* line, size_t line_size) {
-    /*Replace \n to \0*/
-    size_t len = strlen(line);
-
-    if (line[len - 1] == '\n') {
-        line[len - 1] = '\0';
-    }
-
-    if (len + 1 < line_size) {
-        line[len + 1] = '\0';
-    }
-}
-
 /**
  * @brief Wrap for 'append_to_node' for manage appending
  * IN: one word, OUT: Node filled with new one token
@@ -494,7 +474,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
             continue;
         }
 
-        fix_new_line(line, line_size);
+        replace(line, '\n', 0);
 
         // TODO: delete 'line &&' or find why it here
         if (line && line[0] == 0) { // empty line

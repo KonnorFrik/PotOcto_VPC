@@ -9,6 +9,11 @@
     #include <stdio.h>
 #endif
 
+// TODO: change return type for 1:Changed 0:NOT changed
+// change name to 'replace_f'
+// make different versions of this function for 
+// replace all
+// replace first from end
 size_t replace(char* line, char from, char to) {
     size_t new_len = 0;
     int loop = 1;

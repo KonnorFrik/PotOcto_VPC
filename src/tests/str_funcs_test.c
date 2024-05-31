@@ -221,6 +221,36 @@ void string_type_test() {
     printf("DONE\n");
 }
 
+void replace_test() {
+    char s1[] = "Hello";
+    char from = 'H';
+    char to = 'e';
+    assert(s1[0] == from);
+    // size_t bef_repl = 
+    replace(s1, from, to);
+    assert(s1[0] == to);
+    // assert(bef_repl == 0);
+
+    char s2[] = "Hello";
+    from = 'o';
+    to = 'd';
+    assert(s2[4] == from);
+    // bef_repl = 
+    replace(s2, from, to);
+    assert(s2[4] == to);
+    // assert(bef_repl == 4);
+
+    char s3[] = "Hello\n";
+    from = '\n';
+    to = 0;
+    assert(s3[5] == from);
+    // bef_repl = 
+    replace(s3, from, to);
+    assert(s3[5] == to);
+
+    printf("DONE\n");
+}
+
 int main() {
     printf("[TEST]: str_funcs\n");
     printf("Startswith:\n"); 
@@ -237,6 +267,9 @@ int main() {
 
     printf("\nString type:\n"); 
     string_type_test();
+
+    printf("\nReplace:\n");
+    replace_test();
 
     printf("SUCCESS\n");
     return 0;
