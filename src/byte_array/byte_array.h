@@ -2,6 +2,7 @@
 #define __BYTE_ARRAY__
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "../hardware/basic_types.h"
 
@@ -23,10 +24,11 @@ ByteArray* create_bytearray();
 
 /**
  * @brief Increase ByteArray size with formula 'new_size = size + (size / 2)'
+ * @note Only realloc errors can be here
  * @param[in, out] obj Valid ByteArray object
- * @return status 1:OK 0:ERROR
+ * @return status 
  */
-int increase_bytearray_size(ByteArray* obj);
+bool increase_bytearray_size(ByteArray* obj);
 
 /**
  * @brief Correctly deallocate ByteArray object

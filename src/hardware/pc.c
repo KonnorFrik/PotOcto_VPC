@@ -19,6 +19,7 @@ void executor(PC* vpc) {
     int execute = 1;
 
     while (execute) {
+        // TODO: separate geters in function
         word instr_code = vpc->memory[vpc->cpu.IP];
         vpc->cpu.IP++;
         word operand_1 = vpc->memory[vpc->cpu.IP];
@@ -57,7 +58,7 @@ int main(const int argc, const char** argv) {
         exit(MAP_ERROR);
     }
 
-    if (MEM_SIZE < file_stat.st_size) {
+    if (file_stat.st_size > MEM_SIZE) {
         fprintf(stderr, "File too large for memory\n");
         exit(FILE_ERROR);
     }

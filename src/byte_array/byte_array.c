@@ -22,12 +22,13 @@ ByteArray* create_bytearray() {
     return obj;
 }
 
-int increase_bytearray_size(ByteArray* obj) {
+bool increase_bytearray_size(ByteArray* obj) {
     if ( !obj ) {
-        return 0;
+        return false;
     }
     /*check if size of array less then minimum and realloc if yes*/
-    int status = 1;
+    int status = true;
+
     if ( (obj->index + 5) < obj->size ) { // min num for check - '+3'
         size_t new_size = obj->size + (obj->size / 2);
         byte* tmp = realloc(obj->array, new_size);
@@ -37,7 +38,7 @@ int increase_bytearray_size(ByteArray* obj) {
             obj->array = tmp;
 
         } else {
-            status = 0;
+            status = false;
         }
     }
 
