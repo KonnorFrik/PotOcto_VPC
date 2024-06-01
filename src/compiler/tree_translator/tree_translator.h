@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include "../../hardware/basic_types.h"
-#include "../ast.h"
+#include "../lexer/ast_type.h"
 
 /**
  * @brief Translate one token tree to byte code

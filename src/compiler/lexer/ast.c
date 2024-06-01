@@ -3,15 +3,16 @@
 #include <string.h>
 
 #include "ast.h"
-#include "../common/funcs.h"
-#include "../common/error_codes.h"
-#include "../str_funcs/str_funcs.h"
+#include "../../common/funcs.h"
+#include "../../common/error_codes.h"
+#include "../../str_funcs/str_funcs.h"
 
 AST* create_node() {
     AST* obj = calloc(1, sizeof(AST));
     return obj;
 }
 
+// TODO: replace exit to return NULL
 AST* tokenize_line(char* line, size_t line_count) {
     /*Create AST from line*/
     size_t len = strlen(line);

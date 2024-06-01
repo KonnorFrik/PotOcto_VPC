@@ -4,10 +4,10 @@
 
 #include "token.h"
 #include "ast.h"
-#include "keywords_array.h"
-#include "../common/funcs.h"
-#include "../common/error_codes.h"
-#include "../str_funcs/str_funcs.h"
+#include "../keywords_array.h"
+#include "../../common/funcs.h"
+#include "../../common/error_codes.h"
+#include "../../str_funcs/str_funcs.h"
 
 #define REG_ACCESS_WORD 'r'
 #define MEM_ACCESS_WORD '$'

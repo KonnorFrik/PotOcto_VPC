@@ -4,6 +4,7 @@
 #include "../keywords_defines.h"
 #include "../../str_funcs/str_funcs.h"
 #include "../../common/error_codes.h"
+#include "../lexer/ast.h"
 
 #define TRN_DEBUG 0
 

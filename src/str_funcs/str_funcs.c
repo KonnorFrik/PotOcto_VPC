@@ -10,8 +10,8 @@
 #endif
 
 // TODO: make different versions of this function for 
-// TODO: replace all
-// TODO: replace first from end
+// replace all
+// replace first from end
 bool replace_f(char* line, char from, char to) {
     size_t ind = 0;
     bool loop = true;

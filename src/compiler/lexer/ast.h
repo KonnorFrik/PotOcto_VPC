@@ -5,8 +5,8 @@
 #define __AST__
 
 #include <stddef.h>
-#include "token.h"
-#include "../hardware/basic_types.h" 
+#include "../../hardware/basic_types.h" 
+#include "lexer.h"
 
 #define AST_DEBUG 0
 
@@ -17,15 +17,6 @@ enum {
     NUMBER,              // 4
 };
 
-/**
- * @brief One token tree
- * literally this is AST, but with wrong naming
- */
-typedef struct ast {
-    Token* token;       ///< Token object
-    struct ast* left;  ///< Pointer for next same struct with operator/operand
-    struct ast* right; ///< Pointer for next same struct with operator/operand
-} AST;
 
 /**
  * @brief Array with one ast
@@ -42,15 +33,6 @@ typedef struct {
  * @return obj AST object or NULL
  */
 AST* create_node();
-
-/**
- * @brief Parse given line for tokens
- * @note Abort program if any error occured
- * @param[in] line Current line with words
- * @param[in] line_count Current line number
- * @return ast_node Valid AST object
- */
-AST* tokenize_line(char* line, size_t line_count);
 
 /**
  * @brief Part of constructing AST. Append new Token to AST

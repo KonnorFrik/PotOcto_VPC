@@ -5,7 +5,7 @@
 #define __TOKEN_H__
 
 #include <stdbool.h>
-#include "../hardware/basic_types.h" 
+#include "../../hardware/basic_types.h" 
 
 /**
  * @brief Struct with one toke

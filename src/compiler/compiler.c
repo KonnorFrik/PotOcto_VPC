@@ -12,8 +12,8 @@
 #include "../common/funcs.h"
 #include "../str_funcs/str_funcs.h"
 #include "../byte_array/byte_array.h" 
+#include "lexer/lexer.h"
 #include "tree_translator/tree_translator.h"
-#include "ast.h"
 
 #define COMMENT_SYMBOL ';'
 #define STD_FILENAME_OUT "prog.out"
