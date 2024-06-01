@@ -20,24 +20,23 @@ typedef struct {
     dword value; ///< value for numbers
 } Token;
 
-// TODO: Change name 'Node' to 'AST'. 'AST' to smth like 'AST_ARRAY'
 /**
  * @brief One token tree
  * literally this is AST, but with wrong naming
  */
-typedef struct node {
+typedef struct ast {
     Token* token;       ///< Token object
-    struct node* left;  ///< Pointer for next same struct with operator/operand
-    struct node* right; ///< Pointer for next same struct with operator/operand
-} Node;
+    struct ast* left;  ///< Pointer for next same struct with operator/operand
+    struct ast* right; ///< Pointer for next same struct with operator/operand
+} AST;
 
 /**
  * @brief Array with Nodes (aka ast)
  */
 typedef struct {
-    Node** array; ///< Array with nodes
+    AST** array; ///< Array with nodes
     size_t size;  ///< current size
     size_t index; ///< current empty cell index for write
-} AST;
+} AST_ARR;
 
 #endif /* __AST__ */

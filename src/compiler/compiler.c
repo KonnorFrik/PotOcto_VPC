@@ -30,12 +30,12 @@ bool is_line_access_op(char* line);
 bool is_line_number(char* line);
 dword str_to_num(char* line);
 Token* get_token(char* line);
-Node* create_node();
-int append_to_node(Node* head, Token* token, int token_count);
-int safe_create_append(char* line, Node* ast, int token_count);
-Node* tokenize_line(char* line, size_t line_count);
-void print_node(Node* node);
-int append_tree(AST* asts_obj, Node* obj);
+AST* create_node();
+int append_to_node(AST* head, Token* token, int token_count);
+int safe_create_append(char* line, AST* ast, int token_count);
+AST* tokenize_line(char* line, size_t line_count);
+void print_node(AST* node);
+int append_tree(AST_ARR* asts_obj, AST* obj);
 int compile_file(FILE* fd, ByteArray* byte_code);
 
 
@@ -202,8 +202,8 @@ Token* get_token(char* line) {
  * @note Return NULL if Error occured
  * @return obj Node object or NULL
  */
-Node* create_node() {
-    Node* obj = calloc(1, sizeof(Node));
+AST* create_node() {
+    AST* obj = calloc(1, sizeof(AST));
     return obj;
 }
 
@@ -219,7 +219,7 @@ Node* create_node() {
  * @param[in]      token Token object for append
  * @param[in]      token_count value for determine where append token
  */
-int append_to_node(Node* head, Token* token, int token_count) {
+int append_to_node(AST* head, Token* token, int token_count) {
     if ( token_count > 2 ) {
         return INVALID_LINE;
     }
@@ -229,7 +229,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
     }
 
     int result = 0;
-    Node* copy = head;
+    AST* copy = head;
 
     if ( token_count == 0 ) { //kw
         copy->token = token;
@@ -280,7 +280,7 @@ int append_to_node(Node* head, Token* token, int token_count) {
  * @param[in]      token_count Number of current word in line
  * @return result Error code or OK
  */
-int safe_create_append(char* line, Node* ast, int token_count) {
+int safe_create_append(char* line, AST* ast, int token_count) {
     /*append token to AST if it not invalid*/
     int result = OK; // 0
 
@@ -310,10 +310,10 @@ int safe_create_append(char* line, Node* ast, int token_count) {
  * @param[in] line_count Current line number
  * @return ast_node Valid Node object
  */
-Node* tokenize_line(char* line, size_t line_count) {
+AST* tokenize_line(char* line, size_t line_count) {
     /*Create AST from line*/
     size_t len = strlen(line);
-    Node* ast_node = create_node();
+    AST* ast_node = create_node();
 
     if ( !ast_node ) {
         show_error(MEM_ERROR);
@@ -404,14 +404,14 @@ void print_node(Node* node) {
  * @param[in]      obj      Valid Node object
  * @return status OK or Error code
  */
-int append_tree(AST* asts_obj, Node* obj) {
+int append_tree(AST_ARR* asts_obj, AST* obj) {
     /*Append one ast to array 
      * Potential depricated */
     int status = OK;
 
     if (asts_obj->index >= asts_obj->size) {
-        size_t new_size = (asts_obj->size + (asts_obj->size / 2)) * sizeof(Node*);
-        Node** tmp = realloc(asts_obj->array, new_size);
+        size_t new_size = (asts_obj->size + (asts_obj->size / 2)) * sizeof(AST*);
+        AST** tmp = realloc(asts_obj->array, new_size);
 
         if ( tmp ) {
             asts_obj->array = tmp;
@@ -478,7 +478,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
 
         replace_f(line, COMMENT_SYMBOL, 0);
 
-        Node* tokens_line = tokenize_line(line, line_count);
+        AST* tokens_line = tokenize_line(line, line_count);
         int ret_code = translate_token_tree(tokens_line, 
                                             byte_code->array,
                                             &byte_code->index

@@ -11,36 +11,36 @@
 
 typedef struct {
     char* kw;
-    int (*translate_func)(Node*, byte*, size_t*);
+    int (*translate_func)(AST*, byte*, size_t*);
 } Table;
 
 
-static int translate_mov(Node* head, byte* result_arr, size_t* result_index);
-static int translate_jmp(Node* head, byte* result_arr, size_t* result_index);
-static int translate_hlt(Node* head, byte* result_arr, size_t* result_index);
-static int translate_set(Node* head, byte* result_arr, size_t* result_index);
-static int translate_read(Node* head, byte* result_arr, size_t* result_index);
-static int translate_write(Node* head, byte* result_arr, size_t* result_index);
-static int translate_inc(Node* head, byte* result_arr, size_t* result_index);
-static int translate_dec(Node* head, byte* result_arr, size_t* result_index);
-static int translate_eq(Node* head, byte* result_arr, size_t* result_index);
-static int translate_ne(Node* head, byte* result_arr, size_t* result_index);
-static int translate_ge(Node* head, byte* result_arr, size_t* result_index);
-static int translate_le(Node* head, byte* result_arr, size_t* result_index);
-static int translate_gt(Node* head, byte* result_arr, size_t* result_index);
-static int translate_lt(Node* head, byte* result_arr, size_t* result_index);
-static int translate_add(Node* head, byte* result_arr, size_t* result_index);
-static int translate_sub(Node* head, byte* result_arr, size_t* result_index);
-static int translate_mul(Node* head, byte* result_arr, size_t* result_index);
-static int translate_div(Node* head, byte* result_arr, size_t* result_index);
-static int translate_mod(Node* head, byte* result_arr, size_t* result_index);
+static int translate_mov(AST* head, byte* result_arr, size_t* result_index);
+static int translate_jmp(AST* head, byte* result_arr, size_t* result_index);
+static int translate_hlt(AST* head, byte* result_arr, size_t* result_index);
+static int translate_set(AST* head, byte* result_arr, size_t* result_index);
+static int translate_read(AST* head, byte* result_arr, size_t* result_index);
+static int translate_write(AST* head, byte* result_arr, size_t* result_index);
+static int translate_inc(AST* head, byte* result_arr, size_t* result_index);
+static int translate_dec(AST* head, byte* result_arr, size_t* result_index);
+static int translate_eq(AST* head, byte* result_arr, size_t* result_index);
+static int translate_ne(AST* head, byte* result_arr, size_t* result_index);
+static int translate_ge(AST* head, byte* result_arr, size_t* result_index);
+static int translate_le(AST* head, byte* result_arr, size_t* result_index);
+static int translate_gt(AST* head, byte* result_arr, size_t* result_index);
+static int translate_lt(AST* head, byte* result_arr, size_t* result_index);
+static int translate_add(AST* head, byte* result_arr, size_t* result_index);
+static int translate_sub(AST* head, byte* result_arr, size_t* result_index);
+static int translate_mul(AST* head, byte* result_arr, size_t* result_index);
+static int translate_div(AST* head, byte* result_arr, size_t* result_index);
+static int translate_mod(AST* head, byte* result_arr, size_t* result_index);
 
-static int translate_and(Node* head, byte* result_arr, size_t* result_index);
-static int translate_or(Node* head, byte* result_arr, size_t* result_index);
-static int translate_xor(Node* head, byte* result_arr, size_t* result_index);
-static int translate_inv(Node* head, byte* result_arr, size_t* result_index);
-static int translate_lsh(Node* head, byte* result_arr, size_t* result_index);
-static int translate_rsh(Node* head, byte* result_arr, size_t* result_index);
+static int translate_and(AST* head, byte* result_arr, size_t* result_index);
+static int translate_or(AST* head, byte* result_arr, size_t* result_index);
+static int translate_xor(AST* head, byte* result_arr, size_t* result_index);
+static int translate_inv(AST* head, byte* result_arr, size_t* result_index);
+static int translate_lsh(AST* head, byte* result_arr, size_t* result_index);
+static int translate_rsh(AST* head, byte* result_arr, size_t* result_index);
 
 const Table table[] = {
     {KW_set, translate_set},
@@ -76,8 +76,8 @@ const Table table[] = {
     {NULL, NULL},
 };
 
-static dword get_rnum_operand(Node* head) {
-    Node* res = head;
+static dword get_rnum_operand(AST* head) {
+    AST* res = head;
 
     while (res != NULL && res->token->type != NUMBER) {
         res = res->right;
@@ -86,8 +86,8 @@ static dword get_rnum_operand(Node* head) {
     return res->token->value;
 }
 
-static dword get_lnum_operand(Node* head) {
-    Node* res = head;
+static dword get_lnum_operand(AST* head) {
+    AST* res = head;
 
     while (res != NULL && res->token->type != NUMBER) {
         res = res->left;
@@ -100,7 +100,7 @@ static void write_byte(byte* arr, size_t* ind, byte val) {
     arr[(*ind)++] = val;
 }
 
-static int translate_rsh(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_rsh(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xfb;
 
@@ -128,7 +128,7 @@ static int translate_rsh(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_lsh(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_lsh(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xfa;
 
@@ -156,7 +156,7 @@ static int translate_lsh(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_inv(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_inv(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xf9;
 
@@ -184,7 +184,7 @@ static int translate_inv(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_xor(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_xor(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xf8;
 
@@ -212,7 +212,7 @@ static int translate_xor(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_or(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_or(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xf7;
 
@@ -240,7 +240,7 @@ static int translate_or(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_and(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_and(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xf6;
 
@@ -268,7 +268,7 @@ static int translate_and(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_mod(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_mod(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xe9; // with num operand
 
@@ -296,7 +296,7 @@ static int translate_mod(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_div(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_div(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xe8; // with num operand
 
@@ -324,7 +324,7 @@ static int translate_div(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_mul(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_mul(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xe7; // with num operand
 
@@ -352,7 +352,7 @@ static int translate_mul(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_sub(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_sub(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xe6; // with num operand
 
@@ -380,7 +380,7 @@ static int translate_sub(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_add(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_add(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xe5; // with num operand
 
@@ -408,7 +408,7 @@ static int translate_add(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_lt(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_lt(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0x2b;
 
@@ -441,7 +441,7 @@ static int translate_lt(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_gt(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_gt(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0x2a;
 
@@ -474,7 +474,7 @@ static int translate_gt(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_le(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_le(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0x29;
 
@@ -507,7 +507,7 @@ static int translate_le(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_ge(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_ge(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0x28;
 
@@ -540,7 +540,7 @@ static int translate_ge(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_ne(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_ne(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0x27;
 
@@ -573,7 +573,7 @@ static int translate_ne(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_eq(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_eq(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0x26;
 
@@ -606,7 +606,7 @@ static int translate_eq(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_set(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_set(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
 
     if (head->token->type == INVALID) { // unreachable in theory
@@ -629,7 +629,7 @@ static int translate_set(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_dec(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_dec(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0;
 
@@ -663,7 +663,7 @@ static int translate_dec(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_inc(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_inc(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0;
 
@@ -697,7 +697,7 @@ static int translate_inc(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_write(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_write(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     //byte code = 0x12;
 
@@ -720,7 +720,7 @@ static int translate_write(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_read(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_read(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     //byte code = 0x11;
 
@@ -743,7 +743,7 @@ static int translate_read(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_hlt(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_hlt(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
     byte code = 0xff;
 
@@ -759,7 +759,7 @@ static int translate_hlt(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_jmp(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_jmp(AST* head, byte* result_arr, size_t* result_index) {
     // 30
     int result = OK;
     //byte code = 0;
@@ -785,7 +785,7 @@ static int translate_jmp(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-static int translate_mov(Node* head, byte* result_arr, size_t* result_index) {
+static int translate_mov(AST* head, byte* result_arr, size_t* result_index) {
     // 11 12 31 32
     int result = OK;
     byte code = 0;
@@ -832,7 +832,7 @@ static int translate_mov(Node* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-int translate_token_tree(Node* head, byte* result_arr, size_t* result_index) {
+int translate_token_tree(AST* head, byte* result_arr, size_t* result_index) {
     int status = OK;
     int kw_ind = 0;
 
