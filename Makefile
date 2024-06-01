@@ -9,15 +9,16 @@ COMPILER_DIR := $(SRC_DIR)/compiler
 COMMON_DIR := $(SRC_DIR)/common
 BYTEARRAY_DIR := $(SRC_DIR)/byte_array
 STR_FUNCS_DIR := $(SRC_DIR)/str_funcs
-TRANSLATOR_DIR := $(COMPILER_DIR)/tree_translator
 HARDWARE_DIR = $(SRC_DIR)/hardware
+TRANSLATOR_DIR := $(COMPILER_DIR)/tree_translator
+LEXER_DIR = $(COMPILER_DIR)/lexer
 TESTS_DIR := $(SRC_DIR)/tests
 
 virt_pc_src := $(wildcard $(HARDWARE_DIR)/*.c) $(COMMON_DIR)/funcs.c
 virt_pc_obj := $(virt_pc_src:.c=.o)
 virt_pc_target = pototo
 
-cmp_src := $(foreach dir, $(BYTEARRAY_DIR) $(TRANSLATOR_DIR) $(COMPILER_DIR) $(STR_FUNCS_DIR) $(COMMON_DIR), $(wildcard $(dir)/*.c))
+cmp_src := $(foreach dir, $(BYTEARRAY_DIR) $(TRANSLATOR_DIR) $(COMPILER_DIR) $(STR_FUNCS_DIR) $(COMMON_DIR) $(LEXER_DIR), $(wildcard $(dir)/*.c))
 cmp_obj := $(cmp_src:.c=.o)
 compiler_target = pan
 

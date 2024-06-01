@@ -18,7 +18,7 @@
 #define COMMENT_SYMBOL ';'
 #define STD_FILENAME_OUT "prog.out"
 
-#define CMP_DEBUG 0
+#define CMP_DEBUG 1
 
 void usage(const char* prog_name);
 

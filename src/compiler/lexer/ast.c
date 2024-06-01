@@ -41,7 +41,7 @@ AST* tokenize_line(char* line, size_t line_count) {
     // if will be replaced appending system - enum don't need
     int token_count = 0; //0-kw 1-op1 2-op2
 
-    while ( token ) {
+    while ( (err_code == 0) && token ) {
         err_code = safe_create_append(token, ast_node, token_count);
 
 #if AST_DEBUG == 1
@@ -61,6 +61,7 @@ AST* tokenize_line(char* line, size_t line_count) {
     if (err_code) {
         show_error(err_code);
         fprintf(stderr, "[ERROR] Syntax problem with: #%zu > '%s'\n", line_count, line);
+        free(ast_node);
         exit(ERROR);
     }
 

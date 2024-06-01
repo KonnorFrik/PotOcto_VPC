@@ -11,6 +11,8 @@
 #include "instructions_executors.h"
 #include "../common/error_codes.h"
 
+#define STEP_MODE 0
+
 void usage(const char* prog_name) {
     fprintf(stderr, "Usage: %s <bin file>\n", prog_name);
 }
@@ -34,6 +36,10 @@ void executor(PC* vpc) {
         word operand_2 = pc_get_next_word(vpc);
 
         execute = do_instruction(vpc, instr_code, operand_1, operand_2);
+
+#if STEP_MODE == 1
+        getchar();
+#endif
     }
 }
 

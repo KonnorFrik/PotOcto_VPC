@@ -623,7 +623,7 @@ static int translate_set(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, (addr & 0x00ff));
 
     } else {
-        fprintf(stderr, "Translate: INVALID tree: write\n");
+        fprintf(stderr, "Translate: INVALID tree: set\n");
         result = 1;
     }
 

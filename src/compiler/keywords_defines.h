@@ -6,6 +6,7 @@
 // after refactor only!!!!
 // TODO: add push/pop instructions
 // TODO: add call/ret instructions
+// TODO: make labels system (preprocessing)
 
 #define KW_set "set"
 #define KW_read "read"

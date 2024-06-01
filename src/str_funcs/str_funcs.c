@@ -9,9 +9,6 @@
     #include <stdio.h>
 #endif
 
-// TODO: make different versions of this function for 
-// replace all
-// replace first from end
 bool replace_f(char* line, char from, char to) {
     size_t ind = 0;
     bool loop = true;
