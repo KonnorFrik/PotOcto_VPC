@@ -9,9 +9,9 @@
 
 /**
  * @brief Parse given line for tokens
- * @note Abort program if any error occured
+ * @note Retrun NULL for every error
  * @param[in] line Current line with words
- * @return ast_node Valid AST object
+ * @return ast_node Valid AST object or NULL
  */
 AST* tokenize_line(char* line);
 

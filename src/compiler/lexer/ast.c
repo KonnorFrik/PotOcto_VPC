@@ -13,6 +13,10 @@ AST* create_node() {
 }
 
 AST* tokenize_line(char* line) {
+    if ( !line ) {
+        return NULL;
+    }
+
     int status = OK; // local status code
     size_t len = strlen(line);
     AST* ast_node = create_node();
@@ -66,6 +70,10 @@ AST* tokenize_line(char* line) {
 }
 
 int append_to_node(AST* head, Token* token, int token_count) {
+    if ( !head || !token ) {
+        return MEM_ERROR;
+    }
+
     if ( token_count > 2 ) {
         return INVALID_LINE;
     }
@@ -74,7 +82,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
         return INVALID_WORD;
     }
 
-    int result = 0;
+    int status = 0;
     AST* copy = head;
 
     if ( token_count == 0 ) { //kw
@@ -92,7 +100,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
             copy->left->token = token;
 
         } else {
-            result = MEM_ERROR; // MEM_ERROR
+            status = MEM_ERROR; // MEM_ERROR
         }
     }
 
@@ -107,7 +115,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
             copy->right->token = token;
 
         } else {
-            result = MEM_ERROR;
+            status = MEM_ERROR;
         }
     }
 
@@ -115,7 +123,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
         fprintf(stderr, "\t[AST_DEBUG]: Append token: token: %d | count: %d\n", token->type, token_count);
 #endif
     
-    return result;
+    return status;
 }
 
 int safe_create_append(char* line, AST* ast, int token_count) {

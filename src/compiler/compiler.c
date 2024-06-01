@@ -48,6 +48,10 @@ void usage(const char* prog_name) {
  * @return status OK or Error code
  */
 int compile_file(FILE* fd, ByteArray* byte_code) {
+    if ( !fd || !byte_code ) {
+        return MEM_ERROR;
+    }
+
     int status = OK;
     size_t line_size = DEFAULT_SIZE;
     char* line = calloc(line_size, sizeof(char));

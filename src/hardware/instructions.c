@@ -9,7 +9,7 @@ void memory_instructions(PC* vpc, word code, word op1, word op2) {
     word sub_code = code & 0x0f;
     dword addr = 0;
 
-    switch (sub_code) {
+    switch ( sub_code ) {
         case MEM_SET:
             addr = ((op1 << 8) | (op2));
             vpc->cpu.MP = addr;
@@ -21,7 +21,7 @@ void memory_instructions(PC* vpc, word code, word op1, word op2) {
         
         case MEM_READ:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction read: #%x(%d) = Mem[%x](%d)\n", op2, vpc->cpu.reg[op2], vpc->cpu.MP, vpc->memory[vpc->cpu.MP]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction read: #%d(%d) = Mem[%x](%d)\n", op2, vpc->cpu.reg[op2], vpc->cpu.MP, vpc->memory[vpc->cpu.MP]);
 #endif
 
             vpc->cpu.reg[op2] = vpc->memory[vpc->cpu.MP];
@@ -29,7 +29,7 @@ void memory_instructions(PC* vpc, word code, word op1, word op2) {
         
         case MEM_WRITE:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction write: Mem[%x] = #%x(%d)\n", vpc->cpu.MP, op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction write: Mem[%x] = #%d(%d)\n", vpc->cpu.MP, op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->memory[vpc->cpu.MP] = vpc->cpu.reg[op2];
@@ -63,7 +63,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg eq: #%x(%d) == #%x(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg eq: #%d(%d) == #%d(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
             break;
 
@@ -73,7 +73,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg neq: #%x(%d) != #%x(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg neq: #%d(%d) != #%d(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
             break;
 
@@ -83,7 +83,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg ge: #%x(%d) >= #%x(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg ge: #%d(%d) >= #%d(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
             break;
 
@@ -93,7 +93,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg le: #%x(%d) <= #%x(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg le: #%d(%d) <= #%d(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
             break;
 
@@ -103,7 +103,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg gt: #%x(%d) > #%x(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg gt: #%d(%d) > #%d(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
             break;
 
@@ -113,7 +113,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg lt: #%x(%d) < #%x(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg lt: #%d(%d) < #%d(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
             break;
 
@@ -123,7 +123,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data eq: #%x(%d) == (%d)\n", op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data eq: #%d(%d) == (%d)\n", op1, vpc->cpu.reg[op1], op2);
 #endif
             break;
 
@@ -133,7 +133,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data neq: #%x(%d) != (%d)\n", op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data neq: #%d(%d) != (%d)\n", op1, vpc->cpu.reg[op1], op2);
 #endif
             break;
 
@@ -143,7 +143,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data ge: #%x(%d) >= (%d)\n", op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data ge: #%d(%d) >= (%d)\n", op1, vpc->cpu.reg[op1], op2);
 #endif
             break;
 
@@ -153,7 +153,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data le: #%x(%d) <= (%d)\n", op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data le: #%d(%d) <= (%d)\n", op1, vpc->cpu.reg[op1], op2);
 #endif
             break;
 
@@ -163,7 +163,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data gt: #%x(%d) > (%d)\n", op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data gt: #%d(%d) > (%d)\n", op1, vpc->cpu.reg[op1], op2);
 #endif
             break;
 
@@ -173,7 +173,7 @@ void logic_instructions(PC* vpc, word code, word op1, word op2) {
             }
 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data lt: #%x(%d) < (%d)\n", op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data lt: #%d(%d) < (%d)\n", op1, vpc->cpu.reg[op1], op2);
 #endif
             break;
     }
@@ -195,7 +195,7 @@ void stuff_instructions(PC* vpc, word code, word op1, word op2) {
 
         case STUFF_REG_MOV:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg mov: #%x(%d) = #%x(%d)\n", op1, op1, op2, op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg mov: #%d(%d) = #%d(%d)\n", op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op2];
@@ -203,7 +203,7 @@ void stuff_instructions(PC* vpc, word code, word op1, word op2) {
 
         case STUFF_DATA_MOV:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data mov: #%x(%d) = (%d)\n", op1, op1, op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data mov: #%d(%d) = (%d)\n", op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = op2;
@@ -211,7 +211,7 @@ void stuff_instructions(PC* vpc, word code, word op1, word op2) {
 
         case STUFF_REG_INC:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg inc: #%x(%d)++\n", op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg inc: #%d(%d)++\n", op2, vpc->cpu.reg[op2]);
 #endif
 
             (vpc->cpu.reg[op2])++;
@@ -219,7 +219,7 @@ void stuff_instructions(PC* vpc, word code, word op1, word op2) {
 
         case STUFF_REG_DEC:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg dec: #%x(%d)--\n", op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg dec: #%d(%d)--\n", op2, vpc->cpu.reg[op2]);
 #endif
 
             (vpc->cpu.reg[op2])--;
@@ -233,7 +233,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
     switch (sub_code) {
         case MATH_REG_ADD:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg add: #%x = #%x(%d) + #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg add: #%d = #%d(%d) + #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] + vpc->cpu.reg[op2];
@@ -241,7 +241,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
 
         case MATH_REG_SUB:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg sub: #%x = #%x(%d) - #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg sub: #%d = #%d(%d) - #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] - vpc->cpu.reg[op2];
@@ -249,7 +249,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
 
         case MATH_REG_MUL:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg mul: #%x = #%x(%d) * #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg mul: #%d = #%d(%d) * #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] * vpc->cpu.reg[op2];
@@ -257,7 +257,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
 
         case MATH_REG_DIV:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg div: #%x = #%x(%d) / #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg div: #%d = #%d(%d) / #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] / vpc->cpu.reg[op2];
@@ -265,7 +265,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
 
         case MATH_REG_MOD:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg mod: #%x = #%x(%d) %c #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], '%', op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg mod: #%d = #%d(%d) %c #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], '%', op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] % vpc->cpu.reg[op2];
@@ -273,7 +273,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
 
         case MATH_DATA_ADD:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data add: #%x = #%x(%d) + (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data add: #%d = #%d(%d) + (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] + op2;
@@ -281,7 +281,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
 
         case MATH_DATA_SUB:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data sub: #%x = #%x(%d) - (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data sub: #%d = #%d(%d) - (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] - op2;
@@ -289,7 +289,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
                                                    
         case MATH_DATA_MUL:                                 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data mul: #%x = #%x(%d) * (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data mul: #%d = #%d(%d) * (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] * op2;
@@ -297,7 +297,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
                                                    
         case MATH_DATA_DIV:                                 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data div: #%x = #%x(%d) / (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data div: #%d = #%d(%d) / (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] / op2;
@@ -305,7 +305,7 @@ void math_instructions(PC* vpc, word code, word op1, word op2) {
                                                    
         case MATH_DATA_MOD:                                 
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data mod: #%x = #%x(%d) %c (%d)\n", op1, op1, vpc->cpu.reg[op1], '%', op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data mod: #%d = #%d(%d) %c (%d)\n", op1, op1, vpc->cpu.reg[op1], '%', op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] % op2;
@@ -319,7 +319,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
     switch (sub_code) {
         case BITWISE_REG_AND:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg and: AND #%x = #%x(%d) & #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg and: AND #%d = #%d(%d) & #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] & vpc->cpu.reg[op2];
@@ -327,7 +327,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_REG_OR:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg or: OR #%x = #%x(%d) | #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg or: OR #%d = #%d(%d) | #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] | vpc->cpu.reg[op2];
@@ -335,7 +335,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_REG_XOR:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg xor: XOR #%x = #%x(%d) ^ #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg xor: XOR #%d = #%d(%d) ^ #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] ^ vpc->cpu.reg[op2];
@@ -343,7 +343,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_REG_INV:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg inv: INV #%x = ~#%x(%d)\n", op1, op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg inv: INV #%d = ~#%d(%d)\n", op1, op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = ~vpc->cpu.reg[op2];
@@ -351,7 +351,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_REG_LSH:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg lsh: LSH #%x = #%x(%d) << #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg lsh: LSH #%d = #%d(%d) << #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] << vpc->cpu.reg[op2];
@@ -359,7 +359,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_REG_RSH:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg rsh: #%x = #%x(%d) >> #%x(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction reg rsh: #%d = #%d(%d) >> #%d(%d)\n", op1, op1, vpc->cpu.reg[op1], op2, vpc->cpu.reg[op2]);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] >> vpc->cpu.reg[op2];
@@ -367,7 +367,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_DATA_AND:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data and: #%x = #%x(%d) & (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data and: #%d = #%d(%d) & (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] & op2;
@@ -375,7 +375,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_DATA_OR:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data or: #%x = #%x(%d) | (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data or: #%d = #%d(%d) | (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] | op2;
@@ -383,7 +383,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_DATA_XOR:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data xor: #%x = #%x(%d) ^ (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data xor: #%d = #%d(%d) ^ (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] ^ op2;
@@ -391,7 +391,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_DATA_INV:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data inv: #%x = ~(%d)\n", op1, op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data inv: #%d = ~(%d)\n", op1, op2);
 #endif
 
             vpc->cpu.reg[op1] = ~op2;
@@ -399,7 +399,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_DATA_LSH:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data lsh: #%x = #%x(%d) << (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data lsh: #%d = #%d(%d) << (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] << op2;
@@ -407,7 +407,7 @@ void bitwise_instructions(PC* vpc, word code, word op1, word op2) {
 
         case BITWISE_DATA_RSH:
 #if INST_DEBUG == 1
-                fprintf(stderr, "\t[INST_DEBUG]: Instruction data rsh: #%x = #%x(%d) >> (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
+                fprintf(stderr, "\t[INST_DEBUG]: Instruction data rsh: #%d = #%d(%d) >> (%d)\n", op1, op1, vpc->cpu.reg[op1], op2);
 #endif
 
             vpc->cpu.reg[op1] = vpc->cpu.reg[op1] >> op2;

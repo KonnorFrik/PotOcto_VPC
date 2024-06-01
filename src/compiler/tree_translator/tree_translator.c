@@ -834,6 +834,10 @@ static int translate_mov(AST* head, byte* result_arr, size_t* result_index) {
 }
 
 int translate_token_tree(AST* head, byte* result_arr, size_t* result_index) {
+    if ( !head || !result_arr || !result_index ) {
+        return MEM_ERROR;
+    }
+
     int status = OK;
     int kw_ind = 0;
 

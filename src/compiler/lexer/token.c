@@ -62,7 +62,7 @@ Token* get_token(char* line) {
     // }
 
     #if CMP_DEBUG == 1
-        fprintf(stderr, "\t[CMP_DEBUG]: Create Token: type: %d value: %u\n", token_type, value);
+        fprintf(stderr, "\t[CMP_DEBUG]: Created Token: type: %d value: %u\n", token_type, value);
     #endif
 
     return token;
