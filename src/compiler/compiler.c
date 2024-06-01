@@ -90,7 +90,6 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
         }
 
         replace_f(line, COMMENT_SYMBOL, 0);
-
         AST* tokens_line = tokenize_line(line, line_count);
         int ret_code = translate_token_tree(tokens_line, 
                                             byte_code->array,
@@ -108,6 +107,7 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
             fprintf(stderr, "[COMPILER]: increase_bytearray_size: ERROR\n");
             exit(MEM_ERROR);
         }
+
         memset(line, 0, line_size);
         line_count++;
 
@@ -164,9 +164,6 @@ int main(const int argc, const char** argv) {
     if ( fd ) {
         fclose(fd);
     }
-
-    // TODO: get line -> translate to byte_code as fast as possible
-    //      instead collect trees in arr
 
     // TODO: get out filename from argv (mb parse argv with getopt)
 
