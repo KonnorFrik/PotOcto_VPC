@@ -5,8 +5,8 @@
 #include "token.h"
 #include "ast.h"
 #include "../keywords_array.h"
-#include "../../common/funcs.h"
-#include "../../common/error_codes.h"
+// #include "../../common/funcs.h"
+// #include "../../common/error_codes.h"
 #include "../../str_funcs/str_funcs.h"
 
 #define REG_ACCESS_WORD 'r'
@@ -33,6 +33,7 @@ Token* create_token(int type, char* word, dword value) {
 }
 
 Token* get_token(char* line) {
+    // int status = OK;
     int token_type = INVALID;
     char* word = "";
     dword value = 0;
@@ -56,11 +57,9 @@ Token* get_token(char* line) {
 
     Token* token = create_token(token_type, word, value);
 
-    if ( !token ) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "get_token: token is NULL\n");
-        exit(MEM_ERROR);
-    }
+    // if ( !token ) {
+    //     status = MEM_ERROR;
+    // }
 
     #if CMP_DEBUG == 1
         fprintf(stderr, "\t[CMP_DEBUG]: Create Token: type: %d value: %u\n", token_type, value);

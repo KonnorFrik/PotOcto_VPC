@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "ast.h"
-#include "../../common/funcs.h"
+// #include "../../common/funcs.h"
 #include "../../common/error_codes.h"
 #include "../../str_funcs/str_funcs.h"
 
@@ -12,43 +12,42 @@ AST* create_node() {
     return obj;
 }
 
-// TODO: replace exit to return NULL
-AST* tokenize_line(char* line, size_t line_count) {
-    /*Create AST from line*/
+AST* tokenize_line(char* line) {
+    int status = OK; // local status code
     size_t len = strlen(line);
     AST* ast_node = create_node();
 
     if ( !ast_node ) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "Tokens_line: ast_node is NULL\n");
-        exit(MEM_ERROR);
+        status = MEM_ERROR;
     }
 
     char* buffer = calloc(len + 2, sizeof(char));
     
     if ( !buffer ) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "Tokens_line: buffer line is NULL\n");
-        exit(MEM_ERROR);
+        status = MEM_ERROR;
     }
 
-    strcpy(buffer, line);
+    char* token = NULL;
     const char* delim = " ";
-    char* token = strtok(buffer, delim);
 
-    int err_code = 0;
+    if ( !status ) {
+        strcpy(buffer, line);
+        token = strtok(buffer, delim);
+    }
+
     //TODO: replace magic numbers with enum
     // if will be replaced appending system - enum don't need
     int token_count = 0; //0-kw 1-op1 2-op2
 
-    while ( (err_code == 0) && token ) {
-        err_code = safe_create_append(token, ast_node, token_count);
+    while ( (status == OK) && token ) {
+        int err_code = safe_create_append(token, ast_node, token_count);
 
 #if AST_DEBUG == 1
             fprintf(stderr, "\t[AST_DEBUG]: >append code: '%d'\n\n", err_code);
 #endif
 
-        if (err_code) {
+        if ( err_code ) {
+            status = ERROR;
             continue;
         }
 
@@ -58,11 +57,9 @@ AST* tokenize_line(char* line, size_t line_count) {
 
     free(buffer);
 
-    if (err_code) {
-        show_error(err_code);
-        fprintf(stderr, "[ERROR] Syntax problem with: #%zu > '%s'\n", line_count, line);
+    if ( status != OK ) {
         free(ast_node);
-        exit(ERROR);
+        ast_node = NULL;
     }
 
     return ast_node;
@@ -110,7 +107,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
             copy->right->token = token;
 
         } else {
-            result = MEM_ERROR; // MEM_ERROR
+            result = MEM_ERROR;
         }
     }
 
@@ -123,7 +120,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
 
 int safe_create_append(char* line, AST* ast, int token_count) {
     /*append token to AST if it not invalid*/
-    int result = OK; // 0
+    int status = OK;
 
 #if AST_DEBUG == 1
         fprintf(stderr, "\t[AST_DEBUG]: word: '%s'\n", line);
@@ -131,17 +128,17 @@ int safe_create_append(char* line, AST* ast, int token_count) {
 
     Token* word_token = get_token(line);
 
-    if (word_token->type == INVALID) {
-        result = SYNTAX_ERR;
+    if ( !word_token && (word_token->type == INVALID) ) {
+        status = ERROR;
     }
 
-    result |= append_to_node(ast, word_token, token_count);
+    if ( status == OK ) status = append_to_node(ast, word_token, token_count);
 
-    if (word_token->type == MEM_ACCESS_OPERATOR || word_token->type == REG_ACCESS_OPERATOR) {
-        result |= safe_create_append(line + 1, ast, token_count);
+    if ( (status == OK) && (word_token->type == MEM_ACCESS_OPERATOR || word_token->type == REG_ACCESS_OPERATOR) ) {
+        status = safe_create_append(line + 1, ast, token_count);
     }
 
-    return result;
+    return status;
 }
 
 int append_tree(AST_ARR* asts_obj, AST* obj) {
@@ -162,7 +159,7 @@ int append_tree(AST_ARR* asts_obj, AST* obj) {
         }
     }
 
-    (asts_obj->array)[(asts_obj->index)++] = obj;
+    if ( status == OK ) (asts_obj->array)[(asts_obj->index)++] = obj;
 
     return status;
 }
