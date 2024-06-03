@@ -20,7 +20,7 @@ typedef struct {
  * @note Return NULL if can't allocate memory
  * @return obj ByteArray object or NULL
  */
-ByteArray* create_bytearray();
+ByteArray* bytearray_create();
 
 /**
  * @brief Increase ByteArray size with formula 'new_size = size + (size / 2)'
@@ -28,14 +28,14 @@ ByteArray* create_bytearray();
  * @param[in, out] obj Valid ByteArray object
  * @return status 
  */
-bool increase_bytearray_size(ByteArray* obj);
+bool bytearray_increase_size(ByteArray* obj);
 
 /**
  * @brief Correctly deallocate ByteArray object
  * @param[in, out] obj Valid ByteArray object
  * @return void
  */
-void destroy_bytearray(ByteArray* obj);
+void bytearray_destroy(ByteArray* obj);
 
 #endif /* __BYTE_ARRAY__ */
 

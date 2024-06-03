@@ -3,10 +3,8 @@
 #include <string.h>
 
 #include "token.h"
-#include "ast.h"
+#include "tokens_type.h"
 #include "../keywords_array.h"
-// #include "../../common/funcs.h"
-// #include "../../common/error_codes.h"
 #include "../../str_funcs/str_funcs.h"
 
 #define REG_ACCESS_WORD 'r'
@@ -32,6 +30,10 @@ Token* create_token(int type, char* word, dword value) {
     return obj;
 }
 
+bool is_line_comment(char* line) {
+    return line && (line[0] == 0 || line[0] == COMMENT_SYMBOL);
+}
+
 Token* get_token(char* line) {
     // int status = OK;
     int token_type = INVALID;
@@ -43,16 +45,20 @@ Token* get_token(char* line) {
         word = line;
 
     } else if ( is_line_access_op(line) ) {
-        if ( line[0] == 'r' ) {
+        if ( line[0] == REG_ACCESS_WORD ) {
             token_type = REG_ACCESS_OPERATOR;
 
-        } else if ( line[0] == '$' ) {
+        } else if ( line[0] == MEM_ACCESS_WORD ) {
             token_type = MEM_ACCESS_OPERATOR;
         }
 
     } else if ( is_line_number(line) ) {
         token_type = NUMBER;
         value = str_to_num(line);
+
+    } else if ( is_line_comment(line) ) {
+        token_type = COMMENT;
+        word = line;
     }
 
     Token* token = create_token(token_type, word, value);
@@ -124,4 +130,17 @@ dword str_to_num(char* line) {
     #endif
 
     return result;
+}
+
+void token_destroy(Token* obj) {
+    if ( !obj ) {
+        return;
+    }
+
+    if ( obj->word ) {
+        free(obj->word);
+    }
+
+    free(obj);
+
 }

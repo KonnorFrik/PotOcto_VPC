@@ -6,31 +6,51 @@
 // #include "../../common/funcs.h"
 #include "../../common/error_codes.h"
 #include "../../str_funcs/str_funcs.h"
+#include "tokens_type.h"
 
-AST* create_node() {
+AST* ast_create() {
     AST* obj = calloc(1, sizeof(AST));
     return obj;
 }
 
-AST* tokenize_line(char* line) {
+AST_ARR* astarr_create() {
+    AST_ARR* obj = calloc(1, sizeof(AST_ARR));
+
+    if ( obj ) {
+        obj->size = 1;
+        obj->array = calloc(obj->size, sizeof(AST*)); 
+
+        if ( !obj->array ) {
+            free(obj);
+            obj = NULL;
+        }
+    }
+
+    return obj;
+}
+
+AST* ast_tokenize_line(char* line) {
     if ( !line ) {
         return NULL;
     }
 
     int status = OK; // local status code
     size_t len = strlen(line);
-    AST* ast_node = create_node();
+    char* buffer = NULL;
+    AST* ast_node = ast_create();
 
     if ( !ast_node ) {
         status = MEM_ERROR;
     }
 
-    char* buffer = calloc(len + 2, sizeof(char));
-    
-    if ( !buffer ) {
-        status = MEM_ERROR;
-    }
+    if ( status == OK ) {
+        buffer = calloc(len + 2, sizeof(char));
 
+        if ( !buffer ) {
+            status = MEM_ERROR;
+        }
+    }
+    
     char* token = NULL;
     const char* delim = " ";
 
@@ -44,11 +64,15 @@ AST* tokenize_line(char* line) {
     int token_count = 0; //0-kw 1-op1 2-op2
 
     while ( (status == OK) && token ) {
-        int err_code = safe_create_append(token, ast_node, token_count);
+        int err_code = ast_safe_append_tokens(token, ast_node, token_count);
 
 #if AST_DEBUG == 1
             fprintf(stderr, "\t[AST_DEBUG]: >append code: '%d'\n\n", err_code);
 #endif
+        
+        if ( ast_node->token->type == COMMENT ) {
+            break;
+        }
 
         if ( err_code ) {
             status = ERROR;
@@ -69,7 +93,7 @@ AST* tokenize_line(char* line) {
     return ast_node;
 }
 
-int append_to_node(AST* head, Token* token, int token_count) {
+int ast_append_token(AST* head, Token* token, int token_count) {
     if ( !head || !token ) {
         return MEM_ERROR;
     }
@@ -94,7 +118,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
             copy = copy->left;
         }
 
-        copy->left = create_node();
+        copy->left = ast_create();
 
         if ( copy->left ) {
             copy->left->token = token;
@@ -109,7 +133,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
             copy = copy->right;
         }
 
-        copy->right = create_node();
+        copy->right = ast_create();
 
         if ( copy->right ) {
             copy->right->token = token;
@@ -126,7 +150,7 @@ int append_to_node(AST* head, Token* token, int token_count) {
     return status;
 }
 
-int safe_create_append(char* line, AST* ast, int token_count) {
+int ast_safe_append_tokens(char* line, AST* ast, int token_count) {
     /*append token to AST if it not invalid*/
     int status = OK;
 
@@ -140,23 +164,37 @@ int safe_create_append(char* line, AST* ast, int token_count) {
         status = ERROR;
     }
 
-    if ( status == OK ) status = append_to_node(ast, word_token, token_count);
+    if ( status == OK ) status = ast_append_token(ast, word_token, token_count);
 
     if ( (status == OK) && (word_token->type == MEM_ACCESS_OPERATOR || word_token->type == REG_ACCESS_OPERATOR) ) {
-        status = safe_create_append(line + 1, ast, token_count);
+        status = ast_safe_append_tokens(line + 1, ast, token_count);
     }
 
     return status;
 }
 
-int append_tree(AST_ARR* asts_obj, AST* obj) {
+int astarr_append(AST_ARR* asts_obj, AST* obj) {
     /*Append one ast to array 
      * Potential depricated */
     int status = OK;
 
     if (asts_obj->index >= asts_obj->size) {
-        size_t new_size = (asts_obj->size + (asts_obj->size / 2)) * sizeof(AST*);
-        AST** tmp = realloc(asts_obj->array, new_size);
+
+        size_t new_size = (asts_obj->size + (asts_obj->size / 2)) + 1;
+
+#if AST_DEBUG == 1
+        fprintf(stderr, "[AST_DEBUG]: realloc AST_ARR->array:\n");
+        fprintf(stderr, "[AST_DEBUG]: \tindex:     %zu\n", asts_obj->index);
+        fprintf(stderr, "[AST_DEBUG]: \tprev size: %zu bytes\n", asts_obj->size);
+        fprintf(stderr, "[AST_DEBUG]: \tnew  size: %zu cells\n", new_size);
+        fprintf(stderr, "[AST_DEBUG]: \tnew  size: %zu bytes\n", new_size * sizeof(AST*));
+#endif
+
+        AST** tmp = realloc(asts_obj->array, new_size * sizeof(AST*));
+
+#if AST_DEBUG == 1
+        fprintf(stderr, "[AST_DEBUG]: \tnew addr: %p\n", (void*)tmp);
+#endif
 
         if ( tmp ) {
             asts_obj->array = tmp;
@@ -167,9 +205,35 @@ int append_tree(AST_ARR* asts_obj, AST* obj) {
         }
     }
 
-    if ( status == OK ) (asts_obj->array)[(asts_obj->index)++] = obj;
+    if ( status == OK ) {
+        (asts_obj->array)[(asts_obj->index)++] = obj;
+    }
 
     return status;
+}
+
+void ast_destroy(AST* obj) {
+    if ( !obj ) {
+        return;
+    }
+
+    if ( obj->token ) {
+        token_destroy(obj->token);
+    }
+
+    free(obj);
+}
+
+void astarr_destroy(AST_ARR* obj) {
+    if ( !obj ) {
+        return;
+    }
+
+    for (size_t ind = 0; ind < obj->index; ++ind) {
+        ast_destroy(obj->array[ind]);
+    }
+
+    free(obj);
 }
 
 #if AST_DEBUG == 1
@@ -177,14 +241,16 @@ int append_tree(AST_ARR* asts_obj, AST* obj) {
  * @brief Print given AST object to stdout
  * @note For debug use
  */
-void print_node(AST* node) {
+void ast_print(AST* node) {
     /*For debug*/
-    if (node->token == 0 || node->left == 0 || node->right == 0) {
+    fprintf(stderr, "\tPrint AST\n");
+
+    if (node->token == 0 ) {// || node->left == 0 || node->right == 0) {
         return;
     }
 
     AST* copy = node;
-    printf("\tHead token: %d(%s)\n", copy->token->type, copy->token->type == KEYWORD ? copy->token->word : "");
+    printf("\tHead token: %d(%s)\n", copy->token->type, copy->token->word);
     printf("\tLeft: ");
 
     copy = node->left;

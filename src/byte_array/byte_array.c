@@ -5,7 +5,7 @@
 // #include "../common/error_codes.h"
 // #include "../common/funcs.h"
 
-ByteArray* create_bytearray() {
+ByteArray* bytearray_create() {
     ByteArray* obj = calloc(1, sizeof(ByteArray));
 
     if ( obj ) {
@@ -22,7 +22,7 @@ ByteArray* create_bytearray() {
     return obj;
 }
 
-bool increase_bytearray_size(ByteArray* obj) {
+bool bytearray_increase_size(ByteArray* obj) {
     if ( !obj ) {
         return false;
     }
@@ -45,7 +45,7 @@ bool increase_bytearray_size(ByteArray* obj) {
     return status;
 }
 
-void destroy_bytearray(ByteArray* obj) {
+void bytearray_destroy(ByteArray* obj) {
     if ( !obj ) {
         return;
     }

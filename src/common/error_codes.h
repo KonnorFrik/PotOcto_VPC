@@ -7,10 +7,10 @@
 enum ERROR_CODES {
     ERROR = -1, ///< Unknown error
     OK = 0,     ///< No error
-    WRONG_ARGS,
-    FILE_ERROR,
+    WRONG_ARGS, // 1
+    FILE_ERROR, // 2
     MAP_ERROR,
-    MEM_ERROR,
+    MEM_ERROR,  // 4
     SYNTAX_ERR,
     INVALID_LINE,
     INVALID_WORD,

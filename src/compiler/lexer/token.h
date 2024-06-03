@@ -6,15 +6,9 @@
 
 #include <stdbool.h>
 #include "../../hardware/basic_types.h" 
+#include "tokens_type.h" 
 
-/**
- * @brief Struct with one toke
- */
-typedef struct {
-    int type;    ///< Token type
-    char* word;  ///< line with current word
-    dword value; ///< value for numbers
-} Token;
+#define COMMENT_SYMBOL ';'
 
 /**
  * @brief Create Token object and init it
@@ -56,10 +50,24 @@ bool is_line_access_op(char* line);
 bool is_line_number(char* line);
 
 /**
+ * @brief Check is line full comment
+ * @param[in] line Valid line
+ * @return status true or false
+ */
+bool is_line_comment(char* line);
+
+/**
  * @brief Determine number base and convert given word to number
  * @param[in] line Word for convert
  * @return result Converted number 
  */
 dword str_to_num(char* line);
+
+/**
+ * @brief Destroy Token object
+ * @param[in, out] obj Valid Token object
+ * @return void
+ */
+void token_destroy(Token* obj);
 
 #endif /* __TOKEN_H__ */
