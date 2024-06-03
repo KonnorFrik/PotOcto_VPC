@@ -83,9 +83,9 @@ int compile_file(FILE* fd, ByteArray* byte_code) {
         line_count++;
 
         replace_f(line, '\n', 0);
+        replace_f(line, COMMENT_SYMBOL, 0);
 
-        if ( line[0] == 0 ||
-             line[0] == COMMENT_SYMBOL ) { // empty line
+        if ( line[0] == 0 ) {
             continue;
         }
 
