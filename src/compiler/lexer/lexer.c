@@ -125,6 +125,8 @@ Token* token_get(char* line) {
     } else if ( is_line_comment(line) ) {
         token_type = COMMENT;
 
+    } else if ( is_line_label(line) ) {
+        token_type = LABEL;
     }
 
     Token* token = token_create(token_type, line, value);

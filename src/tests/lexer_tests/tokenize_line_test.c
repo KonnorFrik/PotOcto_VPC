@@ -88,6 +88,52 @@ START_TEST(test_3_token_line) {
 }
 END_TEST
 
+START_TEST(test_4_token_line) {
+    char* line = "lbl:";
+
+    AST* obj = lexer_tokenize_line(line);
+
+    ck_assert_ptr_nonnull(obj);
+    ck_assert_uint_eq(obj->token->type, LABEL);
+    ck_assert_str_eq(obj->token->line, "lbl:");
+    ck_assert_uint_eq(obj->token->value, 0);
+    obj = obj->next;
+
+    ck_assert_ptr_null(obj);
+
+    ast_destroy(obj);
+}
+END_TEST
+
+START_TEST(test_5_token_line) {
+    char* line = "lbl: jmp lbl";
+
+    AST* obj = lexer_tokenize_line(line);
+
+    ck_assert_ptr_nonnull(obj);
+    ck_assert_uint_eq(obj->token->type, LABEL);
+    ck_assert_str_eq(obj->token->line, "lbl:");
+    ck_assert_uint_eq(obj->token->value, 0);
+    obj = obj->next;
+
+    ck_assert_ptr_nonnull(obj);
+    ck_assert_uint_eq(obj->token->type, KEYWORD);
+    ck_assert_str_eq(obj->token->line, "jmp");
+    ck_assert_uint_eq(obj->token->value, 0);
+    obj = obj->next;
+
+    ck_assert_ptr_nonnull(obj);
+    ck_assert_uint_eq(obj->token->type, UNKNOWN);
+    ck_assert_str_eq(obj->token->line, "lbl");
+    ck_assert_uint_eq(obj->token->value, 0);
+    obj = obj->next;
+
+    ck_assert_ptr_null(obj);
+
+    ast_destroy(obj);
+}
+END_TEST
+
 Suite* lexer_tokenize_line_test() {
     Suite* s = suite_create(NAME);
     TCase* t = tcase_create(TCASE_NAME);
@@ -95,6 +141,8 @@ Suite* lexer_tokenize_line_test() {
     tcase_add_test(t, test_1_token_line);
     tcase_add_test(t, test_2_token_line);
     tcase_add_test(t, test_3_token_line);
+    tcase_add_test(t, test_4_token_line);
+    tcase_add_test(t, test_5_token_line);
 
     suite_add_tcase(s, t);
     return s;

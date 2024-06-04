@@ -14,6 +14,7 @@ typedef enum token_type {
     AO_MEMORY,
     NUMBER,      ///< any type of number (bin, dec, hex)
     COMMENT,
+    LABEL,
 } token_type;
 
 typedef struct token {

@@ -7,7 +7,8 @@
 
 #define AO_WORD_REGISTER 'r'
 #define AO_WORD_MEMORY '$'
-#define KW_COMMENT ';'
+#define WORD_LABEL ':'
+#define WORD_COMMENT ';'
 
 /**
  * @brief All possible number types in string
@@ -104,5 +105,12 @@ str_type string_type(const char* str);
  * @return result true or false
  */
 bool is_line_comment(char* line);
+
+/**
+ * @brief Check if word has label symbol(':') at the end
+ * @param[in] line String with one word
+ * @return result true or false
+ */
+bool is_line_label(char* line);
 
 #endif /* __LEXER_HELPERS_H__ */

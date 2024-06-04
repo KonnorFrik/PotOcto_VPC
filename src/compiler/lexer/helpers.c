@@ -43,6 +43,17 @@ bool is_line_number(char* line) {
     return result;
 }
 
+bool is_line_label(char* line) { // \w\:
+    bool result = false;
+    size_t len = strlen(line);
+
+    if ( line[len - 1] == WORD_LABEL ) {
+        result = true;
+    }
+
+    return result;
+}
+
 dword str_to_num(char* line) {
     dword result = 0;
     str_type type = string_type(line);
@@ -185,5 +196,5 @@ str_type string_type(const char* str) {
 }
 
 bool is_line_comment(char* line) {
-    return line && (line[0] == 0 || line[0] == KW_COMMENT);
+    return line && (line[0] == 0 || line[0] == WORD_COMMENT);
 }
