@@ -12,7 +12,6 @@
 
 /**
  * @brief Create Token object and init it
- * @return NULL if can't allocate memory
  * @param[in] type Token type
  * @param[in] word Word for token
  * @param[in] value Value for token
