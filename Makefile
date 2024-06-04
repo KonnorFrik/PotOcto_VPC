@@ -76,7 +76,7 @@ clean_all: clean
 > $(RM) $(TEST_TARGET)
 > $(RM) $(wildcard *.html)
 > $(RM) $(wildcard ./$(GCOV_DIR)/*)
-> rmdir $(GCOV_DIR)
+> rmdir $(GCOV_DIR) || true
 
 show:
 > @echo "vPC data:"

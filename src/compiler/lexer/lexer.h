@@ -75,11 +75,10 @@ AST* ast_create();
 void ast_destroy(AST* obj);
 
 /**
- * @brief Add new token at the end of AST
+ * @brief Add new node at the end
  * @param[in, out] head Head of AST
- * @param[in]      token Token obect for appending
  * @return status From 'enum error_codes'
  */
-int ast_append_token(AST* head, Token* token);
+int ast_append_token(AST** head, Token* token);
 
 #endif /* __LEXER_H__ */

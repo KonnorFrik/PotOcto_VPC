@@ -26,7 +26,7 @@ bool is_line_kw(char* line) {
 bool is_line_access_op(char* line) {
     bool result = false;
 
-    if (line[0] == AO_WORD_REGISTER || line[0] == AO_WORD_REGISTER) {
+    if (line[0] == AO_WORD_REGISTER || line[0] == AO_WORD_MEMORY) {
         result = true;
     }
 

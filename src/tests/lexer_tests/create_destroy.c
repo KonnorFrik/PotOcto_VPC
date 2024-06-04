@@ -21,7 +21,15 @@ START_TEST(test_token_create_1) {
 
     token_destroy(obj);
 }
+END_TEST
 
+START_TEST(test_ast_create_2) {
+    AST* obj = ast_create();
+
+    ck_assert_ptr_nonnull(obj);
+
+    ast_destroy(obj);
+}
 END_TEST
 
 Suite* lexer_create_destroy() {
@@ -29,6 +37,7 @@ Suite* lexer_create_destroy() {
     TCase* t = tcase_create(TCASE_NAME);
 
     tcase_add_test(t, test_token_create_1);
+    tcase_add_test(t, test_ast_create_2);
 
     suite_add_tcase(s, t);
     return s;
