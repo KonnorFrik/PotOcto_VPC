@@ -253,8 +253,9 @@ int main(const int argc, const char** argv) {
     AST_ARR* ast_tree = NULL;
     ByteArray* bin_code = NULL;
 
-    if ( !(file_in = fopen(argv[1], "r")) ) {
+    if ( (file_in = fopen(argv[1], "r")) == NULL ) {
         status = FILE_ERROR;
+        fprintf(stderr, "File not exist: %s\n", argv[1]);
     }
 
     if ( status == OK ) {
@@ -267,7 +268,7 @@ int main(const int argc, const char** argv) {
 
 #if CMP_DEBUG == 1
     fprintf(stderr, "[CMP_DEBUG]: Status after tokenize: %d\n", status);
-    fprintf(stderr, "\t[CMP_DEBUG]: Tokenize lines: %zu\n", ast_tree->index);
+    fprintf(stderr, "\t[CMP_DEBUG]: Tokenize lines: %zu\n", ast_tree ? ast_tree->index : 0);
     fprintf(stderr, "\n");
 #endif
 
