@@ -28,7 +28,7 @@ ByteArray* bytearray_create();
  * @param[in, out] obj Valid ByteArray object
  * @return status 
  */
-bool bytearray_increase_size(ByteArray* obj);
+int bytearray_increase_size(ByteArray* obj);
 
 /**
  * @brief Correctly deallocate ByteArray object

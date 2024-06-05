@@ -6,7 +6,7 @@
 #include "lexer.h"
 #include "helpers.h"
 
-#define LXR_DEBUG 0
+#define LXR_DEBUG 1
 
 #if LXR_DEBUG == 1
 void token_print(Token* obj);
@@ -22,6 +22,24 @@ AST* lexer_tokenize_line(char* line) {
     size_t len = strlen(line);
     char* buffer = NULL;
     AST* ast_node = NULL;
+
+    if ( line[0] == WORD_COMMENT ) {
+        Token* tok = token_get(line);
+
+        if ( !tok ) {
+            status = MEM_ERROR;
+
+        } else {
+            status = ast_append_token(&ast_node, tok);
+        }
+
+        if ( status != OK && ast_node ) {
+            ast_destroy(ast_node);
+            status = MEM_ERROR;
+        }
+
+        return ast_node;
+    }
 
     if ( status == OK ) {
         buffer = calloc(len + 1, sizeof(char));
@@ -132,7 +150,7 @@ Token* token_get(char* line) {
     Token* token = token_create(token_type, line, value);
 
     #if LXR_DEBUG == 1
-        fprintf(stderr, "\t[CMP_DEBUG]: Created Token: type: %d value: %u\n", token_type, value);
+        fprintf(stderr, "[LXR_DEBUG]: Created Token: type: %d value: %u\n", token_type, value);
     #endif
 
     return token;
