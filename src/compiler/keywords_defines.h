@@ -1,5 +1,12 @@
+/** @file All keyword defines here */
+
 #ifndef __KEYWORDS_DEFINES__
 #define __KEYWORDS_DEFINES__
+
+// after refactor only!!!!
+// TODO: add push/pop instructions
+// TODO: add call/ret instructions
+// TODO: make labels system (preprocessing)
 
 #define KW_set "set"
 #define KW_read "read"
@@ -27,4 +34,4 @@
 #define KW_inv "inv"
 #define KW_hlt "hlt"
 
-#endif
+#endif /* __KEYWORDS_DEFINES__ */

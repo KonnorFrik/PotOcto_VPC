@@ -1,87 +1,37 @@
+#include <stdio.h>
+
 #include "funcs.h"
-
-static char decode_symb(byte symb);
-static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr);
-
-int is_null(void* mem) {
-    return mem == NULL;
-}
-
-// max4 | 16 per row  | 16 symb's per row
-// addr | bytes       | decoded symbol's
-// FFFF | 00 00 .. 00 | ....
-
-static char decode_symb(byte symb) {
-    char result = '.';
-
-    // mb isascii will be better
-    // need check only is symb printable as normal symb
-    if (symb > 31 && symb < 127) {
-        result = (char)symb;
-    }
-
-    return result;
-}
-
-static void fprintf_decoded_row(FILE* fd, unsigned char* arr, unsigned short start_addr) {
-    for (dword addr = start_addr - 16; addr < start_addr; ++addr) {
-        fprintf(fd, "%c", decode_symb(arr[addr]));
-    }
-}
-
-void mem_dump(FILE* fd, void* mem, size_t size) {
-    unsigned char* arr = (unsigned char*)mem;
-    fprintf(fd, "       "); // 4 space for addr and 1 for space
-
-    for (int i = 0; i < 16; ++i) {
-        fprintf(fd, "0%X  ", i);
-    }
-
-    fprintf(fd, "\n");
-    dword address = 0;
-
-    while (address < size) {
-        byte current_symb = arr[address];
-
-        if ((address % 16) == 0) {
-            fprintf_decoded_row(fd, arr, address);
-            fprintf(fd, "\n");
-            fprintf(fd, "%4X:  ", address);
-        }
-
-        if (current_symb < 0x10) {
-            fprintf(fd, "0");
-        }
-
-        fprintf(fd, "%X  ", current_symb);
-        address++;
-    }
-
-    fprintf_decoded_row(fd, arr, address);
-    fprintf(fd, "\n");
-}
+#include "error_codes.h"
 
 void show_error(int code) {
-    if (code & MEM_ERROR) {
-        fprintf(stderr, "Memory Alloc Error\n");
+    switch ( code ) {
+        case MEM_ERROR:
+            fprintf(stderr, "Memory Alloc Error\n");
+            break;
 
-    } else if (code & FILE_ERROR) {
-        fprintf(stderr, "File Error\n");
+        case FILE_ERROR:
+            fprintf(stderr, "File Error\n");
+            break;
 
-    } else if (code & SYNTAX) {
-        fprintf(stderr, "Syntax Error\n");
+        case SYNTAX_ERR:
+            fprintf(stderr, "Syntax Error\n");
+            break;
 
-    } else if (code & INVALID_LINE) {
-        fprintf(stderr, "Invalid line Error\n");
+        case INVALID_LINE:
+            fprintf(stderr, "Invalid line Error\n");
+            break;
 
-    } else if (code & INVALID_WORD) {
-        fprintf(stderr, "Invalid word Error\n");
+        case INVALID_WORD:
+            fprintf(stderr, "Invalid word Error\n");
+            break;
 
-    } else if (code & TRANSLATE_LINE) {
-        fprintf(stderr, "Translation Error\n");
+        case TRANSLATE_LINE_ERR:
+            fprintf(stderr, "Translation Error\n");
+            break;
 
-    } else {
-        fprintf(stderr, "Error\n");
+        default:
+            fprintf(stderr, "Error\n");
+            break;
     }
     
 }

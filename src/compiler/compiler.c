@@ -1,567 +1,337 @@
-#include "compiler.h"
+// every line match this pattern.
 // \w\+\s[r]\?\(0x|0b\)\?[0-9a-f]\+\s[r]\?\(0x|0b\)[0-9a-f]\+
-
-#define CMP_DEBUG 0
-
-#if CMP_DEBUG == 1
-#endif
+#define _GNU_SOURCE
+#define __INSTRUCTIONS_PARSE_H__ // turn off including funcs
+#include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+
+// #include "../hardware/basic_types.h" 
+#include "../common/error_codes.h"
+// #include "../common/funcs.h"
+// #include "../str_funcs/str_funcs.h"
+#include "../byte_array/byte_array.h" 
+#include "lexer/lexer.h"
+#include "tree_translator/tree_translator.h"
 
 #define STD_FILENAME_OUT "prog.out"
 
-typedef struct {
-    Node** array;
-    size_t size;
+#define CMP_DEBUG 1
+
+typedef struct ast_arr {
+    AST** array;
     size_t index;
-} AST;
+    size_t size; ///< count of cells
+} AST_ARR;
 
+AST_ARR* astarr_create();
+void astarr_destroy(AST_ARR* obj);
+int astarr_append(AST_ARR* arr, AST* tokens);
 void usage(const char* prog_name);
-Token* create_token(int type, char* word, dword value);
-int is_line_kw(char* line);
-int is_line_access_op(char* line);
-int is_line_number(char* line);
-dword str_to_num(char* line);
-Token* get_token(char* line);
-Node* create_node();
-int append_to_node(Node* head, Token* token, int token_count);
-void fix_new_line(char* line, size_t line_size);
-int safe_create_append(char* line, Node* ast, int token_count);
-Node* tokenize_line(char* line, size_t line_count);
-void print_node(Node* node);
-int append_tree(AST* asts_obj, Node* obj);
-int compile_file(FILE* fd, ByteArray* byte_code);
+bool replace_f(char* line, char from, char to);
 
+bool replace_f(char* line, char from, char to) {
+    size_t ind = 0;
+    bool loop = true;
 
-void usage(const char* prog_name) {
-    printf("Usage: %s file\n", prog_name);
-}
-
-Token* create_token(int type, char* word, dword value) {
-    Token* obj = c_alloc(1, sizeof(Token));
-
-    if (!is_null(obj)) {
-        obj->type = type;
-        obj->value = value;
-        obj->word = c_alloc(strlen(word) + 1, sizeof(char));
-
-        if (!is_null(obj->word)) {
-            strcpy(obj->word, word);
-        }
-    }
-
-    return obj;
-}
-
-int is_line_kw(char* line) {
-    int result = OK;
-    int ind = 0;
-
-    while (!result && Keywords[ind] != NULL) {
-        if (strcmp(line, Keywords[ind]) == 0) {
-            result = 1;
+    while (loop && line[ind] != 0) {
+        if (line[ind] == from) {
+            line[ind] = to;
+            loop = false;
+            continue;
         }
 
         ind++;
     }
 
-    return result;
+    return !loop;
 }
 
-int is_line_access_op(char* line) {
-    int result = 0;
+AST_ARR* astarr_create() {
+    AST_ARR* obj = calloc(1, sizeof(AST_ARR));
 
-    if (line[0] == REG_ACCESS_WORD || line[0] == MEM_ACCESS_WORD) {
-        result = 1;
-    }
+    if ( obj ) {
+        obj->size = 1;
+        obj->array = calloc(1, sizeof(AST*));
 
-    return result;
-}
-
-int is_line_number(char* line) {
-    int result = 0;
-
-    if (string_type((const char*)line) != INVALID) {
-        result = 1;
-    }
-
-    return result;
-}
-
-dword str_to_num(char* line) {
-    dword result = 0;
-    int type = string_type(line);
-    int base = 0;
-
-    if (type == BIN) {
-        base = 2;
-        line += 2;
-
-    } else if (type == HEX) {
-        base = 16;
-        line += 2;
-    }
-
-    result = (dword)strtol(line, NULL, base);
-
-    #if CMP_DEBUG == 1
-        fprintf(stderr, "\t[CMP_DEBUG]: str_to_num: '%s':type(%d) -> '%d'\n", line, type, result);
-    #endif
-
-    return result;
-}
-
-Token* get_token(char* line) {
-    int token_type = INVALID;
-    char* word = "";
-    dword value = 0;
-
-    if (is_line_kw(line)) {
-        token_type = KEYWORD;
-        word = line;
-
-    } else if (is_line_access_op(line)) {
-        if (line[0] == 'r') {
-            token_type = REG_ACCESS_OPERATOR;
-
-        } else if (line[0] == '$') {
-            token_type = MEM_ACCESS_OPERATOR;
+        if ( !obj->array ) {
+            free(obj);
+            obj = NULL;
         }
-
-    } else if (is_line_number(line)) {
-        token_type = NUMBER;
-        value = str_to_num(line);
-    }
-
-    Token* token = create_token(token_type, word, value);
-
-    if (is_null(token)) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "get_token: token\n");
-    }
-
-    #if CMP_DEBUG == 1
-        fprintf(stderr, "\t[CMP_DEBUG]: Create Token: type: %d value: %u\n", token_type, value);
-    #endif
-
-    return token;
-}
-
-Node* create_node() {
-    Node* obj = c_alloc(1, sizeof(Node));
-
-    if (!is_null(obj)) {
-        obj->token = NULL;
-        obj->left = NULL;
-        obj->right = NULL;
     }
 
     return obj;
 }
 
-int append_to_node(Node* head, Token* token, int token_count) {
-    if (token_count > 2) {
-        return INVALID_LINE;
+int astarr_append(AST_ARR* arr, AST* tokens) {
+    if ( !arr || !tokens ) {
+        return MEM_ERROR;
     }
 
-    if (token->type == INVALID) {
-        return INVALID_WORD;
-    }
+    int status = OK;
 
-    int result = 0;
-    Node* copy = head;
+    if ( arr->index >= arr->size ) {
+        size_t new_size = (arr->size + (arr->size / 2)) + 1;
+#if CMP_DEBUG == 1
+        fprintf(stderr, "[CMP_DEBUG]: realloc AST_ARR->array:\n");
+        fprintf(stderr, "[CMP_DEBUG]: \tindex:     %zu\n", arr->index);
+        fprintf(stderr, "[CMP_DEBUG]: \tprev size: %zu bytes\n", arr->size);
+        fprintf(stderr, "[CMP_DEBUG]: \tnew  size: %zu cells\n", new_size);
+        fprintf(stderr, "[CMP_DEBUG]: \tnew  size: %zu bytes\n", new_size * sizeof(AST*));
+#endif
 
-    if (token_count == 0) { //kw
-        copy->token = token;
-    }
+        AST** tmp = realloc(arr->array, new_size * sizeof(AST*));
 
-    if (token_count == 1) { //op1
-        while (copy->left != NULL) {
-            copy = copy->left;
-        }
+        if ( tmp ) {
+            arr->array = tmp;
+            arr->size = new_size;
 
-        copy->left = create_node();
-
-        if (!is_null(copy->left)) {
-            copy->left->token = token;
-
-        } else {
-            result = MEM_ERROR; // MEM_ERROR
+        } else { 
+            status = MEM_ERROR;
         }
     }
 
-    if (token_count == 2) { //op2
-        while (copy->right != NULL) {
-            copy = copy->right;
-        }
-
-        copy->right = create_node();
-
-        if (!is_null(copy->right)) {
-            copy->right->token = token;
-
-        } else {
-            result = MEM_ERROR; // MEM_ERROR
-        }
+    if ( status == OK ) {
+        arr->array[arr->index++] = tokens;
     }
 
-    #if CMP_DEBUG == 1
-        fprintf(stderr, "\t[CMP_DEBUG]: Append token: token: %d | count: %d\n", token->type, token_count);
-    #endif
-    
-    return result;
+    return status;
 }
 
-void fix_new_line(char* line, size_t line_size) {
-    /*Replace \n to \0*/
-    size_t len = strlen(line);
-
-    if (line[len - 1] == '\n') {
-        line[len - 1] = '\0';
-    }
-
-    if (len + 1 < line_size) {
-        line[len + 1] = '\0';
-    }
-}
-
-int safe_create_append(char* line, Node* ast, int token_count) {
-    /*append token to AST if it not invalid*/
-    int result = OK; // 0
-
-    #if CMP_DEBUG == 1
-        fprintf(stderr, "\t[CMP_DEBUG]: word: '%s'\n", line);
-    #endif
-
-    Token* word_token = get_token(line);
-
-    if (word_token->type == INVALID) {
-        result = SYNTAX;
-    }
-
-    result |= append_to_node(ast, word_token, token_count);
-
-    if (word_token->type == MEM_ACCESS_OPERATOR || word_token->type == REG_ACCESS_OPERATOR) {
-        result |= safe_create_append(line + 1, ast, token_count);
-    }
-
-    return result;
-}
-
-Node* tokenize_line(char* line, size_t line_count) {
-    /*Create AST from line*/
-    size_t len = strlen(line);
-    Node* ast_node = create_node();
-
-    if (is_null(ast_node)) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "Tokens_line: ast_node is NULL\n");
-        full_exit(MEM_ERROR);
-    }
-
-    char* buffer = c_alloc(len + 2, sizeof(char));
-    
-    if (is_null(buffer)) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "Tokens_line: buffer line is NULL\n");
-        full_exit(MEM_ERROR);
-    }
-
-    strcpy(buffer, line);
-
-    int err_code = 0;
-    int read_flag = 1;
-    //TODO replace magic numbers with enum
-    int token_count = 0; //0-kw 1-op1 2-op2
-
-    while (read_flag) {
-        long unsigned int ind = 0;
-
-        if (buffer[ind] == '\0' || buffer[ind] == '\n') {
-            read_flag = 0;
-            continue;
-        }
-
-        while (buffer[ind] != ' ' && !(buffer[ind] == '\0' || buffer[ind] == '\n')) {
-            ind++;
-        }
-
-        char save = buffer[ind];
-        buffer[ind] = '\0';
-        err_code = safe_create_append(buffer, ast_node, token_count);
-
-        #if CMP_DEBUG == 1
-            fprintf(stderr, "\t[CMP_DEBUG]: >append code: '%d'\n\n", err_code);
-        #endif
-
-        if (err_code) {
-            read_flag = 0;
-            continue;
-        }
-
-        buffer[ind] = save;
-        buffer += ++ind;
-        token_count++;
-    }
-
-    m_free(buffer);
-
-    if (err_code) {
-        show_error(err_code);
-        fprintf(stderr, "#%zu > '%s'\n", line_count, line);
-        full_exit(ERROR);
-
-    }
-
-    return ast_node;
-}
-
-void print_node(Node* node) {
-    /*For debug*/
-    if (node->token == 0 || node->left == 0 || node->right == 0) {
+void astarr_destroy(AST_ARR* obj) {
+    if ( !obj ) {
         return;
     }
 
-    Node* copy = node;
-    printf("\tHead token: %d(%s)\n", copy->token->type, copy->token->type == KEYWORD ? copy->token->word : "");
-    printf("\tLeft: ");
-
-    copy = node->left;
-    while (copy != NULL) {
-        printf("%d(%d) ", copy->token->type, copy->token->value);
-        copy = copy->left;
-    }
-
-    printf("\n");
-    copy = node->right;
-    printf("\tRight: ");
-
-    while (copy != NULL) {
-        printf("%d(%d) ", copy->token->type, copy->token->value);
-        copy = copy->right;
-    }
-
-    printf("\n\n");
-}
-
-int append_tree(AST* asts_obj, Node* obj) {
-    /*Append one ast to array 
-     * Potential depricated */
-    int status = OK;
-
-    if (asts_obj->index >= asts_obj->size) {
-        size_t new_size = (asts_obj->size + (asts_obj->size / 2)) * sizeof(Node*);
-        Node** tmp = re_alloc(asts_obj->array, new_size);
-
-        if (!is_null(tmp)) {
-            asts_obj->array = tmp;
-            asts_obj->size = new_size;
-
-        } else {
-            status = MEM_ERROR;
+    if ( obj->array ) {
+        for (size_t i = 0; i < obj->index; ++i ) {
+            if ( obj->array[i] ) {
+                ast_destroy(obj->array[i]);
+            }
         }
     }
 
-    (asts_obj->array)[(asts_obj->index)++] = obj;
-
-    return status;
+    free(obj);
 }
 
-int compile_file(FILE* fd, ByteArray* byte_code) {
-    /*Read lines from file and compile it immediately*/
-    size_t line_size = DEFAULT_SIZE;
-    char* line = c_alloc(line_size, sizeof(char));
+/**
+ * @brief Print Usage of compiler to stdout
+ * @param[in] prog_name Current path to this program
+ * @return void
+ */
+void usage(const char* prog_name) {
+    printf("Usage: %s file\n", prog_name);
+}
 
-    if (is_null(line)) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "Compiler: compile_file: c_alloc return NULL for 'line' var\n");
-        full_exit(MEM_ERROR);
+
+AST_ARR* tokenize_file(FILE* file) {
+    int status = OK;
+    AST_ARR* tree = astarr_create();
+
+    if ( !tree ) {
+#if CMP_DEBUG == 1
+        fprintf(stderr, "[CMP_DEBUG]: Can't allocate tree \n");
+#endif
+        status = MEM_ERROR;
     }
 
-    int status = OK;
-    int read_flag = 0;
+    char* line = NULL;
+    size_t line_size = 0;
     size_t line_count = 0;
 
-    //printf("line addr: %p\n", line);
-    while (!read_flag && !feof(fd)) {
-        //this shit leak  VVVVV
-        ssize_t readed = getline(&line, &line_size, fd);
-        //printf("line addr loop: %p\n", line);
+    while ( (status == OK) && !feof(file) ) {
+        ssize_t readed = getline(&line, &line_size, file);
 
-        if (is_null(line)) {
-            show_error(MEM_ERROR);
-            fprintf(stderr, "Compiler: compile_file: getline return NULL\n");
-            full_exit(MEM_ERROR);
-        }
-
-        if (readed == -1) {
-            read_flag = 1;
-            continue;
-        }
-
-        fix_new_line(line, line_size);
-
-        if (line && line[0] == 0) { // empty line
-            line_count++;
-            continue;
-        }
-
-        line_size = replace(line, COMMENT_SYMBOL, 0);
-
-        if (line_size == 0) { //all line is comment
-            continue;
-        }
-
-        Node* tokens_line = tokenize_line(line, line_count);
-        int ret_code = translate_token_tree(tokens_line, 
-                                            byte_code->array,
-                                            &byte_code->index
-                                            );
-
-        if (ret_code) {
-            show_error(TRANSLATE_LINE);
-            fprintf(stderr, "compile_file: translate tree: invalid line #%zu\n", line_count);
+        if ( !line ) {
             status = MEM_ERROR;
-        }
-
-        increase_bytearray_size(byte_code);
-        memset(line, 0, line_size);
-        line_count++;
-
-        if (status) {
-            read_flag = 1;
             continue;
         }
+
+        if ( readed == -1 ) {
+            continue;
+        }
+
+        line_count++;
+        replace_f(line, '\n', 0);
+
+#if CMP_DEBUG == 1
+        fprintf(stderr, "\n\n[CMP_DEBUG]: Read line #%zu, '%s'\n", line_count, line);
+#endif
+
+        if ( line[0] == 0 ) {
+            continue;
+        }
+
+        AST* tokens_line = lexer_tokenize_line(line);
+
+        if ( !tokens_line ) {
+            fprintf(stderr, "[SYNTAX ERROR]: Can't tokenize line number: %zu\n", line_count);
+            fprintf(stderr, "\tline: '%s'\n", line);
+            status = SYNTAX_ERR;
+            continue;
+
+        }
+
+        status = astarr_append(tree, tokens_line);
+
+#if CMP_DEBUG == 1
+        fprintf(stderr, "[CMP_DEBUG]: Append status: %d\n", status);
+#endif
     }
 
-    if (!is_null(line)) {
-        m_free(line);
+    return tree;
+}
+
+ByteArray* translate_tree(AST_ARR* tree) {
+    int status = OK;
+    ByteArray* bin_code = bytearray_create();
+
+    if ( !bin_code ) {
+#if CMP_DEBUG == 1
+        fprintf(stderr, "[CMP_DEBUG]: Can't allocate ByteArray\n");
+#endif
+        status = MEM_ERROR;
     }
 
-    return status;
+    size_t ind = 0;
+
+    for (; (status == OK) && ind < tree->index; ++ind) {
+        if ( tree->array[ind]->token->type == COMMENT ) {
+#if CMP_DEBUG == 1
+            fprintf(stderr, "\t[CMP_DEBUG]: Find comment: SKIP\n");
+#endif
+            continue;
+        }
+
+        if ( tree->array[ind]->token->type == UNKNOWN ) {
+#if CMP_DEBUG == 1
+            fprintf(stderr, "\t[CMP_DEBUG]: Find unknown: SKIP\n");
+#endif
+            continue;
+        }
+
+        status = translate_token_tree(tree->array[ind], bin_code->array, &bin_code->index);
+#if CMP_DEBUG == 1
+        fprintf(stderr, "[CMP_DEBUG]: Translated index: %zu  status: %d\n", ind, status);
+#endif
+
+        if ( status == OK ) {
+            status = bytearray_increase_size(bin_code);
+#if CMP_DEBUG == 1
+            fprintf(stderr, "[CMP_DEBUG]: Try increase ByteArray, status: %d\n", status);
+#endif
+        } else {
+            fprintf(stderr, "Translate ERROR: at line: %zu\n", ind + 1);
+        }
+    }
+
+    if ( status != OK ) {
+        bytearray_destroy(bin_code);
+        bin_code = NULL;
+    }
+
+    return bin_code;
+}
+
+void write_bin_code(ByteArray* bin_code, FILE* file) {
+    size_t real_writen = fwrite(bin_code->array, 1, bin_code->index, file);
+    printf("Expect write %zu\n", bin_code->index);
+    printf("Real writen: %zu\n", real_writen);
 }
 
 int main(const int argc, const char** argv) {
-    if (argc < 2) {
+    if ( argc < 2 ) {
         usage(argv[0]);
-        exit(WRONG_ARGS);
-    }
-
-    // open file and check for exist
-    const char* filename = argv[1];
-    FILE* fd = fopen(filename, "r");
-
-    if (is_null(fd)) {
-        show_error(FILE_ERROR);
-        fprintf(stderr, "Can't open: %s\n", filename);
-        perror("With Error: ");
-        full_exit(FILE_ERROR);
-    }
-
-    // alloc mem for array with AST's
-    //size_t trees_array_size = 30;
-    //Node** trees_array = c_alloc(trees_array_size, sizeof(Node*));
-    //size_t trees_array_index = 0;
-
-    //if (is_null(trees_array)) {
-        //show_error(MEM_ERROR);
-        //fprintf(stderr, "main: trees_array\n");
-        //full_exit(MEM_ERROR);
-    //}
-
-    // alloc mem for array with byte code
-    ByteArray* bin_code = create_bytearray();
-
-    if (is_null(bin_code)) {
-        show_error(MEM_ERROR);
-        fprintf(stderr, "main: bin_code is NULL\n");
-        full_exit(MEM_ERROR);
+        return WRONG_ARGS;
     }
 
     int status = OK;
 
-    //read line, tokenize it, append
-    status = compile_file(fd, bin_code);
+    FILE* file_in = NULL;
+    FILE* file_out = NULL;
+    AST_ARR* ast_tree = NULL;
+    ByteArray* bin_code = NULL;
 
-    if (status) {
-        show_error(status);
-        perror("Compiler: main: ");
-        full_exit(status);
+    if ( (file_in = fopen(argv[1], "r")) == NULL ) {
+        status = FILE_ERROR;
+        fprintf(stderr, "File not exist: %s\n", argv[1]);
     }
 
-    if (!is_null(fd)) {
-        fclose(fd);
+    if ( status == OK ) {
+        ast_tree = tokenize_file(file_in);
+
+        if ( !ast_tree ) {
+            status = ERROR;
+        }
     }
 
-    //int translate_code = OK;
-    //size_t current_tree = 0;
+#if CMP_DEBUG == 1
+    fprintf(stderr, "[CMP_DEBUG]: Status after tokenize: %d\n", status);
+    fprintf(stderr, "\t[CMP_DEBUG]: Tokenize lines: %zu\n", ast_tree ? ast_tree->index : 0);
+    fprintf(stderr, "\n");
+#endif
 
-    // iterate for AST's and compile it
-    //for (; translate_code == OK && current_tree < trees_array_index; ++current_tree) {
-        //translate_code = translate_token_tree(trees_array[current_tree], bin_code, &bin_code_index);
-    //}
+    if ( status == OK ) {
+        bin_code = translate_tree(ast_tree);
 
-    //#if CMP_DEBUG == 1
-        //fprintf(stderr, "\t[CMP_DEBUG]: translate code: %d\n", translate_code);
-        //fprintf(stderr, "\t[CMP_DEBUG]: Byte code:\n\t");
-//
-        //for (size_t i = 0; i < bin_code_index; ++i) {
-            //if ((i % 3) == 0) {
-                //fprintf(stderr, "\n\t");
-            //}
-//
-            //fprintf(stderr, "%x ", bin_code[i]);
-        //}
-//
-        //fprintf(stderr, "\n");
-    //#endif
-
-    //if (translate_code) {
-        //show_error(TRANSLATE_LINE);
-        //fprintf(stderr, "main: translate tree: valid line #%zu\n", current_tree + 0);
-        //full_exit(TRANSLATE_LINE);
-    //}
-
-    //TODO get line -> translate to byte_code as fast as possible
-    //      instead collect trees in arr
-
-    //TODO get out filename from argv (mb parse argv with getopt)
-
-    //TODO Generate tmp file with:
-    //  srand(time(0)); // init rand
-    //  num = rand(); 
-    //  sprintf(name, "tmp_name_%x", num);
-    char* file_out = STD_FILENAME_OUT;
-    fd = fopen(file_out, "wb");
-
-    if (is_null(fd)) {
-        show_error(FILE_ERROR);
-        fprintf(stderr, "main: fd is null");
-        perror("> ");
-        full_exit(FILE_ERROR);
+        if ( !bin_code ) {
+            status = ERROR;
+        }
     }
 
-    size_t real_writen = fwrite(bin_code->array, 1, bin_code->index, fd);
+#if CMP_DEBUG == 1
+    fprintf(stderr, "[CMP_DEBUG]: Status after translate: %d\n", status);
+    fprintf(stderr, "\t[CMP_DEBUG]: Translate bytes: %zu\n", bin_code ?  bin_code->index : 0);
+    fprintf(stderr, "\n");
+#endif
 
-    if (real_writen != bin_code->index) {
-        fprintf(stderr, "expect write %zu, real writen: %zu\n", bin_code->index, real_writen);
-        show_error(FILE_ERROR);
-        perror("> ");
+    char* filename = STD_FILENAME_OUT;
 
-    } else {
-        real_writen = 0;
+    if ( status == OK ) {
+        if ( argc >= 3) {
+            filename = (char*)argv[2];
+
+        }
+
+        file_out = fopen(filename, "wb");
     }
 
-    if (!is_null(fd)) {
-        fclose(fd);
+#if CMP_DEBUG == 1
+    fprintf(stderr, "[CMP_DEBUG]: filename out: %s\n", filename);
+    fprintf(stderr, "[CMP_DEBUG]: fd file out: %p\n", (void*)file_out);
+    fprintf(stderr, "[CMP_DEBUG]: Status after open file out: %d\n", status);
+#endif
+
+    if ( status == OK ) {
+        if ( file_out ) {
+            write_bin_code(bin_code, file_out);
+
+        } else {
+            status = FILE_ERROR;
+        }
     }
 
-    destroy_bytearray(bin_code);
+#if CMP_DEBUG == 1
+    fprintf(stderr, "[CMP_DEBUG]: Status after write compiled code: %d\n", status);
+#endif
 
-    if (status) {
-        show_error(status);
-        fprintf(stderr, "Unknown at: main\n");
+    if ( ast_tree ) {
+        astarr_destroy(ast_tree);
     }
 
-    m_destroy();
+    if ( bin_code ) {
+        bytearray_destroy(bin_code);
+    }
+
+    if ( file_in ) {
+        fclose(file_in);
+    }
+
+    if ( file_out ) {
+        fclose(file_out);
+    }
+
     return status;
 }
+

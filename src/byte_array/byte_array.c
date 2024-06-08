@@ -1,45 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "byte_array.h"
+#include "../common/error_codes.h"
+// #include "../common/funcs.h"
 
-ByteArray* create_bytearray() {
-    ByteArray* obj = c_alloc(1, sizeof(ByteArray));
+#define BTR_DEBUG 1
 
-    if (!is_null(obj)) {
-        init_bytearray(obj);
+ByteArray* bytearray_create() {
+    ByteArray* obj = calloc(1, sizeof(ByteArray));
+
+    if ( obj ) {
+        obj->size = DEFAULT_SIZE;
+        obj->index = 0;
+        obj->array = calloc(obj->size, sizeof(byte));
+
+        if ( !obj->array ) {
+            free(obj);
+            obj = NULL;
+        }
     }
 
     return obj;
 }
 
-void init_bytearray(ByteArray* obj) {
-    obj->size = DEFAULT_SIZE;
-    obj->array = c_alloc(obj->size, sizeof(byte));
-    obj->index = 0;
-}
-
-void increase_bytearray_size(ByteArray* obj) {
+int bytearray_increase_size(ByteArray* obj) {
+    if ( !obj ) {
+        return WRONG_ARGS;
+    }
     /*check if size of array less then minimum and realloc if yes*/
-    if ((obj->index + 5) < obj->size) { // min num for check - '+3'
-        size_t new_size = obj->size + (obj->size / 2);
-        byte* tmp = re_alloc(obj->array, new_size);
+    int status = OK;
 
-        if (!is_null(tmp)) {
+    if ( (obj->index + 3) >= obj->size ) { // min num for check - '+3'
+        size_t new_size = obj->size + (obj->size / 2);
+
+#if BTR_DEBUG == 1
+        fprintf(stderr, "[BTR_DEBUG]: Increase: old size: %lu , new size: %lu\n", obj->size, new_size);
+#endif
+        byte* tmp = realloc(obj->array, new_size);
+
+#if BTR_DEBUG == 1
+        fprintf(stderr, "[BTR_DEBUG]: Increase: new address: %p\n", (void*)tmp);
+#endif
+
+        if ( tmp ) {
             obj->size = new_size;
             obj->array = tmp;
 
         } else {
-            show_error(MEM_ERROR);
-            fprintf(stderr, "increase_bytecode_size: new mem is NULL\n");
-            full_exit(MEM_ERROR);
+            status = MEM_ERROR;
         }
     }
+
+    return status;
 }
 
-void destroy_bytearray(ByteArray* obj) {
-    if (!is_null(obj)) {
-        if (!is_null(obj->array)) {
-            m_free(obj->array);
+void bytearray_destroy(ByteArray* obj) {
+    if ( !obj ) {
+        return;
+    }
+
+    if ( obj ) {
+        if ( obj->array ) {
+            free(obj->array);
         }
 
-        m_free(obj);
+        free(obj);
     }
 }

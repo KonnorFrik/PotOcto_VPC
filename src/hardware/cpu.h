@@ -1,3 +1,6 @@
+/**
+ * @file Pototo PCs CPU declaration here
+ */
 #ifndef __CPU_H__
 #define __CPU_H__
 
@@ -9,4 +12,4 @@ typedef struct {
     unsigned char reg[REG_COUNT];
 } CPU;
 
-#endif
+#endif /* __CPU_H__ */
