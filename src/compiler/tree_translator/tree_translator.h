@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include "../../hardware/basic_types.h"
 #include "../lexer/lexer.h"
+#include "../options.h"
 
 /**
  * @brief Translate one token tree to byte code
@@ -13,6 +14,6 @@
  * @param[in, out] result_index Index from ByteArray object
  * @return status Status code from 'enum ERROR_CODES'
  */
-int translate_token_tree(AST* head, byte* result_arr, size_t* result_index);
+int translate_token_tree(AST* head, byte* result_arr, size_t* result_index, Options* opt);
 
 #endif /* __TREE_VALIDATOR_H__ */

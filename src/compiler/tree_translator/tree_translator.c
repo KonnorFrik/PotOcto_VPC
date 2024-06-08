@@ -818,7 +818,7 @@ static int translate_mov(AST* head, byte* result_arr, size_t* result_index) {
     return result;
 }
 
-int translate_token_tree(AST* head, byte* result_arr, size_t* result_index) {
+int translate_token_tree(AST* head, byte* result_arr, size_t* result_index, Options* opt) {
     if ( !head || !result_arr || !result_index ) {
         return MEM_ERROR;
     }
@@ -827,9 +827,9 @@ int translate_token_tree(AST* head, byte* result_arr, size_t* result_index) {
     int kw_ind = 0;
     int done = 0;
 
-#if TRN_DEBUG == 1
-        fprintf(stderr, "\t[TRN_DEBUG]: Translate tree: %s\n", head->token->line);
-#endif
+    if ( opt->verbose ) {
+        fprintf(stderr, "[TRANSLATOR]: Translate tree: %s\n", head->token->line);
+    }
 
     while ( !done && (status == OK) && (table[kw_ind]).kw != NULL) {
         if (strcmp(head->token->line, (table[kw_ind]).kw) == 0) {

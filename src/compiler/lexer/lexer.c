@@ -23,6 +23,7 @@ AST* lexer_tokenize_line(char* line, Options* opt) {
 
     // fast process commented line
     // TODO: try discard commented line
+    // need return error code with info like 'ret_code = its_comment_its_okay_to_return_null'
     if ( line[0] == WORD_COMMENT ) {
         Token* tok = token_get(line);
 
@@ -64,6 +65,10 @@ AST* lexer_tokenize_line(char* line, Options* opt) {
             status = MEM_ERROR;
             continue;
         }
+
+        // if ( opt->verbose ) {
+        //     fprintf(stderr, "[LEXER]: Created Token: type: %d value: %u\n", word_token->type, word_token->value);
+        // }
 
         status = ast_append_token(&ast_node, word_token);
         token = strtok(NULL, delim);
@@ -108,7 +113,6 @@ Token* token_create(token_type type, char* word, dword value) {
     return obj;
 }
 
-// TODO: write tests for this
 Token* token_get(char* line) {
     token_type token_type = UNKNOWN;
     // char* word = "";
@@ -141,10 +145,6 @@ Token* token_get(char* line) {
     }
 
     Token* token = token_create(token_type, line, value);
-
-    #if LXR_DEBUG == 1
-        fprintf(stderr, "[LXR_DEBUG]: Created Token: type: %d value: %u\n", token_type, value);
-    #endif
 
     return token;
 }
@@ -227,20 +227,20 @@ int ast_append_token(AST** head, Token* token) {
 }
 
 void token_print(Token* obj) {
-    fprintf(stderr, "[LXR_DEBUG]: Token %p\n", (void*)obj);
-    fprintf(stderr, "[LXR_DEBUG]: \ttype: %d\n", obj->type);
-    fprintf(stderr, "[LXR_DEBUG]: \tline: %s\n", obj->line);
-    fprintf(stderr, "[LXR_DEBUG]: \tval : %u\n", obj->value);
+    fprintf(stderr, "[LEXER]: Token %p\n", (void*)obj);
+    fprintf(stderr, "[LEXER]: \ttype: %d\n", obj->type);
+    fprintf(stderr, "[LEXER]: \tline: %s\n", obj->line);
+    fprintf(stderr, "[LEXER]: \tval : %u\n", obj->value);
     fprintf(stderr, "\n");
 }
 
 void ast_print(AST* obj) {
-    fprintf(stderr, "\n\n\t[LEXER]: AST %p\n", (void*)obj);
+    fprintf(stderr, "\n\t[LEXER]: AST %p\n", (void*)obj);
 
     while ( obj ) {
         token_print(obj->token);
         obj = obj->next;
     }
 
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "\n");
 }

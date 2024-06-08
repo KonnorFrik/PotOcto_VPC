@@ -16,9 +16,10 @@
 
 #define STD_FILENAME_OUT "prog.out"
 
-#define CMP_DEBUG 1
+#define CMP_DEBUG 0
 #define ARG_PRINT_AST "print_ast"
 #define ARG_HELP "help"
+#define ARG_VERBOSE "verbose"
 
 typedef struct ast_arr {
     AST** array;
@@ -126,6 +127,7 @@ void usage(const char* prog_name) {
     printf("Options:\n");
 
     printf("%20s: - Print ast after tokenize line\n", ARG_PRINT_AST);
+    printf("%20s: - Show verbose compilation info\n", ARG_VERBOSE);
     printf("%20s: - Show this help\n", ARG_HELP);
 }
 
@@ -164,9 +166,9 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
         line_count++;
         replace_f(line, '\n', 0);
 
-#if CMP_DEBUG == 1
-        fprintf(stderr, "\n\n[CMP_DEBUG]: Read line #%zu, '%s'\n", line_count, line);
-#endif
+        if ( opt->verbose ) {
+            fprintf(stderr, "[COMPILER]: Read line #%zu, '%s'\n", line_count, line);
+        }
 
         if ( line[0] == 0 ) {
             continue;
@@ -179,7 +181,6 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
             fprintf(stderr, "\tline: '%s'\n", line);
             status = SYNTAX_ERR;
             continue;
-
         }
 
         status = astarr_append(tree, tokens_line);
@@ -192,7 +193,7 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
     return tree;
 }
 
-ByteArray* translate_tree(AST_ARR* tree) {
+ByteArray* translate_tree(AST_ARR* tree, Options* opt) {
     int status = OK;
     ByteArray* bin_code = bytearray_create();
 
@@ -220,7 +221,7 @@ ByteArray* translate_tree(AST_ARR* tree) {
             continue;
         }
 
-        status = translate_token_tree(tree->array[ind], bin_code->array, &bin_code->index);
+        status = translate_token_tree(tree->array[ind], bin_code->array, &bin_code->index, opt);
 #if CMP_DEBUG == 1
         fprintf(stderr, "[CMP_DEBUG]: Translated index: %zu  status: %d\n", ind, status);
 #endif
@@ -250,8 +251,8 @@ int write_bin_code(ByteArray* bin_code, FILE* file) {
     }
 
     size_t real_writen = fwrite(bin_code->array, 1, bin_code->index, file);
-    printf("Expect write %zu\n", bin_code->index);
-    printf("Real writen: %zu\n", real_writen);
+    printf("Expect write %zu bytes\n", bin_code->index);
+    printf("Real writen: %zu bytes\n", real_writen);
     return OK;
 }
 
@@ -262,14 +263,13 @@ int parse_args(int argc, char** argv, Options* opt) {
     const struct option long_opt[] = {
         {ARG_PRINT_AST, no_argument, &opt->lexer_show_ast, true},
         {ARG_HELP, no_argument, &opt->help, true},
+        {ARG_VERBOSE, no_argument, &opt->verbose, true},
     };
 
     while ( getopt_long(argc, argv, short_opt, long_opt, NULL) != -1 );
 
     return status;
 }
-
-// TODO: append usage with new info
 
 int main(const int argc, char** argv) {
     int status = OK;
@@ -293,6 +293,11 @@ int main(const int argc, char** argv) {
         fprintf(stderr, "File not exist: %s\n", argv[file_index]);
     }
 
+    if ( user_options.verbose ) {
+        printf("\t[COMPILER]Open file: %s\n", argv[file_index]);
+        printf("\t[COMPILER]: status after open: %d\n\n", status);
+    }
+
     if ( status == OK ) {
         ast_tree = tokenize_file(file_in, &user_options);
 
@@ -301,25 +306,25 @@ int main(const int argc, char** argv) {
         }
     }
 
-#if CMP_DEBUG == 1
-    fprintf(stderr, "[CMP_DEBUG]: Status after tokenize: %d\n", status);
-    fprintf(stderr, "\t[CMP_DEBUG]: Tokenize lines: %zu\n", ast_tree ? ast_tree->index : 0);
-    fprintf(stderr, "\n");
-#endif
+    if ( user_options.verbose ) {
+        fprintf(stderr, "\t[COMPILER]: Tokenized lines: %zu\n", ast_tree ? ast_tree->index : 0);
+        fprintf(stderr, "\t[COMPILER]: Status after tokenize: %d\n", status);
+        fprintf(stderr, "\n");
+    }
 
     if ( status == OK ) {
-        bin_code = translate_tree(ast_tree);
+        bin_code = translate_tree(ast_tree, &user_options);
 
         if ( !bin_code ) {
             status = ERROR;
         }
     }
 
-#if CMP_DEBUG == 1
-    fprintf(stderr, "[CMP_DEBUG]: Status after translate: %d\n", status);
-    fprintf(stderr, "\t[CMP_DEBUG]: Translate bytes: %zu\n", bin_code ?  bin_code->index : 0);
-    fprintf(stderr, "\n");
-#endif
+    if ( user_options.verbose ) {
+        fprintf(stderr, "\t[COMPILER]: Translated bytes: %zu\n", bin_code ?  bin_code->index : 0);
+        fprintf(stderr, "\t[COMPILER]: Status after translate: %d\n", status);
+        fprintf(stderr, "\n");
+    }
 
     char* filename = STD_FILENAME_OUT;
 
@@ -336,19 +341,18 @@ int main(const int argc, char** argv) {
         }
     }
 
-#if CMP_DEBUG == 1
-    fprintf(stderr, "[CMP_DEBUG]: filename out: %s\n", filename);
-    fprintf(stderr, "[CMP_DEBUG]: fd file out: %p\n", (void*)file_out);
-    fprintf(stderr, "[CMP_DEBUG]: Status after open file out: %d\n", status);
-#endif
+    if ( user_options.verbose ) {
+        fprintf(stderr, "\t[COMPILER]: filename out: %s\n", filename);
+        fprintf(stderr, "\t[COMPILER]: Status after open: %d\n\n", status);
+    }
 
     if ( status == OK ) {
         status = write_bin_code(bin_code, file_out);
     }
 
-#if CMP_DEBUG == 1
-    fprintf(stderr, "[CMP_DEBUG]: Status after write compiled code: %d\n", status);
-#endif
+    if ( user_options.verbose ) {
+        fprintf(stderr, "[COMPILER]: Status after write compiled code: %d\n", status);
+    }
 
     if ( ast_tree ) {
         astarr_destroy(ast_tree);

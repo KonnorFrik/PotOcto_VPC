@@ -5,6 +5,7 @@
 typedef struct options {
     int lexer_show_ast;
     int help;
+    int verbose;
 } Options;
 
 #endif /* __OPTIONS_H__ */
