@@ -5,19 +5,20 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <getopt.h>
 #include <string.h>
 
-// #include "../hardware/basic_types.h" 
 #include "../common/error_codes.h"
-// #include "../common/funcs.h"
-// #include "../str_funcs/str_funcs.h"
 #include "../byte_array/byte_array.h" 
 #include "lexer/lexer.h"
 #include "tree_translator/tree_translator.h"
+#include "options.h"
 
 #define STD_FILENAME_OUT "prog.out"
 
 #define CMP_DEBUG 1
+#define ARG_PRINT_AST "print_ast"
+#define ARG_HELP "help"
 
 typedef struct ast_arr {
     AST** array;
@@ -122,10 +123,18 @@ void astarr_destroy(AST_ARR* obj) {
  */
 void usage(const char* prog_name) {
     printf("Usage: %s file\n", prog_name);
+    printf("Options:\n");
+
+    printf("%20s: - Print ast after tokenize line\n", ARG_PRINT_AST);
+    printf("%20s: - Show this help\n", ARG_HELP);
 }
 
 
-AST_ARR* tokenize_file(FILE* file) {
+AST_ARR* tokenize_file(FILE* file, Options* opt) {
+    if ( !file || !opt ) {
+        return NULL;
+    }
+
     int status = OK;
     AST_ARR* tree = astarr_create();
 
@@ -163,7 +172,7 @@ AST_ARR* tokenize_file(FILE* file) {
             continue;
         }
 
-        AST* tokens_line = lexer_tokenize_line(line);
+        AST* tokens_line = lexer_tokenize_line(line, opt);
 
         if ( !tokens_line ) {
             fprintf(stderr, "[SYNTAX ERROR]: Can't tokenize line number: %zu\n", line_count);
@@ -234,32 +243,58 @@ ByteArray* translate_tree(AST_ARR* tree) {
     return bin_code;
 }
 
-void write_bin_code(ByteArray* bin_code, FILE* file) {
-    size_t real_writen = fwrite(bin_code->array, 1, bin_code->index, file);
-    printf("Expect write %zu\n", bin_code->index);
-    printf("Real writen: %zu\n", real_writen);
-}
-
-int main(const int argc, const char** argv) {
-    if ( argc < 2 ) {
-        usage(argv[0]);
+int write_bin_code(ByteArray* bin_code, FILE* file) {
+    if ( !bin_code || !file ) {
+        fprintf(stderr, "Error on writing");
         return WRONG_ARGS;
     }
 
+    size_t real_writen = fwrite(bin_code->array, 1, bin_code->index, file);
+    printf("Expect write %zu\n", bin_code->index);
+    printf("Real writen: %zu\n", real_writen);
+    return OK;
+}
+
+int parse_args(int argc, char** argv, Options* opt) {
     int status = OK;
+
+    const char* short_opt = "A";
+    const struct option long_opt[] = {
+        {ARG_PRINT_AST, no_argument, &opt->lexer_show_ast, true},
+        {ARG_HELP, no_argument, &opt->help, true},
+    };
+
+    while ( getopt_long(argc, argv, short_opt, long_opt, NULL) != -1 );
+
+    return status;
+}
+
+// TODO: append usage with new info
+
+int main(const int argc, char** argv) {
+    int status = OK;
+
+    Options user_options = {0};
+    status = parse_args(argc, argv, &user_options);
+    int file_index = optind;
+
+    if ( file_index >= argc || user_options.help ) {
+        usage(argv[0]);
+        status = WRONG_ARGS;
+    }
 
     FILE* file_in = NULL;
     FILE* file_out = NULL;
     AST_ARR* ast_tree = NULL;
     ByteArray* bin_code = NULL;
 
-    if ( (file_in = fopen(argv[1], "r")) == NULL ) {
+    if ( (status == OK) && (file_in = fopen(argv[file_index], "r")) == NULL ) {
         status = FILE_ERROR;
-        fprintf(stderr, "File not exist: %s\n", argv[1]);
+        fprintf(stderr, "File not exist: %s\n", argv[file_index]);
     }
 
     if ( status == OK ) {
-        ast_tree = tokenize_file(file_in);
+        ast_tree = tokenize_file(file_in, &user_options);
 
         if ( !ast_tree ) {
             status = ERROR;
@@ -289,12 +324,16 @@ int main(const int argc, const char** argv) {
     char* filename = STD_FILENAME_OUT;
 
     if ( status == OK ) {
-        if ( argc >= 3) {
-            filename = (char*)argv[2];
+        if ( file_index + 1 < argc ) {
+            filename = (char*)argv[file_index + 1];
 
         }
 
         file_out = fopen(filename, "wb");
+
+        if ( !file_out ) {
+            status = FILE_ERROR;
+        }
     }
 
 #if CMP_DEBUG == 1
@@ -304,12 +343,7 @@ int main(const int argc, const char** argv) {
 #endif
 
     if ( status == OK ) {
-        if ( file_out ) {
-            write_bin_code(bin_code, file_out);
-
-        } else {
-            status = FILE_ERROR;
-        }
+        status = write_bin_code(bin_code, file_out);
     }
 
 #if CMP_DEBUG == 1

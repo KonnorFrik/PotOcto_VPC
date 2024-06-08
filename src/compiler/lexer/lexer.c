@@ -8,13 +8,11 @@
 
 #define LXR_DEBUG 1
 
-#if LXR_DEBUG == 1
 void token_print(Token* obj);
 void ast_print(AST* obj);
-#endif
 
-AST* lexer_tokenize_line(char* line) {
-    if ( !line ) {
+AST* lexer_tokenize_line(char* line, Options* opt) {
+    if ( !line || !opt ) {
         return NULL;
     }
 
@@ -23,6 +21,8 @@ AST* lexer_tokenize_line(char* line) {
     char* buffer = NULL;
     AST* ast_node = NULL;
 
+    // fast process commented line
+    // TODO: try discard commented line
     if ( line[0] == WORD_COMMENT ) {
         Token* tok = token_get(line);
 
@@ -66,13 +66,6 @@ AST* lexer_tokenize_line(char* line) {
         }
 
         status = ast_append_token(&ast_node, word_token);
-
-#if LXR_DEBUG == 1
-        fprintf(stderr, "[LXR_DEBUG]: Word: '%s'\n", token);
-        fprintf(stderr, "[LXR_DEBUG]: Append to tree status: %d\n", status);
-        token_print(word_token);
-#endif
-
         token = strtok(NULL, delim);
     }
 
@@ -88,9 +81,9 @@ AST* lexer_tokenize_line(char* line) {
         ast_node = NULL;
     }
 
-#if LXR_DEBUG == 1
-    ast_print(ast_node);
-#endif
+    if ( opt->lexer_show_ast ) {
+        ast_print(ast_node);
+    }
 
     return ast_node;
 }
@@ -233,7 +226,6 @@ int ast_append_token(AST** head, Token* token) {
     return status;
 }
 
-#if LXR_DEBUG == 1
 void token_print(Token* obj) {
     fprintf(stderr, "[LXR_DEBUG]: Token %p\n", (void*)obj);
     fprintf(stderr, "[LXR_DEBUG]: \ttype: %d\n", obj->type);
@@ -243,7 +235,7 @@ void token_print(Token* obj) {
 }
 
 void ast_print(AST* obj) {
-    fprintf(stderr, "\n\n\t[LXR_DEBUG]: AST %p\n", (void*)obj);
+    fprintf(stderr, "\n\n\t[LEXER]: AST %p\n", (void*)obj);
 
     while ( obj ) {
         token_print(obj->token);
@@ -252,4 +244,3 @@ void ast_print(AST* obj) {
 
     fprintf(stderr, "\n\n");
 }
-#endif 

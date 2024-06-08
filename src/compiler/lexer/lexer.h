@@ -2,6 +2,7 @@
 #ifndef __LEXER_H__
 #define __LEXER_H__ 
 
+#include "../options.h"
 #include "../../hardware/basic_types.h" 
 
 /**
@@ -36,7 +37,7 @@ typedef struct ast {
  * @param[in] line Line with pasm code for tokenize
  * return obj Valid AST object 
  */
-AST* lexer_tokenize_line(char* line);
+AST* lexer_tokenize_line(char* line, Options* opt);
 
 /**
  * @brief Create Token object and init it
