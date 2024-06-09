@@ -1,5 +1,5 @@
 // every line match this pattern.
-// \w\+\s[r]\?\(0x|0b\)\?[0-9a-f]\+\s[r]\?\(0x|0b\)[0-9a-f]\+
+// \w\+\s[r$]\?\(0x|0b\)\?[0-9a-f]\+\s[r$]\?\(0x|0b\)[0-9a-f]\+
 #define _GNU_SOURCE
 #define __INSTRUCTIONS_PARSE_H__ // turn off including funcs
 #include <stdlib.h>

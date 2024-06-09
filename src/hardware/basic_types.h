@@ -1,6 +1,7 @@
 /**
  * @file file for basic types of Pototo PC
  */
+
 #ifndef __BASIC_TYPES_H__
 #define __BASIC_TYPES_H__
 

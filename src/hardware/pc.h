@@ -16,6 +16,4 @@ typedef struct {
     MEMORY memory [MEM_SIZE];
 } PC;
 
-// TODO: write a description and mb exaple for each instruction in readme
-
 #endif /* __VIRT_PC_H__ */

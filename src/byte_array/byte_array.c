@@ -3,9 +3,8 @@
 
 #include "byte_array.h"
 #include "../common/error_codes.h"
-// #include "../common/funcs.h"
 
-#define BTR_DEBUG 1
+#define BTR_DEBUG 0
 
 ByteArray* bytearray_create() {
     ByteArray* obj = calloc(1, sizeof(ByteArray));

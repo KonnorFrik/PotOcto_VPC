@@ -2,7 +2,6 @@
 
 #include "tree_translator.h"
 #include "../keywords_defines.h"
-// #include "../../str_funcs/str_funcs.h"
 #include "../../common/error_codes.h"
 #include "../lexer/lexer.h"
 
@@ -110,11 +109,6 @@ static int translate_rsh(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
 
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
-
     } else {
         fprintf(stderr, "UNKNOWN in translate: rsh\n");
         result = ERROR;
@@ -137,11 +131,6 @@ static int translate_lsh(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
-
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
         fprintf(stderr, "UNKNOWN in translate: lsh\n");
@@ -166,11 +155,6 @@ static int translate_inv(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
 
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
-
     } else {
         fprintf(stderr, "UNKNOWN in translate: inv\n");
         result = 1;
@@ -193,11 +177,6 @@ static int translate_xor(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
-
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
         fprintf(stderr, "UNKNOWN in translate: xor\n");
@@ -222,11 +201,6 @@ static int translate_or(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
 
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
-
     } else {
         fprintf(stderr, "UNKNOWN in translate: or\n");
         result = 1;
@@ -249,11 +223,6 @@ static int translate_and(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
-
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
         fprintf(stderr, "UNKNOWN in translate: and\n");
@@ -278,11 +247,6 @@ static int translate_mod(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
 
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
-
     } else {
         fprintf(stderr, "UNKNOWN in translate: mod\n");
         result = 1;
@@ -305,11 +269,6 @@ static int translate_div(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
-
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
         fprintf(stderr, "UNKNOWN in translate: div\n");
@@ -334,11 +293,6 @@ static int translate_mul(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
 
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
-
     } else {
         fprintf(stderr, "UNKNOWN in translate: mul\n");
         result = 1;
@@ -362,11 +316,6 @@ static int translate_sub(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
 
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
-
     } else {
         fprintf(stderr, "UNKNOWN in translate: sub\n");
         result = 1;
@@ -389,11 +338,6 @@ static int translate_add(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, get_lnum_operand(head));
         write_byte(result_arr, result_index, get_rnum_operand(head));
-
-    //} else if (head->next->token->type == NUMBER && head->next->next->token->type == AO_REGISTER) {
-        //write_byte(result_arr, result_index, code);
-        //write_byte(result_arr, result_index, get_rnum_operand(head));
-        //write_byte(result_arr, result_index, get_lnum_operand(head));
 
     } else {
         fprintf(stderr, "UNKNOWN in translate: add\n");
@@ -668,7 +612,7 @@ static int translate_inc(AST* head, byte* result_arr, size_t* result_index) {
         write_byte(result_arr, result_index, 0);
         write_byte(result_arr, result_index, 0);
 
-    } else if (head->next->token->type == AO_REGISTER /* && head->next->next->token->type == NUMBER */) { // inc rXX
+    } else if (head->next->token->type == AO_REGISTER ) { // inc rXX
         code = 0x33;
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, 0);
@@ -684,7 +628,6 @@ static int translate_inc(AST* head, byte* result_arr, size_t* result_index) {
 
 static int translate_write(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
-    //byte code = 0x12;
 
     if (head->token->type == UNKNOWN) { // unreachable in theory
         fprintf(stderr, "UNKNOWN in translate\n");
@@ -707,14 +650,13 @@ static int translate_write(AST* head, byte* result_arr, size_t* result_index) {
 
 static int translate_read(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
-    //byte code = 0x11;
 
     if (head->token->type == UNKNOWN) { // unreachable in theory
         fprintf(stderr, "UNKNOWN in translate\n");
         return 1;
     }
 
-    if (head->next->token->type == AO_REGISTER /* && head->next->next->token->type == NUMBER */) {
+    if (head->next->token->type == AO_REGISTER ) {
         byte code = 0x11;
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, 0);
@@ -746,8 +688,6 @@ static int translate_hlt(AST* head, byte* result_arr, size_t* result_index) {
 
 static int translate_jmp(AST* head, byte* result_arr, size_t* result_index) {
     int result = OK;
-    // 30
-    //byte code = 0;
 
     if (head->token->type == UNKNOWN) { // unreachable in theory
         fprintf(stderr, "UNKNOWN in translate\n");
@@ -780,10 +720,10 @@ static int translate_mov(AST* head, byte* result_arr, size_t* result_index) {
         return ERROR;
     }
 
-    if (head->next == NULL || head->next->next == NULL) { // invalid command & bad parsing before
-        fprintf(stderr, "NULL in translate: mov\n");
-        return ERROR;
-    }
+    // if (head->next == NULL || head->next->next == NULL) { // invalid command & bad parsing before
+    //     fprintf(stderr, "NULL in translate: mov\n");
+    //     return ERROR;
+    // }
 
     // mov rX 0xDD
     if (head->next->token->type == AO_REGISTER && head->next->next->token->type == NUMBER) {
