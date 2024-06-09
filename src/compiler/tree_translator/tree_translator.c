@@ -756,9 +756,9 @@ static int translate_jmp(AST* head, byte* result_arr, size_t* result_index) {
 
     if ( head->next->token->type == NUMBER || head->next->token->type == LABEL_END ) {
         byte code = 0x30;
-        result_arr[(*result_index)++] = code; // TODO: actually, this is 'write byte' func
         dword addr = get_lnum_operand(head);
 
+        write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, (word)((addr & 0xff00) >> 8));
         write_byte(result_arr, result_index, (word)(addr & 0x00ff));
 
@@ -785,22 +785,13 @@ static int translate_mov(AST* head, byte* result_arr, size_t* result_index) {
         return ERROR;
     }
 
-    //if (head->next->token->type == MEM_ACCESS_OPERATOR && !(head->next->next->token->type == MEM_ACCESS_OPERATOR || head->next->next->token->type == NUMBER)) { // deprecated
-        //// 11 mov mem[MP] rXX
-        //code = 0x11;
-//
-    //} else if (head->next->next->token->type == MEM_ACCESS_OPERATOR && !(head->next->token->type == MEM_ACCESS_OPERATOR || head->next->token->type == NUMBER)) { // deprecated
-        //// 12 mov rXX mem[MP]
-        //code = 0x12;
-
-        // mov 5 r0 -> 32 0 5
-    // TODO: add mov $0xAA rX , mov rX $0xAA
+    // mov rX 0xDD
     if (head->next->token->type == AO_REGISTER && head->next->next->token->type == NUMBER) {
         // 12 mov 0xDD rXX
         code = 0x32;
 
         // mov r0 r1 -> 31 1 0
-    } else if (head->next->next->token->type == AO_REGISTER && head->next->token->type == AO_REGISTER) {
+    } else if (head->next->token->type == AO_REGISTER && head->next->next->token->type == AO_REGISTER) {
         // 12 mov rXX rYY
         code = 0x31;
 

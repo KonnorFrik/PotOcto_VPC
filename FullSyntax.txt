@@ -1,0 +1,107 @@
+All possible syntactic variations
+Structure:
+    KW - keyword
+        op1 - operand 1
+        op2 - operand 2
+        '|' - OR
+        '-' - Not used or nothing
+
+set:
+    op1: NUMBER
+    op2: -
+
+read:
+    op1: REGISTER
+    op2: -
+
+write:
+    op1: REGISTER
+    op2: -
+
+mov:
+    op1: REGISTER 
+    op2: REGISTER | NUMBER
+
+jmp:
+    op1: NUMBER | LABEL
+    op2: -
+
+inc:
+    op1: REGISTER | - 
+    op2: -
+
+dec:
+    op1: REGISTER | - 
+    op2: -
+
+eq: # Only register + number OR number + register, NOT number + number
+    op1: REGISTER | NUMBER
+    op2: REGISTER | NUMBER
+
+ne: # Only register + number OR number + register, NOT number + number
+    op1: REGISTER | NUMBER
+    op2: REGISTER | NUMBER
+
+ge: # Only register + number OR number + register, NOT number + number
+    op1: REGISTER | NUMBER
+    op2: REGISTER | NUMBER
+
+le: # Only register + number OR number + register, NOT number + number
+    op1: REGISTER | NUMBER
+    op2: REGISTER | NUMBER
+
+gt: # Only register + number OR number + register, NOT number + number
+    op1: REGISTER | NUMBER
+    op2: REGISTER | NUMBER
+
+lt: # Only register + number OR number + register, NOT number + number
+    op1: REGISTER | NUMBER
+    op2: REGISTER | NUMBER
+
+add:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+sub:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+mul:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+div:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+mod:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+and:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+or:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+xor:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+lsh:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+rsh:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+inv:
+    op1: REGISTER
+    op2: REGISTER | NUMBER
+
+hlt:
+    op1: -
+    op2: -

@@ -21,9 +21,7 @@ AST* lexer_tokenize_line(char* line, Options* opt) {
     char* buffer = NULL;
     AST* ast_node = NULL;
 
-    // fast process commented line
-    // TODO: try discard commented line
-    // need return error code with info like 'ret_code = its_comment_its_okay_to_return_null'
+    // fast process full-commented line
     if ( line[0] == WORD_COMMENT ) {
         Token* tok = token_get(line);
 
