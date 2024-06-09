@@ -163,6 +163,8 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
             continue;
         }
 
+        line_count++;
+
         if ( line[0] == WORD_COMMENT ) { // skip comment, do not append its to ast
             if ( opt->verbose ) {
                 printf("[COMPILER]: Discard full-comment line\n");
@@ -171,7 +173,6 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
             continue;
         }
 
-        line_count++;
         replace_f(line, '\n', 0);
 
         if ( opt->verbose ) {
@@ -185,8 +186,13 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
         AST* tokens_line = lexer_tokenize_line(line, opt);
 
         if ( !tokens_line ) {
-            fprintf(stderr, "[SYNTAX ERROR]: Can't tokenize line number: %zu\n", line_count);
+            fprintf(stderr, "SYNTAX ERROR: Can't tokenize line #%zu:\t", line_count);
             fprintf(stderr, "\tline: '%s'\n", line);
+            status = SYNTAX_ERR;
+            continue;
+
+        } else if ( !token_valid(tokens_line) ) {
+            fprintf(stderr, "SYNTAX ERROR: line #%lu: '%s'\n", line_count, line);
             status = SYNTAX_ERR;
             continue;
         }
@@ -196,6 +202,11 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
 #if CMP_DEBUG == 1
         fprintf(stderr, "[CMP_DEBUG]: Append status: %d\n", status);
 #endif
+    }
+
+    if ( status != OK ) {
+        astarr_destroy(tree);
+        tree = NULL;
     }
 
     return tree;
@@ -333,6 +344,7 @@ int substitute_labels(AST_ARR* ast_tree, Options* opt) {
         return WRONG_ARGS;
     }
 
+    char* search_line = NULL;
     int status = OK;
 
     for (size_t i = 0; i < ast_tree->index; ++i) {
@@ -348,6 +360,7 @@ int substitute_labels(AST_ARR* ast_tree, Options* opt) {
 
             if ( node->token->type == UNKNOWN ) {
                 is_lbl_found = 1;
+                search_line = node->token->line;
 
                 if ( opt->verbose ) {
                     fprintf(stderr, "[COMPILER]: Found LABEL_START at: %lu\n", i);
@@ -368,11 +381,12 @@ int substitute_labels(AST_ARR* ast_tree, Options* opt) {
                 node->token->value = lbl_ind; // convert id to address
 
                 if ( opt->verbose ) {
-                    fprintf(stderr, "\t[CMP_DEBUG]: Converted Address: %u\n", node->token->value);
+                    printf("\t[CMP_DEBUG]: Converted Address: %u\n", node->token->value);
                 }
 
             } else {
                 status = ERROR;
+                fprintf(stderr, "UNKNOWN word: '%s'\n", search_line);
             }
 
         }

@@ -2,6 +2,8 @@
 #ifndef __LEXER_H__
 #define __LEXER_H__ 
 
+#include <stdbool.h>
+
 #include "../options.h"
 #include "../../hardware/basic_types.h" 
 #include "../keywords_defines.h"
@@ -84,5 +86,12 @@ void ast_destroy(AST* obj);
  * @return status From 'enum error_codes'
  */
 int ast_append_token(AST** head, Token* token);
+
+/**
+ * @brief Validate tokenized line
+ * @param[in] tokens_line AST object for validate
+ * @return result valid:true or INvalid:false
+ */
+bool token_valid(AST* tokens_line);
 
 #endif /* __LEXER_H__ */

@@ -224,6 +224,31 @@ int ast_append_token(AST** head, Token* token) {
     return status;
 }
 
+bool token_valid(AST* tokens_line) {
+    // validation strategy 1
+    // count nodes in ast, more than 3 - INVALID
+
+    bool result = true;
+    int count = 0;
+    bool loop = true;
+
+    while ( tokens_line != NULL && loop ) {
+        if ( tokens_line->token->type == COMMENT || tokens_line->token->type == UNKNOWN ) {
+            loop = false;
+            continue;
+        }
+
+        count++;
+        tokens_line = tokens_line->next;
+    }
+
+    if ( count > 3 ) {
+        result = false;
+    }
+
+    return result;
+}
+
 void token_print(Token* obj) {
     fprintf(stderr, "[LEXER]: Token %p ", (void*)obj);
     fprintf(stderr, "\ttype:%d ", obj->type);
