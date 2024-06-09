@@ -1,66 +1,93 @@
 .RECIPEPREFIX = >
 .PHONY = all
 
-cmp := gcc
-flags := -Wall -Werror -Wextra -std=c1x
+CC = gcc
+CFLAGS := -std=c11 -Wall -Wextra -Werror -g#-I $(shell pwd)/src
+LDFLAGS = -lcheck
+TEST_FLAGS = `pkg-config --cflags --libs check` -O0
+GCOV_FLAGS = -lgcov --coverage
 
-src_dir := src
-cmp_dir := $(src_dir)/compiler
-common_dir := $(src_dir)/common
-mem_manager_dir := $(src_dir)/mem_manager
-str_funcs_dir := $(src_dir)/str_funcs
-translator_dir := $(src_dir)/tree_translator
-test_dir := $(src_dir)/tests
+REPORT = REPORT.html
+GCOV_DIR = report
+LOCAL_GCOVR = gcovr
 
-build_dir := build
+SRC_DIR := src
+COMPILER_DIR := $(SRC_DIR)/compiler
+COMMON_DIR := $(SRC_DIR)/common
+BYTEARRAY_DIR := $(SRC_DIR)/byte_array
+# STR_FUNCS_DIR := $(SRC_DIR)/str_funcs
+HARDWARE_DIR = $(SRC_DIR)/hardware
+TRANSLATOR_DIR := $(COMPILER_DIR)/tree_translator
+LEXER_DIR = $(COMPILER_DIR)/lexer
 
-virt_pc_src := $(src_dir)/pc.c $(src_dir)/instructions.c $(common_dir)/funcs.c
+TESTS_DIR := $(SRC_DIR)/tests
+TESTS_LEXER_DIR = $(TESTS_DIR)/lexer_tests
+
+LEXER_SRC = $(wildcard $(LEXER_DIR)/*.c)
+
+virt_pc_src := $(wildcard $(HARDWARE_DIR)/*.c) $(COMMON_DIR)/funcs.c
 virt_pc_obj := $(virt_pc_src:.c=.o)
+virt_pc_target = pototo
 
-#cmp_src := $(foreach dir, $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
-cmp_src := $(foreach dir, $(translator_dir) $(cmp_dir) $(mem_manager_dir) $(str_funcs_dir) $(common_dir), $(wildcard $(dir)/*.c))
+cmp_src = $(foreach dir, $(BYTEARRAY_DIR) $(TRANSLATOR_DIR) $(COMPILER_DIR) $(COMMON_DIR), $(wildcard $(dir)/*.c))
+cmp_src += $(LEXER_SRC)
 cmp_obj := $(cmp_src:.c=.o)
+compiler_target = pan
 
-test_src := $(foreach dir, $(test_dir), $(wildcard $(dir)/*.c))
-test_obj := $(test_src:.c=.o)
+TEST_SRC := $(foreach dir, $(TESTS_DIR) $(TESTS_LEXER_DIR), $(wildcard $(dir)/*.c))
+TEST_OBJ := $(TEST_SRC:.c=.o)
+TEST_TARGET = tests_for_all
 
-targets = virt_pc cmp #str_funcs_tests
-
-
-all: $(targets)
-tests: str_funcs_tests
-
-virt_pc: $(virt_pc_obj)
-> $(cmp) $(flags) -g $(virt_pc_obj) -o $(build_dir)/$@
-
-cmp: $(cmp_obj)
-> $(cmp) $(flags) -g $(cmp_obj) -o $(build_dir)/$@
+TARGETS = $(virt_pc_target) $(compiler_target)
 
 
-str_funcs_tests: $(test_obj)
-> $(cmp) -g $(test_obj) -o $(build_dir)/$@
+all: $(TARGETS)
+test: $(TEST_TARGET)
+
+$(virt_pc_target): $(virt_pc_obj)
+> $(CC) $(CFLAGS) $^ -o $@
+
+$(compiler_target): $(cmp_obj)
+> $(CC) $(CFLAGS) $^ -o $@
+
+gcov_report:
+> @mkdir -p $(GCOV_DIR)
+#> $(LOCAL_GCOVR) -f s21_.*\.c -f .*/s21_.*\.c --html-details -o $(GCOV_DIR)/$(REPORT)
+> $(LOCAL_GCOVR) -e $(TESTS_DIR)\/ --html-details -o $(GCOV_DIR)/$(REPORT)
+> ln -s $(GCOV_DIR)/$(REPORT) ./$(REPORT) || true
+> @printf "\n\tREPORT FILE FOR OPEN: '\033[38;5;46m$(REPORT)\033[0m'\n"
+#> @printf "\trun '\033[38;5;46mmake open_report\033[0m' for open'\n"
+> @echo;
+
+
+$(TEST_TARGET): $(TEST_SRC) $(LEXER_SRC)
+> $(CC) -g $^ $(TEST_FLAGS) $(GCOV_FLAGS) -o $@
 
 
 clean:
-> rm -f $(virt_pc_obj)
-> rm -f $(cmp_obj)
-> rm -f $(test_obj)
+> $(RM) $(virt_pc_obj)
+> $(RM) $(cmp_obj)
+> $(RM) $(TEST_OBJ)
+> $(RM) $(wildcard *.gcda)
+> $(RM) $(wildcard *.gcno)
 
 clean_all: clean
-> rm -f $(foreach targ, $(targets), $(build_dir)/$(targ))
-> rm -f $(foreach test, $(tests), $(build_dir)/$(test))
-
-
-%.o: %.c
-> $(cmp) -c $(flags) $? -o $@
+> $(RM) $(TARGETS)
+> $(RM) $(TEST_TARGET)
+> $(RM) $(wildcard *.html)
+> $(RM) $(wildcard ./$(GCOV_DIR)/*)
+> rmdir $(GCOV_DIR) || true
 
 show:
+> @echo "vPC data:"
 > @echo $(virt_pc_src)
 > @echo $(virt_pc_obj)
 > @echo ""
+> @echo "Compiler data:"
 > @echo $(cmp_src)
 > @echo $(cmp_obj)
 > @echo ""
-> @echo $(test_src)
-> @echo $(test_obj)
+> @echo "Tests data:"
+> @echo $(TEST_SRC)
+> @echo $(TEST_OBJ)
 

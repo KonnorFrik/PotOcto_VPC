@@ -1,0 +1,39 @@
+; 0xff:r4 - first arg
+; 0xfe:r5 - second arg
+; 0xfd:r6 - result
+; r0 - count of iters
+
+; load init args in mem
+mov r4 0
+set 0xff
+write r4
+
+mov r5 1
+set 0xfe
+write r5
+mov r0 12 ; 12 iterations is maximum for 1-byte range
+
+loop:
+ne r0 0 ; loop header 21 (0x15)
+jmp end ; to 69 (0x45)
+dec r0
+
+set 0xff ; load args from mem
+read r1
+set 0xfe
+read r2
+
+mov r3 r2 ; copy arg
+add r3 r1 ; make add
+
+set 0xfd ; write result of add
+write r3
+
+set 0xff ; save new args
+write r2
+set 0xfe
+write r3
+
+jmp loop ; addr - 21
+end:
+hlt

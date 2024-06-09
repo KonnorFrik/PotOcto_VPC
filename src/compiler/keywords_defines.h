@@ -1,3 +1,5 @@
+/** @file All keyword defines here */
+
 #ifndef __KEYWORDS_DEFINES__
 #define __KEYWORDS_DEFINES__
 
@@ -27,4 +29,9 @@
 #define KW_inv "inv"
 #define KW_hlt "hlt"
 
-#endif
+#define WORD_LABEL ':'
+#define WORD_COMMENT ';'
+#define AO_WORD_REGISTER 'r'
+#define AO_WORD_MEMORY '$'
+
+#endif /* __KEYWORDS_DEFINES__ */

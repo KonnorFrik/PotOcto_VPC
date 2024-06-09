@@ -1,0 +1,5 @@
+set 0xff ; set memory pointer
+mov r1 0xab
+write r1 ; write register in memory
+read r2  ; read from mem in register
+hlt

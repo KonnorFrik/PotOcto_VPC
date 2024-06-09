@@ -1,57 +1,37 @@
+#include <stdio.h>
+
 #include "funcs.h"
+#include "error_codes.h"
 
-int is_null(void* mem) {
-    return mem == NULL;
-}
+void show_error(int code) {
+    switch ( code ) {
+        case MEM_ERROR:
+            fprintf(stderr, "Memory Alloc Error\n");
+            break;
 
-// max4 16 per row  16 per row
-// addr bytes       decoded
-// FFFF 00 00 .. 00 ....
+        case FILE_ERROR:
+            fprintf(stderr, "File Error\n");
+            break;
 
-static char decode_symb(byte symb) {
-    char result = '.';
+        case SYNTAX_ERR:
+            fprintf(stderr, "Syntax Error\n");
+            break;
 
-    if (symb > 31 && symb < 127) {
-        result = (char)symb;
+        case INVALID_LINE:
+            fprintf(stderr, "Invalid line Error\n");
+            break;
+
+        case INVALID_WORD:
+            fprintf(stderr, "Invalid word Error\n");
+            break;
+
+        case TRANSLATE_LINE_ERR:
+            fprintf(stderr, "Translation Error\n");
+            break;
+
+        default:
+            fprintf(stderr, "Error\n");
+            break;
     }
-
-    return result;
+    
 }
-
-static void fprintf_decoded_row(FILE* fd, byte* arr, dword start_addr) {
-    for (dword addr = start_addr - 16; addr < start_addr; ++addr) {
-        fprintf(fd, "%c", decode_symb(arr[addr]));
-    }
-}
-
-void mem_dump(FILE* fd, byte* arr, size_t size) {
-    fprintf(fd, "       "); // 4 space for addr and 1 for space
-
-    for (int i = 0; i < 16; ++i) {
-        fprintf(fd, "0%X  ", i);
-    }
-
-    fprintf(fd, "\n");
-    dword address = 0;
-
-    while (address < size) {
-        byte current_symb = arr[address];
-
-        if ((address % 16) == 0) {
-            fprintf_decoded_row(fd, arr, address);
-            fprintf(fd, "\n");
-            fprintf(fd, "%4X:  ", address);
-        }
-
-        if (current_symb < 0x10) {
-            fprintf(fd, "0");
-        }
-
-        fprintf(fd, "%X  ", current_symb);
-        address++;
-    }
-
-    fprintf_decoded_row(fd, arr, address);
-    fprintf(fd, "\n");
-}
-
