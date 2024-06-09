@@ -98,7 +98,7 @@ static int translate_rsh(AST* head, byte* result_arr, size_t* result_index) {
         return ERROR;
     }
 
-    if (head->next->token->type == AO_REGISTER && head->next->next->token->type == AO_MEMORY) {
+    if (head->next->token->type == AO_REGISTER && head->next->next->token->type == AO_REGISTER) {
         code = 0xf5;
         write_byte(result_arr, result_index, code);
         write_byte(result_arr, result_index, get_lnum_operand(head));
