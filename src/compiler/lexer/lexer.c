@@ -141,7 +141,7 @@ Token* token_get(char* line) {
         token_type = COMMENT;
 
     } else if ( is_line_label(line) ) {
-        token_type = LABEL;
+        token_type = LABEL_START;
     }
 
     Token* token = token_create(token_type, line, value);
@@ -227,10 +227,10 @@ int ast_append_token(AST** head, Token* token) {
 }
 
 void token_print(Token* obj) {
-    fprintf(stderr, "[LEXER]: Token %p\n", (void*)obj);
-    fprintf(stderr, "[LEXER]: \ttype: %d\n", obj->type);
-    fprintf(stderr, "[LEXER]: \tline: %s\n", obj->line);
-    fprintf(stderr, "[LEXER]: \tval : %u\n", obj->value);
+    fprintf(stderr, "[LEXER]: Token %p ", (void*)obj);
+    fprintf(stderr, "\ttype:%d ", obj->type);
+    fprintf(stderr, "line:'%s' ", obj->line);
+    fprintf(stderr, "val:%u", obj->value);
     fprintf(stderr, "\n");
 }
 

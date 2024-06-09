@@ -4,6 +4,7 @@
 
 #include "../options.h"
 #include "../../hardware/basic_types.h" 
+#include "../keywords_defines.h"
 
 /**
  * @brief Declare all possible token types 
@@ -15,7 +16,8 @@ typedef enum token_type {
     AO_MEMORY,
     NUMBER,      ///< any type of number (bin, dec, hex)
     COMMENT,
-    LABEL,
+    LABEL_START, ///< with ':' at the end
+    LABEL_END,   ///< without ':' at the end
 } token_type;
 
 typedef struct token {

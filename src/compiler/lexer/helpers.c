@@ -3,8 +3,8 @@
 #include <ctype.h>
 
 #include "helpers.h"
+#include "../keywords_defines.h"
 #include "../keywords_array.h"
-// #include "lexer.h"
 
 #define LXR_DEBUG 0
 

@@ -5,11 +5,6 @@
 #include <stdbool.h>
 #include "../../hardware/basic_types.h" 
 
-#define AO_WORD_REGISTER 'r'
-#define AO_WORD_MEMORY '$'
-#define WORD_LABEL ':'
-#define WORD_COMMENT ';'
-
 /**
  * @brief All possible number types in string
  * @note value prepared for pass in 'strtol'
