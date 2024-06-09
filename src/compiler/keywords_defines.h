@@ -34,4 +34,9 @@
 #define KW_inv "inv"
 #define KW_hlt "hlt"
 
+#define WORD_LABEL ':'
+#define WORD_COMMENT ';'
+#define AO_WORD_REGISTER 'r'
+#define AO_WORD_MEMORY '$'
+
 #endif /* __KEYWORDS_DEFINES__ */

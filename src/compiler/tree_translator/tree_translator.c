@@ -754,9 +754,9 @@ static int translate_jmp(AST* head, byte* result_arr, size_t* result_index) {
         return 1;
     }
 
-    if (head->next->token->type == NUMBER) {
+    if ( head->next->token->type == NUMBER || head->next->token->type == LABEL_END ) {
         byte code = 0x30;
-        result_arr[(*result_index)++] = code;
+        result_arr[(*result_index)++] = code; // TODO: actually, this is 'write byte' func
         dword addr = get_lnum_operand(head);
 
         write_byte(result_arr, result_index, (word)((addr & 0xff00) >> 8));
@@ -820,7 +820,11 @@ static int translate_mov(AST* head, byte* result_arr, size_t* result_index) {
 
 int translate_token_tree(AST* head, byte* result_arr, size_t* result_index, Options* opt) {
     if ( !head || !result_arr || !result_index ) {
-        return MEM_ERROR;
+        return WRONG_ARGS;
+    }
+
+    if ( (head->token->type == LABEL_START || head->token->type == LABEL_END) && head->next == NULL ) {
+        return OK;
     }
 
     int status = OK;
@@ -829,6 +833,11 @@ int translate_token_tree(AST* head, byte* result_arr, size_t* result_index, Opti
 
     if ( opt->verbose ) {
         fprintf(stderr, "[TRANSLATOR]: Translate tree: %s\n", head->token->line);
+    }
+
+    // skip label
+    while ( head->token->type == LABEL_START && head != NULL ) {
+        head = head->next;
     }
 
     while ( !done && (status == OK) && (table[kw_ind]).kw != NULL) {

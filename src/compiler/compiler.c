@@ -163,6 +163,14 @@ AST_ARR* tokenize_file(FILE* file, Options* opt) {
             continue;
         }
 
+        if ( line[0] == WORD_COMMENT ) { // skip comment, do not append its to ast
+            if ( opt->verbose ) {
+                printf("[COMPILER]: Discard full-comment line\n");
+            }
+
+            continue;
+        }
+
         line_count++;
         replace_f(line, '\n', 0);
 
@@ -271,6 +279,109 @@ int parse_args(int argc, char** argv, Options* opt) {
     return status;
 }
 
+/**
+* @brief Iterate over every node for find label with given name 
+* @param[in] ast_tree Tokenized AST_ARR object
+* @param[in] line String with label name for search (with ':')
+* @param[out] index With ast_tree valid index 
+* @return result Is found(true) or not(false)
+*/
+bool find_lbl_start(AST_ARR* ast_tree, char* line, size_t* lbl_ind, Options* opt) {
+    if ( !ast_tree || !line || !lbl_ind ) {
+        return false;
+    }
+
+    bool result = false;
+    size_t addr = 0;
+    size_t len = strlen(line); //ignore ':' at the end
+
+    for (size_t i = 0; i < ast_tree->index && !result ; ++i) {
+        AST* node = ast_tree->array[i];
+
+        if ( node->token->type != LABEL_START && node->token->type != LABEL_END ) {
+            addr += 3;
+        }
+
+        while ( ( node != NULL ) && !result ) {
+            if ( node->token->type == LABEL_START &&
+                ( (strlen(node->token->line) - 1) == len ) &&
+                ( strncmp(line, node->token->line, len) == 0 ) ) {
+                *lbl_ind = addr;
+                result = true;
+
+                if ( opt->verbose ) {
+                    fprintf(stderr, "\t[COMPILER]: Found LABEL_END at: %lu\n", i);
+                    fprintf(stderr, "\t[COMPILER]: with line: '%s'\n", node->token->line);
+                    fprintf(stderr, "\t[COMPILER]: with addr: %lu\n", addr);
+                }
+            }
+
+            node = node->next;
+        }
+    }
+
+    return result;
+}
+
+/**
+* @brief Iterate over every ast node, find labels like 'lbl:' and substitute name with address from label like 'lbl' if exist
+* @param[in, out] ast_tree Tokenized AST_ARR object
+* @return status Code from 'enum error_codes'
+*/
+int substitute_labels(AST_ARR* ast_tree, Options* opt) {
+    if ( !ast_tree ) {
+        return WRONG_ARGS;
+    }
+
+    int status = OK;
+
+    for (size_t i = 0; i < ast_tree->index; ++i) {
+        int is_lbl_found = 0;
+        int inner_loop = 1;
+        AST* node = ast_tree->array[i];
+
+        while ( ( node != NULL ) && inner_loop && !is_lbl_found ) {
+            if ( node->token->type == COMMENT ) {
+                inner_loop = 0; // skip all next nodes because its comments
+                continue;
+            }
+
+            if ( node->token->type == UNKNOWN ) {
+                is_lbl_found = 1;
+
+                if ( opt->verbose ) {
+                    fprintf(stderr, "[COMPILER]: Found LABEL_START at: %lu\n", i);
+                    fprintf(stderr, "\t[COMPILER]: label for search: '%s'\n", node->token->line);
+                }
+                
+                continue;
+            }
+
+            node = node->next;
+        }
+
+        if ( is_lbl_found ) {
+            size_t lbl_ind = 0;
+
+            if ( find_lbl_start(ast_tree, node->token->line, &lbl_ind, opt) ) {
+                node->token->type = LABEL_END;
+                node->token->value = lbl_ind; // convert id to address
+
+                if ( opt->verbose ) {
+                    fprintf(stderr, "\t[CMP_DEBUG]: Converted Address: %u\n", node->token->value);
+                }
+
+            } else {
+                status = ERROR;
+            }
+
+        }
+
+    }
+
+    return status;
+}
+
 int main(const int argc, char** argv) {
     int status = OK;
 
@@ -310,6 +421,10 @@ int main(const int argc, char** argv) {
         fprintf(stderr, "\t[COMPILER]: Tokenized lines: %zu\n", ast_tree ? ast_tree->index : 0);
         fprintf(stderr, "\t[COMPILER]: Status after tokenize: %d\n", status);
         fprintf(stderr, "\n");
+    }
+
+    if ( status == OK ) {
+        status = substitute_labels(ast_tree, &user_options);
     }
 
     if ( status == OK ) {
