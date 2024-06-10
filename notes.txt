@@ -1,0 +1,3 @@
+Problems:
+- lexer have Memory Access Operator ('$') and Pototo can handle it, but compiler (translator) don't
+- Bad validation of one AST - counting nodes is weird idea
