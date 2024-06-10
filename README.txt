@@ -1,13 +1,12 @@
 +====================================================+
 | Virtual PC with own CPU,                           |
 |                     Instructions set,              |
-|                     Compiler,                      |
-|                     Virtual machine                |
+|                     Compiler                       |
 +====================================================+
 |                 * Registers *                      |
-|                   IP   - 16 bit                    |
-|                   MP   - 16 bit                    |
-|                   0-ff -  8 bit                    |
+|  Instruction pointer - IP   - 16 bit               |
+|       Memory pointer - MP   - 16 bit               |
+|   User registers rXX - 0-ff -  8 bit               |
 +====================================================+
 |                * Instructions *                    |
 |              XX, YY - register name                |
