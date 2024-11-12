@@ -1,0 +1,5 @@
+jmp end
+mov r1 0xff
+;useless for lexer
+end:
+hlt

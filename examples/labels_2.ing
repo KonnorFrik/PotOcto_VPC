@@ -1,0 +1,10 @@
+; r1 - counter
+mov r1 5
+loop:
+ne r1 0
+jmp end
+sub r1 1
+jmp loop
+end:
+hlt
+
